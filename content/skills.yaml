@@ -45,7 +45,7 @@ skills:
     name: BigQuery y SQL
     description: BigQuery y SQL, datasets grandes
     core: true
-    target_xp: 930 # 875 + capstone 50
+    target_xp: 760 # REAL Z5 publicada (2026-11-05): 710 + capstone milestone 5: 50
   - code: observability
     name: Observabilidad
     description: Prometheus + Grafana, métricas y alertas

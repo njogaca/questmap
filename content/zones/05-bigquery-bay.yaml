@@ -2,7 +2,6 @@ slug: bigquery-bay
 title: BigQuery Bay
 order: 5
 emoji: "🌊"
-status: outline
 unlocked_from_start: true
 map: { x: 150, y: 540 }
 prerequisites: []
@@ -13,143 +12,1002 @@ levels:
   - slug: bq-1-novice
     number: 1
     title: "Novice — Repaso de SQL: joins y agregaciones"
+    story: "Llegas a la bahía. Antes de navegar en aguas de terabytes, afina el remo que ya conoces: el SQL de todos los días."
     quests:
-      - slug: bq-1-novice-learn-1
+      - slug: bq-1-learn-joins
         type: learn
-        title: "Conceptos: Repaso de SQL: joins y agregaciones"
+        title: JOINs sin sorpresas
         required: true
+        estimated_min: 40
         skills:
           bigquery_sql: 1
-      - slug: bq-1-novice-learn-2
+        resources:
+          - ref: res-pg-joins
+          - ref: res-sqlbolt
+            required: false
+        payload:
+          note_prompt: Explica con un ejemplo de clientes y órdenes la diferencia entre INNER JOIN y LEFT JOIN, y qué pasa si después del LEFT JOIN filtras con WHERE sobre una columna de la tabla de la derecha.
+          summary_md: |
+            - INNER JOIN: solo filas con coincidencia en ambos lados.
+            - LEFT JOIN: todas las filas de la izquierda; si no hay coincidencia, las columnas de la derecha vienen NULL.
+            - Trampa clásica: `LEFT JOIN orders o ... WHERE o.status = 'PAID'` elimina a los clientes sin órdenes (su o.status es NULL) y lo vuelve un INNER JOIN. Si quieres conservarlos, pon la condición en el ON.
+            - Un JOIN puede MULTIPLICAR filas: si un cliente tiene 3 órdenes, aparece 3 veces. Cuidado al sumar después.
+      - slug: bq-1-learn-aggregates
         type: learn
-        title: "Lectura guiada: Repaso de SQL: joins y agregaciones"
+        title: GROUP BY, HAVING y NULL
         required: true
+        estimated_min: 35
         skills:
           bigquery_sql: 1
-      - slug: bq-1-novice-glossary
+        resources:
+          - ref: res-pg-aggregates
+        payload:
+          note_prompt: ¿Cuál es la diferencia entre WHERE y HAVING? ¿Y entre COUNT(*) y COUNT(columna) cuando la columna tiene NULLs?
+      - slug: bq-1-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de SQL
         required: true
+        estimated_min: 10
         skills:
           bigquery_sql: 1
-      - slug: bq-1-novice-quiz
+        payload:
+          terms:
+            - bq-inner-join
+            - bq-left-join
+            - bq-group-by
+            - bq-having
+            - bq-null
+            - bq-cte
+            - bq-fan-out-join
+      - slug: bq-1-lab-sql
+        type: lab
+        title: "Lab (opcional): SQL en un Postgres de práctica"
+        required: false
+        estimated_min: 45
+        skills:
+          bigquery_sql: 1
+        payload:
+          goal: Calentar con SQL en un Postgres desechable en Docker antes de usar BigQuery.
+          steps:
+            - title: Levanta un Postgres de práctica
+              body: Usamos el puerto 5434 para no chocar con QuestMap (5433). La contraseña es solo para este contenedor local.
+              commands:
+                - docker run --name sql-lab -e POSTGRES_PASSWORD=lab -p 127.0.0.1:5434:5432 -d postgres:16
+                - docker exec -it sql-lab psql -U postgres
+            - title: Crea datos (dentro de psql)
+              body: |
+                ```sql
+                CREATE TABLE customers (id int PRIMARY KEY, name text, country text);
+                CREATE TABLE orders (id int PRIMARY KEY, customer_id int REFERENCES customers(id), status text, total numeric, created_at date);
+                INSERT INTO customers VALUES (1,'ana','US'),(2,'luis','MX'),(3,'marta','US'),(4,'jo','CO');
+                INSERT INTO orders VALUES
+                  (10,1,'PAID',120,'2026-11-01'),(11,1,'PAID',80,'2026-11-03'),
+                  (12,2,'PENDING',35.5,'2026-11-02'),(13,3,'CANCELLED',200,'2026-11-02'),
+                  (14,3,'PAID',15,'2026-11-04');
+                ```
+            - title: Resuelve estas 5 consultas
+              body: |
+                1. Total pagado (PAID) por cliente, de mayor a menor.
+                2. TODOS los clientes con su número de órdenes, incluidos los que no tienen ninguna (jo debe salir con 0).
+                3. Países con más de 1 cliente (HAVING).
+                4. Clientes que nunca han hecho una orden PAID.
+                5. Con un CTE (`WITH`): el ticket promedio de órdenes PAID por país.
+            - title: Limpia
+              commands:
+                - docker rm -f sql-lab
+          expected: "Consulta 1: ana 200, marta 15. Consulta 2: jo aparece con 0 (COUNT(o.id), no COUNT(*)). Consulta 3: US. Consulta 4: luis y jo. Consulta 5: US ≈ 71,67."
+          checklist:
+            - Las 5 consultas dan el resultado esperado
+            - En la consulta 2 usé LEFT JOIN y COUNT(o.id)
+            - Entiendo por qué COUNT(*) habría dado 1 para jo
+          hints:
+            - "Consulta 2: `SELECT c.name, COUNT(o.id) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name;`"
+            - "Consulta 4: LEFT JOIN con la condición `o.status = 'PAID'` en el ON y luego `WHERE o.id IS NULL`, o usa NOT EXISTS."
+          evidence_hint: Pega tus 5 consultas y sus resultados.
+      - slug: bq-1-quiz
         type: quiz
-        title: "Quiz — Repaso de SQL: joins y agregaciones"
+        title: Quiz — SQL esencial
         required: true
+        estimated_min: 15
         skills:
           bigquery_sql: 1
+        questions:
+          - slug: b1-q1
+            type: mcq
+            prompt: Quieres listar TODOS los clientes, tengan o no órdenes. ¿Qué JOIN usas (clientes a la izquierda)?
+            options:
+              - INNER JOIN
+              - LEFT JOIN
+              - CROSS JOIN
+              - "Ninguno: no se puede"
+            answer: 1
+            explanation: LEFT JOIN conserva todas las filas de la tabla izquierda; si no hay órdenes, sus columnas vienen NULL.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b1-q2
+            type: mcq
+            prompt: "`SELECT country, COUNT(*) FROM customers GROUP BY country HAVING COUNT(*) > 1`. ¿Para qué sirve HAVING aquí?"
+            options:
+              - Filtra filas antes de agrupar
+              - Filtra grupos después de agregar
+              - Ordena el resultado
+              - Elimina duplicados
+            answer: 1
+            explanation: WHERE filtra filas antes del GROUP BY; HAVING filtra los grupos ya agregados (por eso puede usar COUNT).
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b1-q3
+            type: tf
+            prompt: COUNT(columna) cuenta también las filas donde esa columna es NULL.
+            answer: false
+            explanation: COUNT(columna) ignora NULLs; COUNT(*) cuenta filas. Por eso en un LEFT JOIN se usa COUNT(o.id) para obtener 0.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b1-q4
+            type: mcq
+            prompt: ¿Qué devuelve `WHERE status = NULL`?
+            options:
+              - Las filas con status NULL
+              - "Ninguna fila: hay que usar IS NULL"
+              - Error de sintaxis
+              - Todas las filas
+            answer: 1
+            explanation: Cualquier comparación con NULL da NULL (desconocido), no TRUE. Se usa `IS NULL` / `IS NOT NULL`.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b1-q5
+            type: mcq
+            prompt: Unes clientes con órdenes y luego haces `SUM(c.credit_limit)`. El total sale inflado. ¿Por qué?
+            options:
+              - Por los NULL
+              - El JOIN repite cada cliente una vez por orden (fan-out) y sumas su límite varias veces
+              - Por usar LEFT JOIN
+              - SUM no funciona con decimales
+            answer: 1
+            explanation: El JOIN multiplica filas. Agrega antes de unir (o usa DISTINCT con cuidado). Es un error muy común en reportes.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b1-q6
+            type: fill
+            prompt: Para definir una subconsulta con nombre y reutilizarla legiblemente usas `______ nombre AS (SELECT ...)` (CTE).
+            answer:
+              - WITH
+              - with
+            explanation: Los CTE (Common Table Expressions) hacen las consultas largas mucho más legibles, algo que se valora en entrevistas.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b1-q7
+            type: order
+            prompt: "Ordena el orden LÓGICO de ejecución de una consulta SQL:"
+            options:
+              - FROM / JOIN
+              - WHERE
+              - GROUP BY
+              - HAVING
+              - SELECT
+              - ORDER BY / LIMIT
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+            explanation: "Por eso no puedes usar en WHERE un alias definido en SELECT: SELECT se evalúa después."
+            skill: bigquery_sql
+            difficulty: 2
+            hint: Primero de dónde vienen los datos; al final, cómo se presentan.
+          - slug: b1-q8
+            type: mcq
+            prompt: "Pregunta típica de entrevista: '¿clientes que nunca compraron?'. ¿Cuál es correcta?"
+            options:
+              - SELECT * FROM customers c JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL
+              - SELECT * FROM customers c WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)
+              - SELECT * FROM customers WHERE id != (SELECT customer_id FROM orders)
+              - SELECT * FROM orders WHERE customer_id IS NULL
+            answer: 1
+            explanation: NOT EXISTS (o LEFT JOIN + IS NULL) es la forma correcta. Con INNER JOIN nunca habrá o.id NULL, y `!=` contra una subconsulta de varias filas falla.
+            skill: bigquery_sql
+            difficulty: 2
+      - slug: bq-1-micro-flashcards
+        type: micro
+        title: Repaso rápido de SQL
+        required: false
+        estimated_min: 10
+        skills:
+          bigquery_sql: 1
+        payload:
+          kind: flashcards
+          terms:
+            - bq-left-join
+            - bq-having
+            - bq-null
+            - bq-fan-out-join
   - slug: bq-2-apprentice
     number: 2
-    title: "Apprentice — BigQuery Sandbox y datasets públicos"
+    title: Apprentice — BigQuery Sandbox y datasets públicos
+    story: "Zarpas por primera vez en aguas profundas: millones de órdenes de una tienda de ropa ficticia, gratis, en el sandbox de BigQuery."
     quests:
-      - slug: bq-2-apprentice-learn
+      - slug: bq-2-learn-bigquery
         type: learn
-        title: BigQuery Sandbox y datasets públicos
+        title: Qué es BigQuery y por qué se cobra por bytes
         required: true
+        estimated_min: 40
         skills:
           bigquery_sql: 1
-      - slug: bq-2-apprentice-glossary
+        resources:
+          - ref: res-bq-overview
+          - ref: res-bq-storage
+            required: false
+        payload:
+          note_prompt: Explica por qué en BigQuery `SELECT *` sobre una tabla grande cuesta mucho más que seleccionar 2 columnas, aunque devuelvas las mismas filas.
+          summary_md: |
+            - BigQuery es un data warehouse serverless: no administras servidores; el almacenamiento y el cómputo están separados.
+            - Guarda los datos por COLUMNA (formato columnar). Una consulta lee solo las columnas que nombras.
+            - En el modelo on-demand pagas por bytes procesados (leídos), no por filas devueltas: `LIMIT 10` NO reduce los bytes leídos de una tabla sin particiones.
+            - Es para análisis (OLAP) de grandes volúmenes, no para transacciones de una fila (OLTP, eso es Postgres o Cassandra).
+      - slug: bq-2-learn-sandbox
+        type: learn
+        title: El sandbox y los datasets públicos
+        required: true
+        estimated_min: 25
+        skills:
+          bigquery_sql: 1
+        resources:
+          - ref: res-bq-sandbox
+          - ref: res-bq-public-data
+          - ref: res-bq-costs
+        payload:
+          note_prompt: Anota los límites del sandbox que te importan para practicar (cuánto puedes consultar al mes, qué pasa con tus tablas) y cómo ves cuántos bytes va a leer una consulta ANTES de ejecutarla.
+      - slug: bq-2-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de BigQuery
         required: true
+        estimated_min: 10
         skills:
           bigquery_sql: 1
-      - slug: bq-2-apprentice-lab
+        payload:
+          terms:
+            - bq-data-warehouse
+            - bq-columnar
+            - bq-serverless
+            - bq-dataset
+            - bq-sandbox
+            - bq-bytes-processed
+            - bq-dry-run
+            - bq-olap-oltp
+      - slug: bq-2-lab-thelook
         type: lab
-        title: "Lab: BigQuery Sandbox y datasets públicos"
+        title: "Lab: primeras consultas sobre theLook eCommerce"
         required: true
+        estimated_min: 60
         skills:
           bigquery_sql: 1
-      - slug: bq-2-apprentice-quiz
+        payload:
+          goal: Activar el sandbox de BigQuery y responder preguntas de negocio sobre el dataset público theLook eCommerce, mirando siempre cuántos bytes procesa cada consulta.
+          steps:
+            - title: Activa el sandbox
+              body: "Entra a https://console.cloud.google.com/bigquery con tu cuenta de Google y sigue la guía del sandbox (recurso del nivel): crea un proyecto, sin tarjeta. En el panel Explorer agrega el proyecto público `bigquery-public-data` y busca el dataset `thelook_ecommerce` (tablas orders, order_items, products, users…)."
+            - title: Mira el esquema antes de consultar
+              body: Haz clic en la tabla `orders` y revisa Schema y Details (número de filas y tamaño). Haz lo mismo con `order_items` y `products`. Si alguna columna de este lab cambió de nombre en el dataset, ajústala según el esquema.
+            - title: Consulta 1 — órdenes por estado
+              body: |
+                Antes de ejecutar, mira arriba a la derecha el validador: "This query will process X MB". Anótalo.
+
+                ```sql
+                SELECT status, COUNT(*) AS orders
+                FROM `bigquery-public-data.thelook_ecommerce.orders`
+                GROUP BY status
+                ORDER BY orders DESC;
+                ```
+            - title: Consulta 2 — ventas por categoría
+              body: |
+                ```sql
+                SELECT p.category,
+                       ROUND(SUM(oi.sale_price), 2) AS revenue,
+                       COUNT(DISTINCT oi.order_id) AS orders
+                FROM `bigquery-public-data.thelook_ecommerce.order_items` AS oi
+                JOIN `bigquery-public-data.thelook_ecommerce.products` AS p ON p.id = oi.product_id
+                WHERE oi.status NOT IN ('Cancelled', 'Returned')
+                GROUP BY p.category
+                ORDER BY revenue DESC
+                LIMIT 10;
+                ```
+            - title: El experimento del SELECT *
+              body: "Escribe `SELECT * FROM ...order_items LIMIT 10` y anota los bytes del validador. Luego `SELECT order_id, sale_price FROM ...order_items LIMIT 10`. NO hace falta ejecutarlas: compara los bytes estimados."
+            - title: Tus propias preguntas
+              body: |
+                Resuelve tú:
+                1. Los 5 países con más usuarios (`users.country`).
+                2. El ticket promedio (`AVG(sale_price)`) por `traffic_source` del usuario (une order_items con users por `user_id`).
+                3. ¿Qué porcentaje de los order_items fue devuelto (`status = 'Returned'`)?
+          expected: El SELECT * de order_items estima varias veces más bytes que seleccionar 2 columnas, aunque ambos tengan LIMIT 10. Las consultas de agregación procesan pocos MB y responden en segundos.
+          checklist:
+            - Activé el sandbox sin tarjeta y veo bigquery-public-data en el Explorer
+            - Anoté los bytes estimados de cada consulta antes de ejecutarla
+            - Comprobé que LIMIT no reduce los bytes procesados
+            - Resolví las 3 preguntas propias
+          hints:
+            - "Pregunta 2: `JOIN ...users AS u ON u.id = oi.user_id` y `GROUP BY u.traffic_source`."
+            - "Pregunta 3: `ROUND(100 * COUNTIF(status = 'Returned') / COUNT(*), 2)`. COUNTIF es una función de BigQuery muy práctica."
+          evidence_hint: Pega tus 3 consultas propias con sus resultados y los bytes estimados del experimento SELECT * vs 2 columnas.
+      - slug: bq-2-quiz
         type: quiz
-        title: Quiz — BigQuery Sandbox y datasets públicos
+        title: Quiz — BigQuery básico
         required: true
+        estimated_min: 15
         skills:
           bigquery_sql: 1
+        questions:
+          - slug: b2-q1
+            type: mcq
+            prompt: En el modelo on-demand de BigQuery, ¿qué determina el costo de una consulta?
+            options:
+              - El número de filas devueltas
+              - Los bytes procesados (columnas leídas)
+              - El tiempo que tardas en escribirla
+              - El número de JOINs
+            answer: 1
+            explanation: Se cobra por bytes leídos. Seleccionar menos columnas y filtrar por particiones reduce el costo; devolver menos filas, no necesariamente.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q2
+            type: tf
+            prompt: Agregar `LIMIT 10` a `SELECT *` sobre una tabla sin particiones reduce los bytes facturados.
+            answer: false
+            explanation: BigQuery igual tiene que leer las columnas completas; LIMIT solo recorta lo que devuelve. (Hay excepciones con tablas clusterizadas, pero no cuentes con eso.)
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b2-q3
+            type: mcq
+            prompt: ¿Por qué BigQuery es eficiente para `SUM(sale_price)` sobre 1.000 millones de filas?
+            options:
+              - Porque tiene índices B-tree en todo
+              - Almacenamiento columnar + procesamiento masivamente paralelo
+              - Porque guarda todo en RAM
+              - Porque usa Cassandra
+            answer: 1
+            explanation: Lee solo la columna sale_price, comprimida, y reparte el trabajo entre miles de workers.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q4
+            type: mcq
+            prompt: ¿Para qué carga NO usarías BigQuery?
+            options:
+              - Reportes diarios de ventas
+              - Guardar y leer una orden por id con latencia de milisegundos en cada request de la API
+              - Análisis de cohortes
+              - Dashboards de negocio
+            answer: 1
+            explanation: "Eso es OLTP: una base transaccional o Cassandra. BigQuery es OLAP: análisis de grandes volúmenes."
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q5
+            type: mcq
+            prompt: ¿Cómo sabes cuántos bytes procesará una consulta antes de ejecutarla?
+            options:
+              - No se puede
+              - Con el validador de la consola o un dry run
+              - Ejecutándola con LIMIT 1
+              - Mirando el número de filas
+            answer: 1
+            explanation: El dry run (o el validador de la consola) estima los bytes sin cobrar nada. Hábito de oro en BigQuery.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q6
+            type: fill
+            prompt: En BigQuery la jerarquía es proyecto → ______ → tabla.
+            answer:
+              - dataset
+              - datasets
+            explanation: Un dataset agrupa tablas y vistas, y define ubicación y permisos. Ej. `bigquery-public-data.thelook_ecommerce.orders`.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q7
+            type: mcq
+            prompt: ¿Qué función de BigQuery cuenta las filas que cumplen una condición?
+            options:
+              - COUNT_IF
+              - COUNTIF
+              - SUMIF
+              - FILTER_COUNT
+            answer: 1
+            explanation: "`COUNTIF(status = 'Returned')`. Equivale a `SUM(CASE WHEN ... THEN 1 ELSE 0 END)`."
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b2-q8
+            type: mcq
+            prompt: "Pregunta de entrevista: '¿qué es serverless en BigQuery?'"
+            options:
+              - Que no hay servidores en ningún lado
+              - "Que no aprovisionas ni administras servidores: Google asigna el cómputo (slots) por consulta"
+              - Que es gratis
+              - Que no necesita SQL
+            answer: 1
+            explanation: "Los servidores existen, pero los administra Google; tú solo envías SQL. Ventaja: escalas sin operar infraestructura."
+            skill: bigquery_sql
+            difficulty: 1
   - slug: bq-3-journeyman
     number: 3
-    title: "Journeyman — Particiones, clustering y costo"
+    title: Journeyman — Particiones, clustering y costo
+    story: "La bahía es inmensa y cada travesía cuesta. Aprende a trazar rutas cortas: leer solo el pedazo de mar que necesitas."
     quests:
-      - slug: bq-3-journeyman-learn
+      - slug: bq-3-learn-partitioning
         type: learn
-        title: Particiones, clustering y costo
+        title: Particiones y partition pruning
         required: true
+        estimated_min: 40
         skills:
           bigquery_sql: 1
-      - slug: bq-3-journeyman-glossary
+        resources:
+          - ref: res-bq-partitioned
+          - ref: res-bq-costs
+        payload:
+          note_prompt: Explica qué es partition pruning y escribe un ejemplo de filtro que SÍ lo aprovecha y otro que NO (por ejemplo, aplicar una función a la columna de partición de forma que BigQuery no pueda usarla).
+          summary_md: |
+            - Partición = la tabla dividida en segmentos (normalmente uno por día). Filtrar por la columna de partición hace que BigQuery lea SOLO esos segmentos (partition pruning).
+            - Tipos: por columna de fecha/hora, por tiempo de ingesta o por rango de enteros.
+            - `require_partition_filter = TRUE` obliga a filtrar por partición: evita escaneos completos accidentales.
+            - Clustering = dentro de cada partición, los datos se ordenan por hasta 4 columnas; filtrar por ellas reduce aún más lo que se lee.
+            - Regla: particiona por la fecha con la que siempre filtras; clusteriza por las columnas que más usas en WHERE o JOIN.
+      - slug: bq-3-learn-cost
+        type: learn
+        title: Optimizar costo y rendimiento
+        required: true
+        estimated_min: 35
+        skills:
+          bigquery_sql: 1
+        resources:
+          - ref: res-bq-best-practices
+          - ref: res-bq-clustered
+        payload:
+          note_prompt: Lista las 4 reglas de optimización que más aplicarías en tu trabajo y por qué cada una ahorra bytes o tiempo.
+      - slug: bq-3-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de rendimiento
         required: true
+        estimated_min: 10
         skills:
           bigquery_sql: 1
-      - slug: bq-3-journeyman-lab
+        payload:
+          terms:
+            - bq-partition
+            - bq-partition-pruning
+            - bq-clustering
+            - bq-require-partition-filter
+            - bq-slot
+            - bq-select-star
+      - slug: bq-3-lab-partitions
         type: lab
-        title: "Lab: Particiones, clustering y costo"
+        title: "Lab: misma pregunta, 20 veces menos bytes"
         required: true
+        estimated_min: 75
         skills:
           bigquery_sql: 1
-      - slug: bq-3-journeyman-quiz
+        payload:
+          goal: Crear en tu sandbox una tabla sin particiones y otra particionada + clusterizada con los mismos datos, y medir cuántos bytes lee la misma consulta en cada una.
+          steps:
+            - title: Crea tu dataset
+              body: "En el Explorer, sobre tu proyecto: Create dataset → nombre `lab`, misma región que prefieras (ej. US)."
+            - title: Una advertencia del sandbox
+              body: "En el sandbox las particiones con fecha de más de 60 días expiran solas. Por eso creamos una columna `event_date` sintética dentro de los últimos 50 días: así la partición no se borra y el experimento funciona."
+            - title: Tabla plana (sin particiones)
+              body: |
+                ```sql
+                CREATE OR REPLACE TABLE lab.items_flat AS
+                SELECT
+                  oi.*,
+                  DATE_SUB(CURRENT_DATE(), INTERVAL MOD(ABS(FARM_FINGERPRINT(CAST(oi.id AS STRING))), 50) DAY) AS event_date
+                FROM `bigquery-public-data.thelook_ecommerce.order_items` AS oi;
+                ```
+            - title: Tabla particionada y clusterizada
+              body: |
+                ```sql
+                CREATE OR REPLACE TABLE lab.items_part
+                PARTITION BY event_date
+                CLUSTER BY status, product_id
+                OPTIONS (require_partition_filter = TRUE)
+                AS SELECT * FROM lab.items_flat;
+                ```
+            - title: Compara los bytes estimados
+              body: |
+                Escribe esta consulta contra cada tabla y anota lo que dice el validador (no hace falta ejecutarla):
+
+                ```sql
+                SELECT SUM(sale_price) AS revenue
+                FROM lab.items_flat   -- luego cambia por lab.items_part
+                WHERE event_date = DATE_SUB(CURRENT_DATE(), INTERVAL 3 DAY)
+                  AND status = 'Complete';
+                ```
+
+                Luego quita el filtro de `event_date` en la consulta contra `items_part`: ¿qué pasa?
+            - title: Revisa los detalles de la tabla
+              body: "Abre `lab.items_part` → Details: confirma Partitioned by DAY (event_date) y Clustered by status, product_id. En Storage info verás el número de particiones."
+          expected: Sobre items_part la consulta estima aproximadamente 1/50 de los bytes de items_flat (lee una sola partición de ~50). Sin el filtro de fecha, items_part rechaza la consulta por require_partition_filter.
+          checklist:
+            - Creé el dataset lab y las dos tablas
+            - Comparé los bytes estimados de la misma consulta en ambas tablas
+            - Vi el error de require_partition_filter al quitar el filtro de fecha
+            - Puedo explicar por qué particioné por fecha y clusterizé por status y product_id
+          hints:
+            - Si el CREATE TABLE falla en el sandbox, revisa que el dataset esté en la misma ubicación (US) que el dataset público.
+            - "Para tablas clusterizadas el validador da una cota superior: los bytes reales facturados pueden ser aún menores (míralos en Job information después de ejecutar)."
+          evidence_hint: Pega los bytes estimados de ambas consultas y el mensaje de error de require_partition_filter.
+      - slug: bq-3-quiz
         type: quiz
-        title: Quiz — Particiones, clustering y costo
+        title: Quiz — Particiones y costo
         required: true
+        estimated_min: 15
         skills:
           bigquery_sql: 1
+        questions:
+          - slug: b3-q1
+            type: mcq
+            prompt: Una tabla de eventos está particionada por `event_date`. ¿Qué consulta aprovecha mejor el partition pruning?
+            options:
+              - SELECT ... WHERE user_id = 7
+              - SELECT ... WHERE event_date BETWEEN '2026-11-01' AND '2026-11-07'
+              - SELECT ... ORDER BY event_date LIMIT 10
+              - SELECT ... WHERE status = 'OK'
+            answer: 1
+            explanation: Solo un filtro sobre la columna de partición permite leer únicamente esas particiones (aquí 7 días).
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b3-q2
+            type: mcq
+            prompt: ¿Cuántas columnas de clustering admite una tabla de BigQuery?
+            options:
+              - "1"
+              - Hasta 4
+              - Hasta 10
+              - Ilimitadas
+            answer: 1
+            explanation: "Hasta 4, y el orden importa: la primera columna es la que más ordena los datos."
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b3-q3
+            type: tf
+            prompt: "`require_partition_filter = TRUE` hace que BigQuery rechace consultas que no filtran por la columna de partición."
+            answer: true
+            explanation: Es una protección contra escaneos completos accidentales en tablas enormes (y facturas enormes).
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b3-q4
+            type: mcq
+            prompt: ¿Cuál es la mejor elección para una tabla de órdenes que siempre se consulta por rango de fechas y por tienda?
+            options:
+              - PARTITION BY store_id
+              - PARTITION BY DATE(created_at) CLUSTER BY store_id
+              - CLUSTER BY created_at solamente
+              - Sin particiones, con LIMIT
+            answer: 1
+            explanation: Particiona por la fecha (filtro de rango), clusteriza por la columna de alta cardinalidad que más filtras (tienda).
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b3-q5
+            type: mcq
+            prompt: ¿Cuál de estas prácticas NO reduce los bytes procesados?
+            options:
+              - Seleccionar solo las columnas necesarias
+              - Filtrar por la columna de partición
+              - Agregar ORDER BY al final
+              - Usar una tabla clusterizada y filtrar por sus columnas
+            answer: 2
+            explanation: ORDER BY no reduce lo que se lee; de hecho agrega trabajo. Las otras tres sí reducen los bytes.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b3-q6
+            type: fill
+            prompt: La unidad de capacidad de cómputo de BigQuery (CPU virtual + memoria) se llama ______.
+            answer:
+              - slot
+              - slots
+            explanation: On-demand comparte un pool de slots; con capacidad reservada (editions) compras slots y pagas por ellos en lugar de por bytes.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b3-q7
+            type: mcq
+            prompt: Un analista corre cada hora `SELECT * FROM events` (2 TB) para un dashboard que usa 3 columnas de las últimas 24 h. ¿Qué propones?
+            options:
+              - Más slots
+              - Seleccionar las 3 columnas, filtrar la última partición y, si se repite, una tabla agregada o vista materializada
+              - Exportar a Excel
+              - Nada
+            answer: 1
+            explanation: Columnas mínimas + pruning + preagregación. Así se pasa de terabytes a megabytes por consulta.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b3-q8
+            type: order
+            prompt: "Ordena el proceso para optimizar una consulta cara en BigQuery:"
+            options:
+              - "Medir: dry run y bytes del job"
+              - Quitar SELECT * y columnas innecesarias
+              - Filtrar por partición y clustering
+              - Agregar antes de hacer JOIN
+              - Volver a medir y comparar
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Siempre mide antes y después: optimizar sin medir es adivinar."
+            skill: bigquery_sql
+            difficulty: 2
   - slug: bq-4-expert
     number: 4
-    title: "Expert — Window functions y campos anidados"
+    title: Expert — Window functions y campos anidados
+    story: "Ahora navegas con instrumentos finos: comparar cada fila con sus vecinas sin perderlas, y abrir datos que vienen unos dentro de otros."
     quests:
-      - slug: bq-4-expert-learn
+      - slug: bq-4-learn-window
         type: learn
-        title: Window functions y campos anidados
+        title: Window functions — ROW_NUMBER, RANK, LAG y acumulados
         required: true
+        estimated_min: 50
         skills:
           bigquery_sql: 1
-      - slug: bq-4-expert-glossary
+        resources:
+          - ref: res-bq-window
+          - ref: res-bq-query-syntax
+            required: false
+        payload:
+          note_prompt: "Explica con tus palabras la diferencia entre GROUP BY y una window function (OVER). Luego: ¿en qué se diferencian ROW_NUMBER, RANK y DENSE_RANK cuando hay empates?"
+          summary_md: |
+            - Una window function calcula sobre un grupo de filas relacionadas SIN colapsarlas (GROUP BY sí las colapsa).
+            - `OVER (PARTITION BY x ORDER BY y)`: PARTITION BY define el grupo; ORDER BY, el orden dentro del grupo.
+            - ROW_NUMBER: 1, 2, 3, 4 (sin empates). RANK: 1, 2, 2, 4 (salta). DENSE_RANK: 1, 2, 2, 3 (no salta).
+            - LAG/LEAD: el valor de la fila anterior o siguiente (ej. días desde la orden anterior).
+            - Acumulado: `SUM(x) OVER (ORDER BY day ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`.
+            - QUALIFY filtra por el resultado de una window function (como HAVING, pero para ventanas): `QUALIFY ROW_NUMBER() OVER (...) = 1`.
+      - slug: bq-4-learn-nested
+        type: learn
+        title: ARRAY, STRUCT y UNNEST
+        required: true
+        estimated_min: 40
+        skills:
+          bigquery_sql: 1
+        resources:
+          - ref: res-bq-arrays
+        payload:
+          note_prompt: ¿Por qué BigQuery prefiere guardar las líneas de una orden como un ARRAY dentro de la fila de la orden en lugar de una tabla aparte? ¿Qué hace UNNEST?
+      - slug: bq-4-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario avanzado de SQL
         required: true
+        estimated_min: 10
         skills:
           bigquery_sql: 1
-      - slug: bq-4-expert-lab
+        payload:
+          terms:
+            - bq-window-function
+            - bq-row-number
+            - bq-lag
+            - bq-qualify
+            - bq-array
+            - bq-struct
+            - bq-unnest
+            - bq-materialized-view
+      - slug: bq-4-lab-window
         type: lab
-        title: "Lab: Window functions y campos anidados"
+        title: "Lab: preguntas de entrevista con window functions y UNNEST"
         required: true
+        estimated_min: 90
         skills:
           bigquery_sql: 1
-      - slug: bq-4-expert-quiz
+        payload:
+          goal: Resolver en el sandbox 5 problemas típicos de entrevista de SQL usando window functions, QUALIFY y UNNEST sobre datasets públicos.
+          steps:
+            - title: 1 — Última orden de cada usuario (deduplicar)
+              body: |
+                ```sql
+                SELECT user_id, order_id, created_at, status
+                FROM `bigquery-public-data.thelook_ecommerce.orders`
+                WHERE TRUE
+                QUALIFY ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) = 1
+                LIMIT 20;
+                ```
+                (En BigQuery, QUALIFY necesita un WHERE, GROUP BY o HAVING en la consulta; por eso el `WHERE TRUE`.)
+            - title: 2 — Top 3 productos por categoría
+              body: "Con order_items y products, calcula los ingresos por producto y quédate con los 3 mejores de cada categoría usando `RANK() OVER (PARTITION BY category ORDER BY revenue DESC)`. Pista: primero agrega en un CTE, luego aplica la ventana."
+            - title: 3 — Días entre órdenes del mismo usuario
+              body: Usa `LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at)` y `TIMESTAMP_DIFF(created_at, prev, DAY)`. Calcula el promedio de días entre compras de los usuarios con 2 o más órdenes.
+            - title: 4 — Ingresos diarios y acumulado del mes
+              body: |
+                ```sql
+                WITH daily AS (
+                  SELECT DATE(created_at) AS day, SUM(sale_price) AS revenue
+                  FROM `bigquery-public-data.thelook_ecommerce.order_items`
+                  WHERE status = 'Complete'
+                  GROUP BY day
+                )
+                SELECT day, ROUND(revenue, 2) AS revenue,
+                       ROUND(SUM(revenue) OVER (PARTITION BY DATE_TRUNC(day, MONTH) ORDER BY day
+                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 2) AS month_to_date
+                FROM daily
+                ORDER BY day DESC
+                LIMIT 31;
+                ```
+            - title: 5 — Datos anidados con UNNEST
+              body: |
+                El dataset de Google Analytics guarda los hits de cada sesión como un ARRAY de STRUCTs. Las páginas más vistas en un día:
+
+                ```sql
+                SELECT h.page.pagePath, COUNT(*) AS views
+                FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS s,
+                     UNNEST(s.hits) AS h
+                WHERE h.type = 'PAGE'
+                GROUP BY h.page.pagePath
+                ORDER BY views DESC
+                LIMIT 10;
+                ```
+
+                Ahora tú: ¿cuántas sesiones de ese día tuvieron al menos una transacción? (`totals.transactions` es un campo de un STRUCT, no hace falta UNNEST).
+          expected: "Consulta 1: una fila por usuario. Consulta 2: 3 productos por categoría (más si hay empates con RANK). Consulta 4: el acumulado reinicia cada mes. Consulta 5: rutas como /home encabezan las vistas."
+          checklist:
+            - Resolví los 5 problemas
+            - Usé QUALIFY para deduplicar sin subconsulta
+            - Puedo explicar por qué en el top 3 usé RANK (o por qué elegiría ROW_NUMBER)
+            - Entiendo cuándo hace falta UNNEST (arrays) y cuándo no (structs)
+          hints:
+            - "Problema 2: `WITH rev AS (SELECT p.category, p.name, SUM(oi.sale_price) AS revenue FROM ... GROUP BY 1, 2) SELECT * FROM rev QUALIFY RANK() OVER (PARTITION BY category ORDER BY revenue DESC) <= 3`."
+            - "Problema 5 (tú): `SELECT COUNTIF(totals.transactions > 0) FROM ...ga_sessions_20170801`."
+          evidence_hint: Pega tus consultas de los problemas 2, 3 y 5 (la tuya) con un extracto de resultados.
+      - slug: bq-4-quiz
         type: quiz
-        title: Quiz — Window functions y campos anidados
+        title: Quiz — Window functions y datos anidados
         required: true
+        estimated_min: 15
         skills:
           bigquery_sql: 1
+        questions:
+          - slug: b4-q1
+            type: mcq
+            prompt: Valores 100, 90, 90, 80 ordenados de mayor a menor. ¿Qué devuelve DENSE_RANK?
+            options:
+              - 1, 2, 3, 4
+              - 1, 2, 2, 4
+              - 1, 2, 2, 3
+              - 1, 1, 2, 3
+            answer: 2
+            explanation: "DENSE_RANK no deja huecos tras un empate: 1, 2, 2, 3. RANK daría 1, 2, 2, 4 y ROW_NUMBER 1, 2, 3, 4."
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b4-q2
+            type: mcq
+            prompt: "Clásico de entrevista: 'el segundo salario más alto'. ¿Qué es lo más robusto?"
+            options:
+              - ORDER BY salary DESC LIMIT 1 OFFSET 1
+              - DENSE_RANK() OVER (ORDER BY salary DESC) = 2
+              - MAX(salary) - 1
+              - MIN(salary)
+            answer: 1
+            explanation: Con empates en el primer lugar, OFFSET 1 devolvería el mismo salario máximo. DENSE_RANK = 2 da el segundo valor distinto.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b4-q3
+            type: tf
+            prompt: Una window function reduce el número de filas del resultado, igual que GROUP BY.
+            answer: false
+            explanation: Las window functions conservan todas las filas y agregan una columna calculada sobre su 'ventana'.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b4-q4
+            type: fill
+            prompt: Para obtener el valor de la fila ANTERIOR dentro de la ventana usas la función ______.
+            answer:
+              - LAG
+              - lag
+            explanation: LAG(x) mira hacia atrás; LEAD(x) hacia adelante. Muy usado para calcular diferencias entre eventos.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b4-q5
+            type: mcq
+            prompt: ¿Qué hace `QUALIFY ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) = 1`?
+            options:
+              - Devuelve la primera orden de la historia
+              - Deja solo la fila más reciente de cada usuario
+              - Ordena todos los usuarios
+              - Elimina usuarios sin órdenes
+            answer: 1
+            explanation: "QUALIFY filtra por el resultado de la ventana: es la forma idiomática de deduplicar en BigQuery."
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b4-q6
+            type: mcq
+            prompt: Tienes una columna `items ARRAY<STRUCT<sku STRING, qty INT64>>`. ¿Cómo obtienes una fila por cada item?
+            options:
+              - SELECT items.sku
+              - FROM orders, UNNEST(items) AS it
+              - GROUP BY items
+              - JOIN items ON TRUE
+            answer: 1
+            explanation: UNNEST convierte el array en filas, y la coma equivale a un CROSS JOIN con la fila padre.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b4-q7
+            type: mcq
+            prompt: ¿Por qué BigQuery favorece tablas desnormalizadas con campos anidados (ARRAY/STRUCT)?
+            options:
+              - Porque no soporta JOINs
+              - Evitan JOINs costosos y mantienen juntas las partes de una entidad (orden + líneas)
+              - Porque ocupan menos de 1 KB
+              - Porque son obligatorias
+            answer: 1
+            explanation: Los JOINs entre tablas enormes mueven muchos datos; el anidamiento mantiene juntas las partes de una entidad. Es otra forma de 'modelar para las consultas'.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b4-q8
+            type: mcq
+            prompt: Un dashboard calcula cada minuto las ventas por día de los últimos 30 días desde una tabla de 5 TB. ¿Qué usarías?
+            options:
+              - Una vista normal
+              - Una vista materializada (o tabla agregada) que BigQuery mantiene actualizada
+              - Más RAM
+              - Un CSV
+            answer: 1
+            explanation: "Una vista materializada guarda el resultado precalculado y se actualiza de forma incremental: consultas baratas y rápidas."
+            skill: bigquery_sql
+            difficulty: 2
   - slug: bq-5-boss
     number: 5
-    title: "Boss — Análisis de un dataset grande"
+    title: Boss — Análisis de un dataset grande
+    story: El almirante de la bahía te da millones de registros y una pregunta de negocio. Quiere respuestas con números, consultas eficientes y que sepas defenderlas en inglés.
     quests:
-      - slug: bq-5-boss-learn-review
+      - slug: bq-5-learn-review
         type: learn
-        title: Repaso para el jefe
+        title: Repaso — de pregunta de negocio a SQL
         required: true
+        estimated_min: 30
         skills:
           bigquery_sql: 1
-      - slug: bq-5-boss-quiz-final
+        resources:
+          - ref: res-bq-best-practices
+          - ref: res-bq-window
+            required: false
+        payload:
+          note_prompt: "Describe tu método para responder una pregunta de negocio con SQL: cómo entiendes los datos, cómo armas la consulta paso a paso con CTEs y cómo verificas que el resultado tiene sentido."
+          summary_md: |
+            Método para la entrevista (y para el trabajo):
+            1. Aclara la pregunta y la definición de cada métrica ("cliente activo" = ¿compró en los últimos 30 días?).
+            2. Explora el esquema y el tamaño (dry run) antes de escribir.
+            3. Construye con CTEs pequeños y verificables, uno por paso.
+            4. Valida: totales que cuadran, conteos sin duplicados por un JOIN, casos borde (NULL, devoluciones).
+            5. Cuenta la historia: 3 hallazgos con números y qué decisión permiten tomar.
+      - slug: bq-5-quiz-final
         type: quiz
-        title: Examen final de la zona
+        title: Examen final — BigQuery Bay
         required: true
+        estimated_min: 20
         skills:
           bigquery_sql: 1
-      - slug: bq-5-boss-boss-fight
+        questions:
+          - slug: b5-q1
+            type: mcq
+            prompt: Encuentra emails duplicados en `users`. ¿Qué consulta es correcta?
+            options:
+              - SELECT email FROM users WHERE COUNT(*) > 1
+              - SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1
+              - SELECT DISTINCT email FROM users
+              - SELECT email FROM users ORDER BY email
+            answer: 1
+            explanation: Los agregados no pueden ir en WHERE; se filtran grupos con HAVING.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b5-q2
+            type: mcq
+            prompt: "Tasa de retención: % de clientes que compraron en su primer mes y volvieron a comprar al mes siguiente. ¿Primer paso?"
+            options:
+              - Un JOIN de todas las tablas
+              - Un CTE con el mes de la primera compra de cada cliente (MIN(created_at) por user_id)
+              - Un ORDER BY por fecha
+              - Un SELECT *
+            answer: 1
+            explanation: Toda cohorte empieza por asignar a cada cliente su mes de entrada; después se cruza con su actividad posterior.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b5-q3
+            type: tf
+            prompt: "`AVG(x)` ignora los NULL, así que puede dar un resultado distinto a `SUM(x) / COUNT(*)`."
+            answer: true
+            explanation: AVG divide entre COUNT(x) (no nulos). Si los NULL deberían contar como 0, usa `AVG(IFNULL(x, 0))`.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b5-q4
+            type: mcq
+            prompt: Una consulta de reporte lee 3 TB y se ejecuta 24 veces al día. ¿Cuál es el cambio con más impacto en el costo?
+            options:
+              - Ejecutarla de noche
+              - Particionar por fecha y filtrar solo el periodo necesario (o preagregar en una tabla o vista materializada)
+              - Usar LIMIT 100
+              - Cambiar los alias
+            answer: 1
+            explanation: Reducir los bytes leídos (pruning y preagregación) es lo que baja el costo on-demand.
+            skill: bigquery_sql
+            difficulty: 1
+          - slug: b5-q5
+            type: mcq
+            prompt: "`SELECT category, SUM(sale_price) FROM order_items JOIN products ...` da ingresos más altos que el total real. ¿Sospecha principal?"
+            options:
+              - BigQuery tiene un bug
+              - "El JOIN duplica filas: la clave de products no es única o uniste por la columna equivocada"
+              - SUM redondea mal
+              - Falta ORDER BY
+            answer: 1
+            explanation: Siempre valida la unicidad de la clave del lado 'uno' (`COUNT(*) vs COUNT(DISTINCT id)`). Los fan-outs inflan las sumas.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b5-q6
+            type: fill
+            prompt: Para contar usuarios únicos de forma aproximada pero muy barata en tablas gigantes, BigQuery ofrece `APPROX_COUNT_______(user_id)`.
+            answer:
+              - DISTINCT
+              - distinct
+            explanation: "APPROX_COUNT_DISTINCT usa HyperLogLog++: error de ~1 % a cambio de mucha menos memoria y tiempo. Útil para dashboards."
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b5-q7
+            type: mcq
+            prompt: En una entrevista te piden 'el producto más vendido de cada mes'. ¿Qué patrón usas?
+            options:
+              - GROUP BY mes, producto y luego QUALIFY ROW_NUMBER() OVER (PARTITION BY mes ORDER BY ventas DESC) = 1
+              - MAX(producto) GROUP BY mes
+              - ORDER BY ventas LIMIT 12
+              - Una subconsulta por cada mes
+            answer: 0
+            explanation: Agregar primero y luego elegir el mejor por grupo con una ventana es el patrón top-N por grupo.
+            skill: bigquery_sql
+            difficulty: 2
+          - slug: b5-q8
+            type: order
+            prompt: "Ordena cómo presentar un análisis en una entrevista:"
+            options:
+              - Repetir la pregunta y las definiciones que asumiste
+              - Explicar el enfoque (pasos y CTEs)
+              - Mostrar los resultados clave con números
+              - Mencionar limitaciones y próximos pasos
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Definiciones primero evitan malentendidos; las limitaciones al final muestran criterio.
+            skill: bigquery_sql
+            difficulty: 1
+      - slug: bq-5-boss-fight
         type: boss
-        title: "Jefe: Análisis de un dataset grande"
+        title: "Jefe: el informe para el almirante"
         required: true
+        estimated_min: 120
         skills:
-          bigquery_sql: 1
-      - slug: bq-5-boss-interview
+          bigquery_sql: 0.8
+          english: 0.2
+        payload:
+          task: |
+            Con el dataset `bigquery-public-data.thelook_ecommerce` responde para el equipo de negocio:
+            1. **Devoluciones:** ¿qué 5 categorías tienen la mayor tasa de devolución (items devueltos / items vendidos) en los últimos 12 meses con datos? ¿Cambió la tendencia mes a mes?
+            2. **Canales:** ¿qué `traffic_source` trae clientes con mayor tasa de recompra (2 o más órdenes) y mayor ingreso por cliente?
+            3. **Cohortes:** retención al mes 1 y al mes 3 por mes de primera compra.
+
+            Entrega: las consultas SQL (con CTEs y window functions donde aplique), una tabla corta de resultados por pregunta, 3 hallazgos con números, los bytes procesados de cada consulta y cómo modelarías estas tablas en producción para que el dashboard sea barato (particiones, clustering, tabla agregada o vista materializada). Luego defiéndelo en una mini-entrevista en inglés.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - metric definitions and edge cases
+            - window functions and cohort logic
+            - query cost and partitioning
+            - communicating insights
+      - slug: bq-5-interview
         type: interview
-        title: Mini-entrevista de la zona
+        title: "Mini-entrevista: SQL screen"
         required: false
+        estimated_min: 30
         skills:
-          bigquery_sql: 1
+          bigquery_sql: 0.6
+          english: 0.4
         payload:
           mode: technical_screen
           zone: bigquery-bay

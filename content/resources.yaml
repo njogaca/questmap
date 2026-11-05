@@ -601,3 +601,143 @@ resources:
     required: false
     why: Explicación visual de la arquitectura de Prometheus.
     verified: false
+  - slug: res-pg-joins
+    title: PostgreSQL Tutorial — Joins Between Tables
+    type: docs
+    url: https://www.postgresql.org/docs/current/tutorial-join.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Explicación clara y oficial de los tipos de JOIN con ejemplos.
+    verified: true
+  - slug: res-pg-aggregates
+    title: PostgreSQL Tutorial — Aggregate Functions
+    type: docs
+    url: https://www.postgresql.org/docs/current/tutorial-agg.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: GROUP BY, HAVING y la diferencia con WHERE.
+    verified: true
+  - slug: res-sqlbolt
+    title: SQLBolt — Learn SQL with interactive exercises
+    type: course
+    url: https://sqlbolt.com/
+    language: en
+    duration_min: 120
+    cost: free
+    required: false
+    why: Ejercicios en el navegador para recuperar soltura con SQL.
+    verified: true
+  - slug: res-bq-overview
+    title: BigQuery overview
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/introduction
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Qué es BigQuery, almacenamiento separado del cómputo y almacenamiento columnar.
+    verified: true
+  - slug: res-bq-storage
+    title: BigQuery — Overview of BigQuery storage
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/storage_overview
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Por qué el formato columnar hace que SELECT * sea caro.
+    verified: true
+  - slug: res-bq-sandbox
+    title: BigQuery — Try BigQuery using the sandbox
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/sandbox
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Usar BigQuery gratis, sin tarjeta (1 TiB de consultas al mes; tablas expiran a los 60 días).
+    verified: true
+  - slug: res-bq-public-data
+    title: BigQuery public datasets
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/public-data
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Datasets públicos para practicar con volumen real.
+    verified: true
+  - slug: res-bq-costs
+    title: BigQuery — Estimate and control costs
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/estimate-costs
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Dry run, validador de consultas y cómo no gastar de más.
+    verified: true
+  - slug: res-bq-partitioned
+    title: BigQuery — Introduction to partitioned tables
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/partitioned-tables
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Particiones por fecha, por entero o por ingesta.
+    verified: true
+  - slug: res-bq-clustered
+    title: BigQuery — Introduction to clustered tables
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/clustered-tables
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Clustering (hasta 4 columnas) y cómo combina con particiones.
+    verified: true
+  - slug: res-bq-best-practices
+    title: BigQuery — Optimize query computation
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/best-practices-performance-compute
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Evitar SELECT *, filtrar temprano, agregar antes de unir.
+    verified: true
+  - slug: res-bq-window
+    title: BigQuery — Window function calls
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/window-function-calls
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: OVER, PARTITION BY, ORDER BY y marcos (frames).
+    verified: true
+  - slug: res-bq-arrays
+    title: BigQuery — Work with arrays
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/arrays
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: ARRAY, STRUCT y UNNEST para datos anidados.
+    verified: true
+  - slug: res-bq-query-syntax
+    title: GoogleSQL — Query syntax (incluye QUALIFY)
+    type: docs
+    url: https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: Referencia completa de SELECT, incluida la cláusula QUALIFY.
+    verified: true

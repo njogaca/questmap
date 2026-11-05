@@ -96,6 +96,8 @@ async function main() {
           story: z.story ?? null,
           skills: z.skills,
           unlockedFromStart: z.unlocked_from_start,
+          mapX: z.map ? Math.round(z.map.x) : null,
+          mapY: z.map ? Math.round(z.map.y) : null,
           status: z.status,
         };
         const [row] = await tx

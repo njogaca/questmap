@@ -1,0 +1,21 @@
+slug: capstone-castle
+title: Capstone Castle
+order: 9
+emoji: "🏯"
+status: outline
+map: { x: 880, y: 400 }
+prerequisites:
+  - { zone: java-forest, level: 4 }
+  - { zone: event-harbor, level: 3 }
+  - { zone: cassandra-caverns, level: 3 }
+  - { zone: observability-observatory, level: 3 }
+skills: [java, eda, cassandra, bigquery_sql, observability, microservices_gcp, cicd, security, testing, english]
+story: >
+  Sector 09. El castillo final. Construyes un sistema de órdenes completo, pieza por pieza,
+  y al final lo defiendes en una entrevista. Puedes usar Claude Code, pero debes poder explicar cada parte.
+levels:
+  - { slug: capstone-1, number: 1, title: "Milestones 1–2 — API de órdenes en Spring Boot que publica a Pub/Sub" }
+  - { slug: capstone-2, number: 2, title: "Milestones 3–4 — Consumidor idempotente con DLQ y Cassandra" }
+  - { slug: capstone-3, number: 3, title: "Milestones 5–6 — Exportación a BigQuery, Prometheus y Grafana" }
+  - { slug: capstone-4, number: 4, title: "Milestones 7–8 — GitHub Actions a Cloud Run, JWT, Testcontainers y k6" }
+  - { slug: capstone-5, number: 5, title: "Milestones 9–10 — README en inglés y defensa del proyecto" }

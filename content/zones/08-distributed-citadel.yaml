@@ -1,0 +1,17 @@
+slug: distributed-citadel
+title: Distributed Systems Citadel
+order: 8
+emoji: "🧠"
+status: outline
+map: { x: 640, y: 540 }
+prerequisites: [{ zone: event-harbor, level: 2 }, { zone: cassandra-caverns, level: 2 }]
+skills: [distributed_systems]
+story: >
+  Sector 08. La ciudadela de la teoría. Aquí aprendes por qué todo lo anterior
+  funciona… y por qué a veces falla.
+levels:
+  - { slug: ds-1-novice, number: 1, title: "Novice — Qué es un sistema distribuido, latencia y fallos" }
+  - { slug: ds-2-apprentice, number: 2, title: "Apprentice — CAP, PACELC y modelos de consistencia" }
+  - { slug: ds-3-journeyman, number: 3, title: "Journeyman — Replicación, particionamiento y relojes" }
+  - { slug: ds-4-expert, number: 4, title: "Expert — Consenso, sagas y backpressure" }
+  - { slug: ds-5-boss, number: 5, title: "Boss — Preguntas de diseño de sistemas" }

@@ -1,0 +1,18 @@
+slug: interview-arena
+title: Interview Arena
+order: 10
+emoji: "🎯"
+status: outline
+unlocked_from_start: true
+map: { x: 150, y: 100 }
+prerequisites: []
+skills: [english, ai_tools]
+story: >
+  Sector 10. La arena donde todo se pone a prueba en inglés.
+  Cada combate es una entrevista; cada victoria te acerca a la oferta.
+levels:
+  - { slug: arena-1-novice, number: 1, title: "Novice — Tell me about yourself y la historia puente" }
+  - { slug: arena-2-apprentice, number: 2, title: "Apprentice — Preguntas conductuales con STAR" }
+  - { slug: arena-3-journeyman, number: 3, title: "Journeyman — Screens técnicos por zona" }
+  - { slug: arena-4-expert, number: 4, title: "Expert — System design y mini take-home" }
+  - { slug: arena-5-boss, number: 5, title: "Boss — Mock Loop completo" }

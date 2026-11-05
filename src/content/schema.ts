@@ -118,6 +118,8 @@ export const zoneSchema = z.object({
   story: z.string().optional(),
   status,
   unlocked_from_start: z.boolean().default(false),
+  /** Posición del nodo en el mapa (viewBox 1000 × 640). */
+  map: z.object({ x: z.number().min(0).max(1000), y: z.number().min(0).max(640) }).optional(),
   prerequisites: z.array(z.object({ zone: slug, level: z.number().int().min(1).max(5) })).default([]),
   skills: z.array(z.string()).default([]),
   levels: z.array(levelSchema).max(5),

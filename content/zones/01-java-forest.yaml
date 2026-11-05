@@ -4,6 +4,7 @@ title: Java Forest
 order: 1
 emoji: "🌲"
 unlocked_from_start: true
+map: { x: 170, y: 320 }
 prerequisites: []
 skills: [java, git, testing]
 story: >

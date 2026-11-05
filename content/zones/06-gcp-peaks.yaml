@@ -1,0 +1,17 @@
+slug: gcp-peaks
+title: GCP & Microservices Peaks
+order: 6
+emoji: "☁️"
+status: outline
+map: { x: 600, y: 90 }
+prerequisites: [{ zone: java-forest, level: 3 }]
+skills: [microservices_gcp, cicd, security]
+story: >
+  Sector 06. Picos entre las nubes donde viven los servicios pequeños e independientes.
+  Aquí despliegas, escalas y automatizas.
+levels:
+  - { slug: gcp-1-novice, number: 1, title: "Novice — Nube, IAM, regiones y free tier" }
+  - { slug: gcp-2-apprentice, number: 2, title: "Apprentice — Cloud Run, GKE y contenedores" }
+  - { slug: gcp-3-journeyman, number: 3, title: "Journeyman — Patrones de microservicios y GitHub Actions" }
+  - { slug: gcp-4-expert, number: 4, title: "Expert — Auth servicio a servicio, secretos y despliegue" }
+  - { slug: gcp-5-boss, number: 5, title: "Boss — Microservicio en GCP con pipeline" }

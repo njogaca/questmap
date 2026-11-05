@@ -1,0 +1,17 @@
+slug: cassandra-caverns
+title: Cassandra Caverns
+order: 3
+emoji: "🕳️"
+status: outline
+map: { x: 390, y: 450 }
+prerequisites: [{ zone: java-forest, level: 2 }]
+skills: [cassandra, distributed_systems]
+story: >
+  Sector 03. Cavernas donde los datos se reparten en un anillo de nodos.
+  Si cae uno, los demás siguen respondiendo. Aprende a modelar para las consultas.
+levels:
+  - { slug: cassandra-1-novice, number: 1, title: "Novice — NoSQL, wide-column, anillo y replicación" }
+  - { slug: cassandra-2-apprentice, number: 2, title: "Apprentice — CQL y modelado orientado a consultas" }
+  - { slug: cassandra-3-journeyman, number: 3, title: "Journeyman — Consistencia, tombstones, TTL y cluster de 3 nodos" }
+  - { slug: cassandra-4-expert, number: 4, title: "Expert — Alto throughput, hot partitions y nodetool" }
+  - { slug: cassandra-5-boss, number: 5, title: "Boss — Modelar un caso real con escenario de fallo" }

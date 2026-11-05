@@ -1,0 +1,17 @@
+slug: observability-observatory
+title: Observability Observatory
+order: 4
+emoji: "🔭"
+status: outline
+map: { x: 590, y: 320 }
+prerequisites: [{ zone: java-forest, level: 3 }]
+skills: [observability, debugging_rca]
+story: >
+  Sector 04. Un observatorio que vigila cada latido del sistema.
+  Métricas, logs y trazas: si algo falla, aquí se ve primero.
+levels:
+  - { slug: obs-1-novice, number: 1, title: "Novice — Métricas, logs, trazas y golden signals" }
+  - { slug: obs-2-apprentice, number: 2, title: "Apprentice — Prometheus, exporters y Micrometer" }
+  - { slug: obs-3-journeyman, number: 3, title: "Journeyman — PromQL y dashboards de Grafana" }
+  - { slug: obs-4-expert, number: 4, title: "Expert — Alertas, Alertmanager, SLO/SLI y burn rate" }
+  - { slug: obs-5-boss, number: 5, title: "Boss — Diagnosticar un incidente (RCA)" }

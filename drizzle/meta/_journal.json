@@ -8,6 +8,13 @@
       "when": 1793900511080,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793901092429,
+      "tag": "0001_zone_map_position",
+      "breakpoints": true
     }
   ]
 }

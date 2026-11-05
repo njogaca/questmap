@@ -50,6 +50,8 @@ export const zones = pgTable("zones", {
   story: text("story"),
   skills: jsonb("skills").$type<string[]>().notNull().default([]),
   unlockedFromStart: boolean("unlocked_from_start").notNull().default(false),
+  mapX: integer("map_x"),
+  mapY: integer("map_y"),
   status: contentStatus("status").notNull().default("published"),
 });
 

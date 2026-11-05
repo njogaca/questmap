@@ -1,0 +1,17 @@
+slug: security-fortress
+title: Security & Testing Fortress
+order: 7
+emoji: "🏰"
+status: outline
+map: { x: 800, y: 190 }
+prerequisites: [{ zone: java-forest, level: 4 }, { zone: event-harbor, level: 3 }]
+skills: [security, testing, debugging_rca]
+story: >
+  Sector 07. La fortaleza que decide quién entra y qué puede hacer.
+  Lo que antes hacía DataPower en la puerta, ahora lo hacen tokens y pruebas.
+levels:
+  - { slug: sec-1-novice, number: 1, title: "Novice — Authn vs authz, OAuth2, OIDC y JWT" }
+  - { slug: sec-2-apprentice, number: 2, title: "Apprentice — Proteger una API con JWT y roles" }
+  - { slug: sec-3-journeyman, number: 3, title: "Journeyman — Pirámide de pruebas y Testcontainers" }
+  - { slug: sec-4-expert, number: 4, title: "Expert — Performance (k6), chaos y RCA" }
+  - { slug: sec-5-boss, number: 5, title: "Boss — Auditar y probar un servicio" }

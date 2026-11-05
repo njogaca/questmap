@@ -1,0 +1,17 @@
+slug: event-harbor
+title: Event Harbor
+order: 2
+emoji: "⚓"
+status: outline
+map: { x: 390, y: 190 }
+prerequisites: [{ zone: java-forest, level: 2 }]
+skills: [eda, distributed_systems]
+story: >
+  Sector 02. Un puerto donde los mensajes llegan y zarpan sin esperar a nadie.
+  Tú ya dominabas las colas de IBM MQ; aquí aprenderás el idioma de Pub/Sub.
+levels:
+  - { slug: eda-1-novice, number: 1, title: "Novice — Mensajería asíncrona y el mapa MQ → Pub/Sub" }
+  - { slug: eda-2-apprentice, number: 2, title: "Apprentice — Cloud Pub/Sub con el emulador" }
+  - { slug: eda-3-journeyman, number: 3, title: "Journeyman — Reintentos, DLQ, idempotencia y ordering" }
+  - { slug: eda-4-expert, number: 4, title: "Expert — Esquemas, backpressure y consumidores en Spring" }
+  - { slug: eda-5-boss, number: 5, title: "Boss — Diseñar un flujo de eventos" }

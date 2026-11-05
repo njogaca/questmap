@@ -1,0 +1,18 @@
+slug: bigquery-bay
+title: BigQuery Bay
+order: 5
+emoji: "🌊"
+status: outline
+unlocked_from_start: true
+map: { x: 150, y: 540 }
+prerequisites: []
+skills: [bigquery_sql]
+story: >
+  Sector 05. Una bahía de datos sin fondo. Con SQL bien escrito
+  puedes cruzarla en segundos; con SQL malo, pagas cada byte.
+levels:
+  - { slug: bq-1-novice, number: 1, title: "Novice — Repaso de SQL: joins y agregaciones" }
+  - { slug: bq-2-apprentice, number: 2, title: "Apprentice — BigQuery Sandbox y datasets públicos" }
+  - { slug: bq-3-journeyman, number: 3, title: "Journeyman — Particiones, clustering y costo" }
+  - { slug: bq-4-expert, number: 4, title: "Expert — Window functions y campos anidados" }
+  - { slug: bq-5-boss, number: 5, title: "Boss — Análisis de un dataset grande" }

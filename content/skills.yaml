@@ -95,4 +95,4 @@ skills:
     name: Sistemas distribuidos
     description: Teoría de sistemas distribuidos (base para todo lo anterior)
     core: false
-    target_xp: 1310 # 875×.25 ×2 = 438 + 875
+    target_xp: 1040 # XP real publicado al completar la Zona 8 (1042)

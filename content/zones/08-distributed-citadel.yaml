@@ -2,7 +2,6 @@ slug: distributed-citadel
 title: Distributed Systems Citadel
 order: 8
 emoji: "🧠"
-status: outline
 map: { x: 640, y: 540 }
 prerequisites: [ { zone: event-harbor, level: 2 }, { zone: cassandra-caverns, level: 2 } ]
 skills: [ distributed_systems ]
@@ -11,144 +10,1551 @@ story: >
 levels:
   - slug: ds-1-novice
     number: 1
-    title: "Novice — Qué es un sistema distribuido, latencia y fallos"
+    title: Novice — Qué es un sistema distribuido, latencia y fallos
+    story: "Las puertas de la ciudadela se abren con una advertencia grabada en piedra: la red no es confiable, el tiempo no es gratis y una máquina callada puede estar muerta… o solo lenta."
     quests:
-      - slug: ds-1-novice-learn-1
+      - slug: ds-1-learn-what
         type: learn
-        title: "Conceptos: Qué es un sistema distribuido, latencia y fallos"
+        title: Qué es un sistema distribuido (y por qué duele)
         required: true
+        estimated_min: 45
         skills:
           distributed_systems: 1
-      - slug: ds-1-novice-learn-2
+        resources:
+          - ref: res-kleppmann-notes
+          - ref: res-fallacies
+          - ref: res-kleppmann-lectures
+            required: false
+        payload:
+          note_prompt: "Con tus palabras: ¿qué es un fallo parcial? Da un ejemplo con `orders` llamando a `payments` donde no sabes si el pago se hizo o no."
+          summary_md: |
+            Un sistema distribuido son varias máquinas que se comunican por red y cooperan para parecer UN solo sistema.
+
+            ¿Por qué distribuir si duele?
+            - **Escala:** una sola máquina no aguanta la carga o los datos.
+            - **Disponibilidad:** si una máquina cae, otras siguen.
+            - **Latencia:** poner datos cerca del usuario (otra región).
+
+            El precio:
+            - **Fallos parciales:** una parte falla y el resto sigue. En una sola máquina, o todo funciona o todo se cae; aquí puede caer solo `payments`.
+            - **Incertidumbre:** si una llamada no responde, NO sabes si el otro lado procesó la petición o no.
+            - **No hay reloj común:** cada máquina tiene su reloj y se desvían.
+
+            Las 8 falacias de la computación distribuida (lo que los principiantes asumen sin darse cuenta):
+            1. La red es confiable.
+            2. La latencia es cero.
+            3. El ancho de banda es infinito.
+            4. La red es segura.
+            5. La topología no cambia.
+            6. Hay un solo administrador.
+            7. El costo de transporte es cero.
+            8. La red es homogénea.
+
+            Tú ya viviste esto con IBM MQ: por eso existían las colas persistentes, los reintentos y los mensajes duplicados.
+      - slug: ds-1-learn-latency
         type: learn
-        title: "Lectura guiada: Qué es un sistema distribuido, latencia y fallos"
+        title: "Latencia: los números que todo backend debe saber"
         required: true
+        estimated_min: 30
         skills:
           distributed_systems: 1
-      - slug: ds-1-novice-glossary
+        resources:
+          - ref: res-latency-numbers
+          - ref: res-aws-timeouts-retries
+        payload:
+          note_prompt: Si una página llama en serie a 5 servicios y cada uno tarda 40 ms en promedio pero 400 ms en el p99, ¿qué latencia esperas en el peor caso común? ¿Qué cambiarías?
+          summary_md: |
+            Órdenes de magnitud (aproximados, lo que importa es la escala):
+            - Leer de memoria: ~100 nanosegundos.
+            - Ida y vuelta dentro del mismo datacenter: ~0,5 ms.
+            - Ida y vuelta entre continentes (California ↔ Países Bajos): ~150 ms.
+
+            Una llamada de red es miles de veces más lenta que una llamada de método. Por eso:
+            - **Evita llamadas en cadena** (A → B → C → D): las latencias se suman.
+            - **Mira percentiles, no promedios:** el p99 es lo que sufre 1 de cada 100 usuarios. Si una petición toca 10 servicios, la probabilidad de pegarle a algún "p99 lento" crece mucho (tail latency).
+            - **Todo lo remoto necesita timeout:** sin timeout, un servicio lento te contagia y te quedas sin hilos.
+
+            Latencia ≠ ancho de banda: la latencia es cuánto tarda en llegar el primer byte; el ancho de banda, cuántos bytes por segundo caben.
+      - slug: ds-1-learn-failures
+        type: learn
+        title: "Modelos de fallo: crash, red y el nodo lento"
+        required: true
+        estimated_min: 30
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-kleppmann-notes
+        payload:
+          note_prompt: Explica por qué un timeout no te dice si el servidor está muerto o solo lento. ¿Qué decisiones de diseño salen de esa incertidumbre?
+          summary_md: |
+            Tipos de fallo, de más fácil a más difícil:
+            - **Crash-stop:** el nodo se apaga y no vuelve.
+            - **Crash-recovery:** se cae y vuelve (con lo que guardó en disco, sin lo que tenía en memoria).
+            - **Fallos de red:** mensajes perdidos, duplicados, desordenados o retrasados. Una **partición de red** separa el cluster en grupos que no se ven entre sí.
+            - **Nodo lento (gray failure):** responde, pero tarde. Es el peor: parece vivo y arrastra a todos.
+            - **Bizantino:** un nodo miente o se comporta de forma maliciosa. En backend normal casi nunca se diseña para esto (sí en blockchain o aviones).
+
+            La gran lección: **desde afuera, "muerto", "lento" y "red cortada" se ven igual: silencio.** Lo único que tienes es un timeout. Por eso:
+            - Las operaciones deben poder **repetirse sin daño** (idempotencia, la verás en el nivel 3).
+            - Los timeouts se eligen con datos (p99 + margen), no al azar.
+            - Detectar fallos siempre es una apuesta: un timeout corto da falsos positivos, uno largo hace esperar a todos.
+      - slug: ds-1-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de la ciudadela
         required: true
+        estimated_min: 10
         skills:
           distributed_systems: 1
-      - slug: ds-1-novice-quiz
+        payload:
+          terms:
+            - ds-distributed-system
+            - ds-partial-failure
+            - ds-fallacies
+            - ds-latency
+            - ds-tail-latency
+            - ds-timeout
+            - ds-network-partition
+            - ds-gray-failure
+      - slug: ds-1-lab-silence
+        type: lab
+        title: "Lab: el silencio de un servidor (lento vs muerto)"
+        required: false
+        estimated_min: 30
+        skills:
+          distributed_systems: 1
+        payload:
+          goal: "Medir latencia local y remota desde PowerShell, y comprobar que un servidor congelado y uno detenido se ven igual desde el cliente: solo un timeout te salva."
+          steps:
+            - title: Levanta un servidor de prueba
+              commands:
+                - docker run -d --name ds-web -p 127.0.0.1:8088:80 nginx:alpine
+            - title: Mide la latencia local (5 veces) y una remota
+              body: La primera petición suele ser más lenta (conexión nueva, caches frías). Fíjate en la diferencia entre local y remoto.
+              commands:
+                - 1..5 | ForEach-Object { '{0:N1} ms' -f (Measure-Command { Invoke-WebRequest http://127.0.0.1:8088 -UseBasicParsing | Out-Null }).TotalMilliseconds }
+                - "'{0:N1} ms' -f (Measure-Command { Invoke-WebRequest https://www.google.com -UseBasicParsing | Out-Null }).TotalMilliseconds"
+            - title: Congela el servidor (un "nodo lento" extremo)
+              body: "`docker pause` congela el proceso: el puerto sigue abierto, pero nadie responde. Llama con timeout de 2 segundos."
+              commands:
+                - docker pause ds-web
+                - $sw = [Diagnostics.Stopwatch]::StartNew(); try { Invoke-WebRequest http://127.0.0.1:8088 -UseBasicParsing -TimeoutSec 2 } catch { $_.Exception.Message }; '{0:N0} ms' -f $sw.ElapsedMilliseconds
+                - docker unpause ds-web
+            - title: Ahora detenlo del todo
+              commands:
+                - docker stop ds-web
+                - $sw = [Diagnostics.Stopwatch]::StartNew(); try { Invoke-WebRequest http://127.0.0.1:8088 -UseBasicParsing -TimeoutSec 2 } catch { $_.Exception.Message }; '{0:N0} ms' -f $sw.ElapsedMilliseconds
+            - title: Limpia
+              commands:
+                - docker rm ds-web
+          expected: "Local: 1–5 ms (la primera más lenta); remoto: decenas o cientos de ms. Congelado: falla a los ~2.000 ms por timeout. Detenido: en Docker Desktop para Windows normalmente TAMBIÉN falla por timeout a los ~2.000 ms (el proxy de puertos acepta la conexión); en otros entornos verías 'connection refused' al instante. Desde el cliente no puedes saber cuál de los dos pasó."
+          checklist:
+            - Medí latencia local y remota y anoté la diferencia
+            - Vi el timeout con el servidor congelado
+            - Comparé con el servidor detenido
+            - Puedo explicar por qué sin timeout el cliente esperaría para siempre
+          hints:
+            - Si `Invoke-WebRequest` muestra una barra de progreso lenta, agrega `$ProgressPreference = 'SilentlyContinue'` antes de medir.
+          evidence_hint: Pega las latencias medidas y los dos mensajes de error con sus milisegundos.
+      - slug: ds-1-quiz
         type: quiz
-        title: Quiz — Qué es un sistema distribuido, latencia y fallos
+        title: Quiz — fundamentos de sistemas distribuidos
         required: true
+        estimated_min: 15
         skills:
           distributed_systems: 1
+        questions:
+          - slug: d1-q1
+            type: mcq
+            prompt: "`orders` llama a `payments` y la llamada vence por timeout. ¿Qué sabes con certeza?"
+            options:
+              - Que el pago falló
+              - Que el pago se hizo
+              - "Nada: el pago pudo hacerse, fallar o seguir en curso"
+              - Que la red está caída
+            answer: 2
+            explanation: Un timeout solo dice 'no recibí respuesta a tiempo'. Por eso los reintentos deben ser seguros (idempotentes) y hay que poder consultar el estado después.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q2
+            type: mcq
+            prompt: ¿Cuál NO es una de las falacias de la computación distribuida?
+            options:
+              - La red es confiable
+              - La latencia es cero
+              - Los relojes de todas las máquinas pueden desviarse
+              - La topología no cambia
+            answer: 2
+            explanation: Que los relojes se desvían es VERDAD, no una falacia. Las falacias son suposiciones falsas, como que la red nunca falla o que la latencia es cero.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q3
+            type: tf
+            prompt: Para medir la experiencia de los usuarios, el promedio de latencia es mejor indicador que el p99.
+            answer: false
+            explanation: El promedio esconde la cola. El p99 (o p95) muestra lo que vive el usuario que peor la pasa, y en sistemas con muchas llamadas esa cola le pega a casi todos.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q4
+            type: mcq
+            prompt: ¿Qué es un fallo parcial?
+            options:
+              - Un bug que solo afecta a algunos usuarios
+              - Cuando una parte del sistema falla y el resto sigue funcionando
+              - Un disco medio lleno
+              - Cuando un test pasa a veces
+            answer: 1
+            explanation: "Es LA característica que distingue a un sistema distribuido: en una sola máquina, normalmente todo funciona o todo se cae."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q5
+            type: mcq
+            prompt: Un nodo responde, pero tarda 10 veces más de lo normal y los health checks siguen en verde. ¿Cómo se llama esto?
+            options:
+              - Crash-stop
+              - Gray failure (nodo lento)
+              - Fallo bizantino
+              - Split-brain
+            answer: 1
+            explanation: Los fallos grises son peligrosos porque el sistema cree que el nodo está sano y le sigue mandando tráfico.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d1-q6
+            type: order
+            prompt: "Ordena de menor a mayor latencia (aproximada):"
+            options:
+              - Leer de memoria RAM
+              - Ida y vuelta dentro del mismo datacenter
+              - Ida y vuelta entre continentes
+            answer:
+              - 0
+              - 1
+              - 2
+            explanation: "~100 ns, ~0,5 ms y ~150 ms: cada salto es de 1.000 veces o más."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q7
+            type: mcq
+            prompt: Una página llama EN SERIE a 4 servicios de 50 ms cada uno. ¿Qué mejora más la latencia, si las llamadas son independientes?
+            options:
+              - Subir el timeout
+              - Hacer las 4 llamadas en paralelo
+              - Agregar logs
+              - Usar un servidor más grande para la página
+            answer: 1
+            explanation: "En serie: ~200 ms. En paralelo: ~50 ms (lo que tarde la más lenta). En Java, por ejemplo con `CompletableFuture`."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d1-q8
+            type: fill
+            prompt: Cuando la red separa un cluster en grupos de nodos que no pueden comunicarse entre sí, hay una ______ de red.
+            answer:
+              - partición
+              - particion
+              - partition
+            explanation: "Network partition: cada grupo sigue vivo, pero no ve al otro. Es el escenario central del teorema CAP (nivel 2)."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d1-q9
+            type: tf
+            prompt: Si un servidor no responde, el cliente puede distinguir con seguridad si está caído o si la red está cortada.
+            answer: false
+            explanation: "Ambos casos se ven igual: silencio. Solo tienes un timeout, que es una suposición."
+            skill: distributed_systems
+            difficulty: 1
   - slug: ds-2-apprentice
     number: 2
-    title: "Apprentice — CAP, PACELC y modelos de consistencia"
+    title: Apprentice — CAP, PACELC y modelos de consistencia
+    story: "En la sala de los dilemas, cada puerta te obliga a elegir: responder siempre o responder siempre bien. La ciudadela no acepta a quien diga 'las dos'."
     quests:
-      - slug: ds-2-apprentice-learn
+      - slug: ds-2-learn-cap
         type: learn
-        title: CAP, PACELC y modelos de consistencia
+        title: CAP y PACELC sin mitos
         required: true
+        estimated_min: 45
         skills:
           distributed_systems: 1
-      - slug: ds-2-apprentice-glossary
+        resources:
+          - ref: res-pacelc
+          - ref: res-kleppmann-notes
+          - ref: res-ddia
+            required: false
+        payload:
+          note_prompt: Clasifica tu cluster de Cassandra de la Zona 3 y un PostgreSQL con una réplica síncrona según PACELC. ¿Qué ganas y qué pierdes en cada uno?
+          summary_md: |
+            **CAP**: si hay una **partición de red** (P), un sistema replicado debe elegir entre:
+            - **C (consistencia fuerte / linearizable):** todos ven el último valor escrito, aunque eso signifique rechazar peticiones.
+            - **A (disponibilidad):** todo nodo vivo responde, aunque sea con datos viejos.
+
+            Mitos comunes:
+            - "Elige 2 de 3" es engañoso: las particiones NO son opcionales en una red real. La pregunta real es qué haces CUANDO ocurren.
+            - CAP solo habla del momento de la partición. El resto del tiempo también hay un costo…
+
+            **PACELC** completa la idea: si hay **P**artición → elige **A** o **C**; **E**n otro caso (**E**lse), elige entre **L**atencia o **C**onsistencia.
+            - Consistencia fuerte siempre cuesta latencia: hay que esperar a que otras réplicas confirmen.
+            - Cassandra por defecto: **PA/EL** (disponible y rápida; puedes subir a QUORUM y moverte hacia C).
+            - Bases relacionales con réplica síncrona: **PC/EC**.
+
+            En entrevistas, la respuesta madura no es "elijo AP" sino: **"para el saldo o el inventario necesito C; para el catálogo o las recomendaciones acepto datos un poco viejos."** Distintas partes del sistema eligen distinto.
+      - slug: ds-2-learn-models
+        type: learn
+        title: Modelos de consistencia (del más fuerte al más débil)
+        required: true
+        estimated_min: 45
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-jepsen-models
+          - ref: res-kleppmann-notes
+        payload:
+          note_prompt: Un cliente actualiza su dirección de envío y al recargar la página ve la dirección vieja. ¿Qué garantía de consistencia se violó y cómo la arreglarías sin hacer todo linearizable?
+          summary_md: |
+            Del más fuerte (más caro) al más débil (más barato):
+            - **Linearizable (consistencia fuerte):** el sistema se comporta como si hubiera UNA sola copia. Apenas una escritura termina, todos la ven.
+            - **Causal:** si B ocurrió por culpa de A (ej. una respuesta a un comentario), todos ven A antes que B. Eventos sin relación pueden verse en distinto orden.
+            - **Garantías de sesión** (por cliente, muy útiles y baratas):
+              - **Read-your-writes:** tú siempre ves lo que acabas de escribir.
+              - **Monotonic reads:** nunca "retrocedes en el tiempo" (no ves un valor y después uno más viejo).
+            - **Eventual:** si dejan de llegar escrituras, todas las réplicas terminan iguales. No promete CUÁNDO.
+
+            Truco práctico de quórum (Dynamo, Cassandra): con N réplicas, si escribes en W y lees de R, y **R + W > N**, toda lectura toca al menos una réplica con el último valor.
+
+            No confundas la **C de CAP** (linearizabilidad entre réplicas) con la **C de ACID** (que la transacción respete las reglas de la base, como un CHECK o una foreign key).
+      - slug: ds-2-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de consistencia
         required: true
+        estimated_min: 10
         skills:
           distributed_systems: 1
-      - slug: ds-2-apprentice-lab
+        payload:
+          terms:
+            - cass-cap
+            - ds-pacelc
+            - ds-linearizability
+            - ds-causal-consistency
+            - ds-read-your-writes
+            - ds-monotonic-reads
+            - eda-eventual-consistency
+            - ds-quorum-overlap
+      - slug: ds-2-lab-quorum
         type: lab
-        title: "Lab: CAP, PACELC y modelos de consistencia"
+        title: "Lab: simulador de quórums (R + W > N)"
         required: true
+        estimated_min: 45
         skills:
-          distributed_systems: 1
-      - slug: ds-2-apprentice-quiz
+          distributed_systems: 0.8
+          java: 0.2
+        payload:
+          goal: Escribir un simulador en Java de 3 réplicas y comprobar con números cuándo una lectura puede devolver un valor viejo y cuándo la regla R + W > N lo impide.
+          steps:
+            - title: Prepara la carpeta
+              body: Java 11+ puede ejecutar un archivo `.java` directamente, sin compilar ni Maven.
+              commands:
+                - New-Item -ItemType Directory -Force $HOME\ds-labs | Out-Null; Set-Location $HOME\ds-labs
+            - title: Crea Quorum.java
+              body: |
+                Guarda esto como `Quorum.java`. Cada prueba escribe la versión 2 en solo W réplicas (las demás quedan con la versión 1, como si la escritura no les hubiera llegado aún) y lee de R réplicas al azar, quedándose con la versión más alta.
+
+                ```java
+                import java.util.*;
+
+                public class Quorum {
+                    record Versioned(long version, String value) {}
+
+                    static final int N = 3;
+                    static final Random rnd = new Random(42);
+
+                    public static void main(String[] args) {
+                        int w = args.length > 0 ? Integer.parseInt(args[0]) : 1;
+                        int r = args.length > 1 ? Integer.parseInt(args[1]) : 1;
+                        int trials = 10_000, stale = 0;
+
+                        for (int t = 0; t < trials; t++) {
+                            Versioned[] replicas = new Versioned[N];
+                            Arrays.fill(replicas, new Versioned(1, "price=10"));
+
+                            // Escritura: solo W réplicas (al azar) reciben la versión nueva a tiempo
+                            Versioned latest = new Versioned(2, "price=12");
+                            for (int i : pick(w)) replicas[i] = latest;
+
+                            // Lectura: preguntamos a R réplicas y nos quedamos con la versión más alta
+                            Versioned seen = null;
+                            for (int i : pick(r)) {
+                                if (seen == null || replicas[i].version() > seen.version()) seen = replicas[i];
+                            }
+                            if (seen.version() < latest.version()) stale++;
+                        }
+
+                        System.out.printf("N=%d W=%d R=%d  R+W>N? %-5s  lecturas viejas: %d de %d (%.1f %%)%n",
+                            N, w, r, (r + w > N), stale, trials, 100.0 * stale / trials);
+                    }
+
+                    static List<Integer> pick(int k) {
+                        List<Integer> ids = new ArrayList<>(List.of(0, 1, 2));
+                        Collections.shuffle(ids, rnd);
+                        return ids.subList(0, k);
+                    }
+                }
+                ```
+            - title: Prueba combinaciones de W y R
+              commands:
+                - java Quorum.java 1 1
+                - java Quorum.java 2 1
+                - java Quorum.java 1 2
+                - java Quorum.java 2 2
+                - java Quorum.java 3 1
+            - title: Conéctalo con lo que ya conoces
+              body: "En Cassandra con RF=3: `CONSISTENCY ONE` en escritura y lectura es W=1, R=1. `QUORUM` en ambas es W=2, R=2. Escribe en tus notas qué combinación usarías para el inventario de una tienda y cuál para el contador de 'vistas' de un producto, y por qué."
+          expected: W=1 R=1 → ~66 % de lecturas viejas. W=2 R=1 y W=1 R=2 → ~33 %. W=2 R=2 y W=3 R=1 → 0 %, porque R + W > N obliga a que el grupo leído y el escrito compartan al menos una réplica.
+          checklist:
+            - Corrí las 5 combinaciones
+            - Puedo explicar por qué R + W > N elimina las lecturas viejas
+            - "Sé el costo: W=3 hace que la escritura falle si cae una réplica"
+            - Elegí niveles para inventario y para contador de vistas, con razones
+          hints:
+            - "Si `java` no se reconoce, revisa que el JDK esté en el PATH: `java -version`."
+            - "El simulador es idealizado: en la vida real también importan los relojes, los nodos caídos durante la lectura y el read repair."
+          evidence_hint: Pega la salida de las 5 ejecuciones y tu elección para inventario y vistas.
+      - slug: ds-2-open-tradeoff
+        type: open_answer
+        title: "Pregunta abierta: ¿AP o CP para el inventario?"
+        required: false
+        estimated_min: 20
+        skills:
+          distributed_systems: 0.6
+          english: 0.4
+        payload:
+          prompt_en: An online store shows 'in stock' on the product page and reserves the item at checkout. Which parts of this flow would you make strongly consistent and which can be eventually consistent? Explain using CAP/PACELC and mention what the customer experiences during a network partition.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+      - slug: ds-2-quiz
         type: quiz
-        title: Quiz — CAP, PACELC y modelos de consistencia
+        title: Quiz — CAP, PACELC y consistencia
         required: true
+        estimated_min: 15
         skills:
           distributed_systems: 1
+        questions:
+          - slug: d2-q1
+            type: mcq
+            prompt: Según CAP, ¿cuándo debes elegir entre consistencia y disponibilidad?
+            options:
+              - Siempre
+              - Solo cuando hay una partición de red
+              - Solo al diseñar la base de datos
+              - Nunca, puedes tener las tres
+            answer: 1
+            explanation: CAP habla del momento de la partición. Fuera de ella, PACELC dice que eliges entre latencia y consistencia.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d2-q2
+            type: mcq
+            prompt: En PACELC, ¿qué significa la parte 'ELC'?
+            options:
+              - Error, Log, Commit
+              - "Else: elegir entre Latency y Consistency cuando NO hay partición"
+              - Eventual Linearizable Consistency
+              - Elección de líder en cluster
+            answer: 1
+            explanation: "Aun con la red sana, la consistencia fuerte exige esperar confirmaciones de otras réplicas: más latencia."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d2-q3
+            type: mcq
+            prompt: Con N = 3 réplicas, ¿qué combinación garantiza que toda lectura vea la última escritura confirmada?
+            options:
+              - W=1, R=1
+              - W=1, R=2
+              - W=2, R=2
+              - W=2, R=1
+            answer: 2
+            explanation: "2 + 2 = 4 > 3: los conjuntos de escritura y lectura siempre se cruzan en al menos una réplica."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d2-q4
+            type: mcq
+            prompt: Un usuario actualiza su foto de perfil y, al recargar, ve la foto vieja. ¿Qué garantía se violó?
+            options:
+              - Monotonic writes
+              - Read-your-writes
+              - Atomicidad
+              - Durabilidad
+            answer: 1
+            explanation: "Se arregla sin hacer todo linearizable: por ejemplo, leer del líder durante unos segundos después de que ESE usuario escribe."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d2-q5
+            type: tf
+            prompt: La C de CAP y la C de ACID significan lo mismo.
+            answer: false
+            explanation: La C de CAP es linearizabilidad entre réplicas. La C de ACID es que la transacción deja la base respetando sus reglas (constraints).
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d2-q6
+            type: order
+            prompt: "Ordena del modelo de consistencia MÁS fuerte al más débil:"
+            options:
+              - Linearizable
+              - Causal
+              - Eventual
+            answer:
+              - 0
+              - 1
+              - 2
+            explanation: Cuanto más fuerte, más coordinación (y latencia) necesita.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d2-q7
+            type: mcq
+            prompt: Cassandra con su configuración por defecto se clasifica en PACELC como…
+            options:
+              - PC/EC
+              - PA/EL
+              - PC/EL
+              - No aplica
+            answer: 1
+            explanation: Prioriza disponibilidad y baja latencia. Subiendo a QUORUM en lectura y escritura se mueve hacia la consistencia, pagando latencia.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d2-q8
+            type: mcq
+            prompt: En una entrevista te preguntan '¿AP o CP?' para una tienda. ¿Cuál es la mejor respuesta?
+            options:
+              - Siempre CP, la consistencia es lo más importante
+              - Siempre AP, la disponibilidad vende
+              - "Depende de cada dato: CP para pagos e inventario reservado, AP para catálogo, reseñas o recomendaciones"
+              - CAP ya no aplica en la nube
+            answer: 2
+            explanation: "Los buenos diseños mezclan: cada parte elige según el costo de un dato viejo frente al costo de no responder."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d2-q9
+            type: fill
+            prompt: "Si dejan de llegar escrituras, todas las réplicas terminan con el mismo valor: eso es consistencia ______."
+            answer:
+              - eventual
+              - eventual consistency
+            explanation: Eventual promete convergencia, pero no cuándo ni qué ves mientras tanto.
+            skill: distributed_systems
+            difficulty: 1
   - slug: ds-3-journeyman
     number: 3
-    title: "Journeyman — Replicación, particionamiento y relojes"
+    title: Journeyman — Replicación, particionamiento, idempotencia y relojes
+    story: En las torres gemelas de la ciudadela, cada escriba copia los libros del maestro… con algo de retraso. Y ningún reloj de las torres marca exactamente la misma hora.
     quests:
-      - slug: ds-3-journeyman-learn
+      - slug: ds-3-learn-replication
         type: learn
-        title: Replicación, particionamiento y relojes
+        title: "Replicación: líder, seguidores y el retraso"
         required: true
+        estimated_min: 45
         skills:
           distributed_systems: 1
-      - slug: ds-3-journeyman-glossary
+        resources:
+          - ref: res-kleppmann-notes
+          - ref: res-fowler-dist-patterns
+          - ref: res-ddia
+            required: false
+        payload:
+          note_prompt: ¿Qué pasa con las escrituras ya confirmadas al cliente si el líder cae con replicación asíncrona? ¿Y con síncrona? Da un ejemplo con órdenes.
+          summary_md: |
+            **Replicar** = guardar copias de los mismos datos en varias máquinas: para sobrevivir caídas, para leer más rápido y para estar cerca del usuario.
+
+            Tres estilos:
+            - **Líder-seguidores (leader-follower):** todas las escrituras van al líder; los seguidores copian su log. PostgreSQL, MySQL, Kafka. Simple; el líder es el cuello de botella y su caída requiere un **failover**.
+            - **Multi-líder:** varios nodos aceptan escrituras (ej. uno por región). Rápido, pero aparecen **conflictos** de escritura que hay que resolver.
+            - **Sin líder (leaderless):** cualquier réplica acepta escrituras y se usan quórums. Cassandra, Dynamo.
+
+            **Síncrona vs asíncrona:**
+            - **Síncrona:** el líder espera que el seguidor confirme antes de responder "OK". No pierdes datos confirmados, pero si el seguidor no responde, las escrituras se **bloquean** (eliges C sobre A).
+            - **Asíncrona:** el líder responde enseguida. Rápido y disponible, pero hay **replication lag** y, si el líder cae, puedes perder las últimas escrituras.
+
+            El retraso de replicación causa los problemas del nivel 2: leer de una réplica justo después de escribir puede devolver datos viejos (se viola read-your-writes).
+      - slug: ds-3-learn-partitioning
+        type: learn
+        title: Particionamiento (sharding) y consistent hashing
+        required: true
+        estimated_min: 30
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-cassandra-dynamo
+          - ref: res-kleppmann-notes
+        payload:
+          note_prompt: ¿Por qué `hash(clave) % N` es mala idea cuando el número de nodos cambia? ¿Cómo lo resuelve el anillo de Cassandra con vnodes?
+          summary_md: |
+            **Particionar** = dividir los datos para que cada nodo guarde solo una parte. Replicar copia; particionar reparte. En la práctica se usan juntos (cada partición tiene varias réplicas).
+
+            Formas de repartir:
+            - **Por rango** (A–F, G–M…): permite consultas por rango, pero se forman **hot spots** (todas las órdenes de hoy van al mismo nodo).
+            - **Por hash** de la clave: reparte parejo, pero pierdes las consultas por rango.
+
+            El problema de `hash(clave) % N`: si pasas de 4 a 5 nodos, casi TODAS las claves cambian de nodo → mover casi todos los datos.
+
+            **Consistent hashing:** nodos y claves se ubican en un anillo; cada clave pertenece al siguiente nodo del anillo. Al agregar un nodo solo se mueve ~1/N de los datos. Con **nodos virtuales (vnodes)**, cada servidor ocupa muchos puntos del anillo y la carga queda pareja. Es exactamente el anillo de tokens que viste en Cassandra Caverns.
+
+            Elegir la clave de partición es la decisión más importante: debe repartir bien la carga Y coincidir con las consultas (como modelaste en Cassandra).
+      - slug: ds-3-learn-idempotency
+        type: learn
+        title: "Idempotencia: la defensa contra 'no sé si llegó'"
+        required: true
+        estimated_min: 30
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-aws-idempotent-apis
+        payload:
+          note_prompt: Diseña el endpoint `POST /v1/orders` para que un cliente pueda reintentar sin crear dos órdenes. ¿Dónde guardas la clave de idempotencia, cuánto tiempo y qué devuelves en el segundo intento?
+          summary_md: |
+            En el nivel 1 viste que un timeout no te dice si la operación se hizo. La única salida segura es poder **repetirla sin daño**: idempotencia.
+
+            - Naturalmente idempotentes: `GET`, `PUT` (reemplazar con un valor), `DELETE`. "Poner el stock en 5" dos veces da lo mismo.
+            - NO idempotentes: "sumar 1 al stock", `POST /orders` (crea otra orden cada vez).
+
+            Cómo hacer idempotente una creación:
+            1. El cliente genera una **idempotency key** (un UUID) y la manda en un header (ej. `Idempotency-Key`).
+            2. El servidor guarda la clave junto con el resultado, en la MISMA transacción que la orden (una tabla con la clave como primary key o unique).
+            3. Si llega otra vez la misma clave, devuelve el resultado guardado en lugar de crear otra orden.
+            4. Si llega la misma clave con un cuerpo DISTINTO, es un error del cliente (409 o 422).
+
+            En mensajería (Event Harbor) es igual: el consumidor guarda los IDs de mensajes ya procesados, porque "exactly-once" de punta a punta no existe sin idempotencia.
+      - slug: ds-3-learn-clocks
+        type: learn
+        title: "Relojes: por qué 'el último que escribe gana' puede mentir"
+        required: true
+        estimated_min: 40
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-lamport-clocks
+          - ref: res-kleppmann-notes
+        payload:
+          note_prompt: Dos réplicas reciben actualizaciones del mismo carrito con 50 ms de diferencia, pero el reloj de una está adelantado 200 ms. Con last-write-wins por timestamp, ¿qué se pierde? ¿Qué usarías en su lugar?
+          summary_md: |
+            Cada máquina tiene su reloj físico, sincronizado por **NTP**, pero siempre con algo de **desviación (clock skew)**: milisegundos, a veces más. Además el reloj puede saltar hacia atrás al corregirse.
+
+            Consecuencias:
+            - **Last-write-wins (LWW)** con timestamps físicos (lo que hace Cassandra) puede descartar en silencio la escritura que de verdad fue la última.
+            - Para medir duraciones usa un reloj **monotónico** (`System.nanoTime()` en Java), nunca la hora del día.
+
+            **Relojes lógicos** (ordenan eventos sin depender de la hora real):
+            - **Lamport clock:** un contador. Cada nodo lo incrementa en cada evento y, al recibir un mensaje, toma `max(propio, recibido) + 1`. Si A causó B, entonces `L(A) < L(B)`. (Lo contrario no se cumple: no detecta concurrencia.)
+            - **Vector clock:** un contador por nodo. Sí detecta si dos eventos fueron **concurrentes** (ninguno causó al otro), que es cuando hay un conflicto real que resolver.
+
+            Lamport propuso estas ideas en 1978 y siguen siendo la base de cómo razonamos el orden en sistemas distribuidos.
+      - slug: ds-3-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de replicación y relojes
         required: true
+        estimated_min: 10
         skills:
           distributed_systems: 1
-      - slug: ds-3-journeyman-lab
+        payload:
+          terms:
+            - ds-leader-follower
+            - ds-sync-replication
+            - ds-replication-lag
+            - ds-failover
+            - ds-sharding
+            - ds-consistent-hashing
+            - eda-idempotency
+            - eda-idempotency-key
+            - ds-clock-skew
+            - ds-last-write-wins
+            - ds-lamport-clock
+            - ds-vector-clock
+      - slug: ds-3-lab-replication
         type: lab
-        title: "Lab: Replicación, particionamiento y relojes"
+        title: "Lab: replicación de PostgreSQL — lecturas viejas y escrituras bloqueadas"
         required: true
+        estimated_min: 75
         skills:
           distributed_systems: 1
-      - slug: ds-3-journeyman-quiz
+        payload:
+          goal: "Levantar un PostgreSQL primario con una réplica por streaming, provocar una lectura vieja (replication lag) y luego ver cómo la replicación síncrona bloquea escrituras cuando la réplica cae: CAP en vivo."
+          steps:
+            - title: Carpeta del lab
+              commands:
+                - New-Item -ItemType Directory -Force $HOME\ds-labs\repl | Out-Null; Set-Location $HOME\ds-labs\repl
+            - title: Crea pg_hba.conf
+              body: |
+                Reglas de acceso para el lab (contraseña requerida desde la red de Docker, incluida la conexión de replicación):
+
+                ```text
+                local   all          all                 trust
+                host    all          all   127.0.0.1/32  trust
+                host    all          all   0.0.0.0/0     scram-sha-256
+                host    replication  all   0.0.0.0/0     scram-sha-256
+                ```
+
+                Guárdalo con finales de línea LF si puedes (VS Code: abajo a la derecha, "CRLF" → "LF").
+            - title: Crea docker-compose.yml
+              body: |
+                La réplica, al arrancar por primera vez, copia al primario con `pg_basebackup -R` (la `-R` la configura como réplica) y luego arranca en modo solo lectura.
+
+                ```yaml
+                services:
+                  pg-primary:
+                    image: postgres:16
+                    environment:
+                      POSTGRES_PASSWORD: lab
+                    command: >
+                      postgres -c wal_level=replica -c max_wal_senders=5
+                      -c hba_file=/etc/postgresql/pg_hba.conf
+                    volumes:
+                      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+                    ports: ["127.0.0.1:5441:5432"]
+                    healthcheck:
+                      test: ["CMD-SHELL", "pg_isready -U postgres"]
+                      interval: 3s
+                      retries: 20
+
+                  pg-replica:
+                    image: postgres:16
+                    user: postgres
+                    depends_on:
+                      pg-primary: { condition: service_healthy }
+                    environment:
+                      PGPASSWORD: lab
+                    command: >
+                      bash -c "
+                      if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+                        pg_basebackup -h pg-primary -U postgres -D /var/lib/postgresql/data -R -X stream -P;
+                        chmod 700 /var/lib/postgresql/data;
+                      fi;
+                      exec postgres"
+                    ports: ["127.0.0.1:5442:5432"]
+                ```
+            - title: Arranca y comprueba la replicación
+              commands:
+                - docker compose -p dslab up -d
+                - "docker logs dslab-pg-replica-1 --tail 5   # busca 'started streaming WAL from primary'"
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "SELECT client_addr, state, sync_state, replay_lag FROM pg_stat_replication;"
+            - title: Escribe en el primario, lee en la réplica
+              commands:
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "CREATE TABLE stock(sku text PRIMARY KEY, qty int); INSERT INTO stock VALUES ('drill-20v', 5);"
+                - docker exec dslab-pg-replica-1 psql -U postgres -c "SELECT * FROM stock;"
+                - "docker exec dslab-pg-replica-1 psql -U postgres -c \"INSERT INTO stock VALUES ('saw', 1);\"   # debe fallar: la réplica es solo lectura"
+            - title: Provoca una lectura vieja (replication lag)
+              body: Pausamos la aplicación del WAL en la réplica para simular un retraso grande. El primario vende las 5 taladradoras… pero la réplica sigue mostrando stock.
+              commands:
+                - docker exec dslab-pg-replica-1 psql -U postgres -c "SELECT pg_wal_replay_pause();"
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "UPDATE stock SET qty = 0 WHERE sku = 'drill-20v';"
+                - 'docker exec dslab-pg-primary-1 psql -U postgres -tc "SELECT qty FROM stock;"   # 0'
+                - 'docker exec dslab-pg-replica-1 psql -U postgres -tc "SELECT qty FROM stock;"   # 5  <- lectura vieja'
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "SELECT sent_lsn, replay_lsn, replay_lag FROM pg_stat_replication;"
+                - docker exec dslab-pg-replica-1 psql -U postgres -c "SELECT pg_wal_replay_resume();"
+                - 'docker exec dslab-pg-replica-1 psql -U postgres -tc "SELECT qty FROM stock;"   # ahora 0'
+            - title: Cambia a replicación síncrona (elegir C)
+              commands:
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "ALTER SYSTEM SET synchronous_standby_names = '*';" -c "SELECT pg_reload_conf();"
+                - 'docker exec dslab-pg-primary-1 psql -U postgres -c "SELECT sync_state FROM pg_stat_replication;"   # sync'
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "\timing on" -c "UPDATE stock SET qty = 7;"
+            - title: Tumba la réplica e intenta escribir
+              body: Abre psql interactivo en el primario. La escritura se quedará esperando a la réplica, que no existe. Espera unos segundos y presiona Ctrl+C. Lee con atención el WARNING.
+              commands:
+                - docker stop dslab-pg-replica-1
+                - docker exec -it dslab-pg-primary-1 psql -U postgres
+                - UPDATE stock SET qty = 9;   -- se queda colgado; luego Ctrl+C
+                - SELECT qty FROM stock;      -- ¿qué valor ves?
+                - \q
+            - title: Recupera y limpia
+              commands:
+                - docker start dslab-pg-replica-1
+                - docker exec dslab-pg-primary-1 psql -U postgres -c "SELECT state, sync_state FROM pg_stat_replication;"
+                - "docker compose -p dslab down -v   # solo borra los datos de ESTE lab (proyecto dslab), no los de QuestMap"
+          expected: "Asíncrona: la réplica muestra qty=5 mientras el primario ya tiene 0 (lectura vieja); al reanudar, converge. Síncrona con la réplica caída: el UPDATE se queda bloqueado (el sistema eligió consistencia sobre disponibilidad). Al cancelarlo, PostgreSQL avisa: 'canceling wait for synchronous replication… The transaction has already committed locally, but might not have been replicated to the standby' — y el SELECT muestra 9."
+          checklist:
+            - Vi la réplica en estado streaming con pg_stat_replication
+            - Comprobé que la réplica rechaza escrituras
+            - Provoqué y expliqué una lectura vieja
+            - Vi la escritura bloqueada con replicación síncrona y la réplica caída
+            - Puedo explicar por qué el WARNING demuestra que ni siquiera la replicación síncrona es 'gratis' ni perfecta
+          hints:
+            - "Si la réplica se reinicia en bucle, revisa `docker logs dslab-pg-replica-1`: casi siempre es el pg_hba.conf (finales de línea CRLF) o la contraseña."
+            - Si cambias algo y quieres empezar de cero, usa `docker compose -p dslab down -v` y vuelve a levantar (los datos del lab se pierden, a propósito).
+            - Los puertos quedan solo en 127.0.0.1 (5441 y 5442) por si quieres conectarte con un cliente gráfico.
+          evidence_hint: Pega las dos lecturas de qty (primario y réplica) durante la pausa, y el WARNING de la escritura cancelada.
+      - slug: ds-3-lab-partitioning
+        type: lab
+        title: "Lab: hash % N vs consistent hashing"
+        required: false
+        estimated_min: 30
+        skills:
+          distributed_systems: 0.8
+          java: 0.2
+        payload:
+          goal: Medir cuántas claves se mueven al pasar de 4 a 5 nodos con `hash % N` y con un anillo de consistent hashing con nodos virtuales.
+          steps:
+            - title: Crea Partitioning.java en $HOME\\ds-labs
+              body: |
+                ```java
+                import java.nio.charset.StandardCharsets;
+                import java.security.MessageDigest;
+                import java.util.*;
+
+                public class Partitioning {
+                    static final int KEYS = 100_000;
+
+                    public static void main(String[] args) throws Exception {
+                        int before = 4, after = 5;
+
+                        // 1) hash(key) % N
+                        int movedMod = 0;
+                        for (int k = 0; k < KEYS; k++) {
+                            long h = hash("customer-" + k);
+                            if (Math.floorMod(h, before) != Math.floorMod(h, after)) movedMod++;
+                        }
+
+                        // 2) Consistent hashing con 100 nodos virtuales por servidor
+                        TreeMap<Long, String> ring4 = ring(before, 100), ring5 = ring(after, 100);
+                        int movedRing = 0;
+                        Map<String, Integer> load = new TreeMap<>();
+                        for (int k = 0; k < KEYS; k++) {
+                            long h = hash("customer-" + k);
+                            String a = owner(ring4, h), b = owner(ring5, h);
+                            if (!a.equals(b)) movedRing++;
+                            load.merge(b, 1, Integer::sum);
+                        }
+
+                        System.out.printf("hash %% N   (%d -> %d nodos): se mueven %5.1f %% de las claves%n", before, after, 100.0 * movedMod / KEYS);
+                        System.out.printf("consistent hashing (%d -> %d): se mueven %5.1f %% de las claves%n", before, after, 100.0 * movedRing / KEYS);
+                        System.out.println("Carga por nodo despues de agregar el 5.o: " + load);
+                    }
+
+                    static TreeMap<Long, String> ring(int nodes, int vnodes) throws Exception {
+                        TreeMap<Long, String> ring = new TreeMap<>();
+                        for (int n = 0; n < nodes; n++)
+                            for (int v = 0; v < vnodes; v++)
+                                ring.put(hash("node-" + n + "#" + v), "node-" + n);
+                        return ring;
+                    }
+
+                    static String owner(TreeMap<Long, String> ring, long h) {
+                        Map.Entry<Long, String> e = ring.ceilingEntry(h);
+                        return (e != null ? e : ring.firstEntry()).getValue();
+                    }
+
+                    static long hash(String s) throws Exception {
+                        byte[] d = MessageDigest.getInstance("MD5").digest(s.getBytes(StandardCharsets.UTF_8));
+                        long h = 0;
+                        for (int i = 0; i < 8; i++) h = (h << 8) | (d[i] & 0xff);
+                        return h;
+                    }
+                }
+                ```
+            - title: Ejecútalo
+              commands:
+                - Set-Location $HOME\ds-labs; java Partitioning.java
+            - title: Experimenta
+              body: Cambia los nodos virtuales de 100 a 1 en las dos llamadas a `ring(...)` y vuelve a correrlo. Observa cómo se desbalancea la carga por nodo.
+          expected: Con hash % N se mueve ~80 % de las claves; con consistent hashing, ~20 % (≈ 1/5, lo que le toca al nodo nuevo). Con 100 vnodes la carga queda entre ~19.000 y ~21.000 claves por nodo; con 1 vnode se desbalancea mucho.
+          checklist:
+            - Comparé el porcentaje de claves movidas en los dos esquemas
+            - Probé con 1 vnode y vi el desbalance
+            - Puedo relacionarlo con los tokens y vnodes de Cassandra
+      - slug: ds-3-quiz
         type: quiz
-        title: Quiz — Replicación, particionamiento y relojes
+        title: Quiz — replicación, particionamiento, idempotencia y relojes
         required: true
+        estimated_min: 20
         skills:
           distributed_systems: 1
+        questions:
+          - slug: d3-q1
+            type: mcq
+            prompt: Con replicación ASÍNCRONA, el líder confirma una orden al cliente y cae un segundo después. ¿Qué puede pasar?
+            options:
+              - Nada, la orden está a salvo
+              - La orden puede perderse si no llegó a ningún seguidor antes del failover
+              - El cliente recibe un error
+              - La réplica rechaza el failover
+            answer: 1
+            explanation: "Es el precio de la velocidad: las últimas escrituras confirmadas pueden no estar en el nuevo líder."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q2
+            type: mcq
+            prompt: Con replicación SÍNCRONA y la única réplica caída, ¿qué hace el primario con una escritura?
+            options:
+              - La confirma y replica después
+              - La bloquea esperando a la réplica (eliges C sobre A)
+              - La descarta en silencio
+              - La manda a otra base
+            answer: 1
+            explanation: "Lo viste en el lab: el UPDATE se queda esperando. Por eso en producción se usan varias réplicas o 'quorum commit' (ANY 1 de 2)."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q3
+            type: mcq
+            prompt: ¿Por qué `hash(clave) % N` es problemático?
+            options:
+              - Es lento de calcular
+              - Al cambiar N, casi todas las claves cambian de nodo
+              - No funciona con strings
+              - Genera colisiones siempre
+            answer: 1
+            explanation: De 4 a 5 nodos se mueve ~80 % de los datos. Consistent hashing mueve solo ~1/N.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q4
+            type: tf
+            prompt: "Replicar y particionar son lo mismo: ambos copian los datos en varios nodos."
+            answer: false
+            explanation: Replicar = copias de los mismos datos. Particionar = cada nodo guarda una parte distinta. Se combinan.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d3-q5
+            type: mcq
+            prompt: ¿Qué operación es idempotente?
+            options:
+              - "`stock = stock - 1`"
+              - "`POST /orders` sin clave"
+              - "`PUT /orders/123/status` con valor `SHIPPED`"
+              - Enviar un correo de confirmación
+            answer: 2
+            explanation: Fijar el estado a SHIPPED dos veces deja el mismo resultado. Restar 1 o crear una orden, no.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d3-q6
+            type: mcq
+            prompt: Llega dos veces `POST /orders` con la misma `Idempotency-Key` y el mismo cuerpo. ¿Qué debe responder el segundo?
+            options:
+              - Crear otra orden
+              - "500"
+              - El mismo resultado del primero (la orden ya creada), sin crear nada nuevo
+              - Ignorar la petición sin responder
+            answer: 2
+            explanation: "Si el cuerpo es distinto con la misma clave, se responde con error (409 o 422): es un mal uso del cliente."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q7
+            type: mcq
+            prompt: ¿Qué reloj usas en Java para medir cuánto tardó una llamada?
+            options:
+              - "`System.currentTimeMillis()`"
+              - "`System.nanoTime()` (monotónico)"
+              - "`LocalDateTime.now()`"
+              - El timestamp de la base de datos
+            answer: 1
+            explanation: La hora del día puede saltar (NTP la corrige, incluso hacia atrás). El reloj monotónico solo avanza.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q8
+            type: fill
+            prompt: Un contador lógico que cada nodo incrementa y que, al recibir un mensaje, toma max(propio, recibido) + 1 es un reloj de ______.
+            answer:
+              - Lamport
+              - lamport
+            explanation: Garantiza que si A causó B, L(A) < L(B). Para detectar concurrencia necesitas vector clocks.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d3-q9
+            type: mcq
+            prompt: Dos réplicas aceptan escrituras del mismo dato y una tiene el reloj adelantado. Con last-write-wins por timestamp físico…
+            options:
+              - Siempre gana la escritura más reciente de verdad
+              - Puede ganar la escritura más vieja y la otra se pierde en silencio
+              - Se detecta el conflicto y se avisa
+              - Se guardan ambas
+            answer: 1
+            explanation: LWW confía en los relojes, y los relojes se desvían. Es aceptable para datos donde perder una escritura no importa mucho.
+            skill: distributed_systems
+            difficulty: 3
+          - slug: d3-q10
+            type: order
+            prompt: "Ordena los pasos para que `POST /orders` sea idempotente:"
+            options:
+              - El cliente genera un UUID y lo manda en `Idempotency-Key`
+              - El servidor busca la clave en su tabla
+              - "Si no existe: crea la orden y guarda la clave con el resultado en la misma transacción"
+              - "Si ya existe: devuelve el resultado guardado"
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: La clave y la orden deben guardarse juntas (misma transacción) para que no quede una sin la otra.
+            skill: distributed_systems
+            difficulty: 2
   - slug: ds-4-expert
     number: 4
-    title: "Expert — Consenso, sagas y backpressure"
+    title: Expert — Consenso, sagas y backpressure
+    story: "En el consejo de la ciudadela, cinco sabios deben ponerse de acuerdo aunque dos estén dormidos. Abajo, en las murallas, una multitud golpea las puertas: abrir a todos a la vez derribaría el castillo."
     quests:
-      - slug: ds-4-expert-learn
+      - slug: ds-4-learn-consensus
         type: learn
-        title: Consenso, sagas y backpressure
+        title: "Consenso a nivel intuición: Raft"
         required: true
+        estimated_min: 50
         skills:
           distributed_systems: 1
-      - slug: ds-4-expert-glossary
+        resources:
+          - ref: res-raft
+          - ref: res-raft-visual
+          - ref: res-kleppmann-notes
+            required: false
+        payload:
+          note_prompt: Explica con tus palabras por qué un cluster de Raft de 5 nodos sigue funcionando con 2 caídos, pero no con 3. ¿Qué pasa con el lado minoritario de una partición?
+          summary_md: |
+            **Consenso** = que varios nodos se pongan de acuerdo en UN valor (o en el orden de un log) aunque algunos fallen. Sirve para elegir líder, para locks distribuidos y para guardar configuración crítica (etcd en Kubernetes, ZooKeeper en Kafka antiguo, KRaft en Kafka moderno).
+
+            **Raft**, en intuición:
+            1. Cada nodo es **follower**, **candidate** o **leader**.
+            2. Si un follower deja de oír al líder (timeout aleatorio), se postula: pide votos para un nuevo **term** (mandato).
+            3. Gana quien reciba votos de la **mayoría**. Solo puede haber un líder por term.
+            4. El líder recibe escrituras, las agrega a su log y las replica. Una entrada está **committed** cuando la tiene la mayoría.
+
+            La clave es la **mayoría (quórum)**: dos mayorías siempre se cruzan, así que nunca hay dos decisiones contradictorias.
+            - 3 nodos toleran 1 caído; 5 toleran 2. Por eso se usan números impares.
+            - En una partición, solo el lado con mayoría avanza. El lado minoritario NO acepta escrituras: Raft elige C sobre A.
+
+            No necesitas implementar Raft en una entrevista; sí explicar **por qué existe**: evitar **split-brain** (dos líderes aceptando escrituras distintas).
+      - slug: ds-4-learn-sagas
+        type: learn
+        title: "Transacciones entre servicios: 2PC vs sagas"
+        required: true
+        estimated_min: 40
+        skills:
+          distributed_systems: 0.8
+          microservices_gcp: 0.2
+        resources:
+          - ref: res-pattern-saga
+          - ref: res-pattern-outbox
+        payload:
+          note_prompt: "Diseña la saga de una compra: orders → payments → inventory → shipping. ¿Qué compensación tiene cada paso? ¿Qué pasa si falla la compensación?"
+          summary_md: |
+            Cada microservicio tiene su base de datos, así que no hay una transacción ACID que abarque `orders`, `payments` e `inventory`.
+
+            **Two-phase commit (2PC):** un coordinador pregunta "¿pueden confirmar?" (prepare) y luego ordena "confirmen" (commit). Es atómico, pero si el coordinador cae a la mitad, todos quedan bloqueados con locks. Casi nunca se usa entre microservicios.
+
+            **Saga:** una secuencia de transacciones LOCALES; si un paso falla, se ejecutan **compensaciones** de los pasos anteriores (no es un rollback: es una acción nueva que deshace el efecto, como un reembolso).
+            - **Coreografía:** cada servicio reacciona a eventos del anterior (`OrderCreated` → payments cobra → `PaymentCompleted` → inventory reserva…). Sin coordinador, pero el flujo queda disperso.
+            - **Orquestación:** un orquestador dice a cada servicio qué hacer y lleva el estado. Más fácil de seguir y depurar.
+
+            Reglas prácticas:
+            - Cada paso y cada compensación deben ser **idempotentes** (habrá reintentos).
+            - Publica eventos con **transactional outbox** para no perder mensajes entre la base y Pub/Sub.
+            - Las sagas NO tienen aislamiento: otros pueden ver estados intermedios (ej. una orden "PENDING_PAYMENT"). Diseña la UI y los estados para eso.
+            - Algunos pasos no se pueden compensar (un correo enviado): ponlos al FINAL.
+      - slug: ds-4-learn-backpressure
+        type: learn
+        title: Backpressure, load shedding y tormentas de reintentos
+        required: true
+        estimated_min: 45
+        skills:
+          distributed_systems: 1
+        resources:
+          - ref: res-sre-cascading
+          - ref: res-sre-overload
+          - ref: res-aws-timeouts-retries
+        payload:
+          note_prompt: Explica cómo los reintentos, que están para mejorar la confiabilidad, pueden causar una caída en cascada. Nombra tres defensas.
+          summary_md: |
+            Cuando llega más trabajo del que un servicio puede atender, algo tiene que ceder. Las opciones, de mejor a peor:
+            - **Backpressure:** avisar "más despacio" hacia atrás (colas acotadas, flow control de Pub/Sub, reactive streams). El productor baja el ritmo.
+            - **Load shedding:** rechazar pronto y barato lo que no podrás atender (HTTP 503 o 429) en lugar de aceptarlo y fallar tarde.
+            - **Degradar:** responder algo más simple (sin recomendaciones, datos en caché).
+            - Lo peor: aceptar todo, encolar sin límite, quedarse sin memoria y caer.
+
+            **Caída en cascada:** un servicio se pone lento → sus clientes acumulan hilos esperando → los clientes se ponen lentos → y así hacia arriba.
+
+            **Tormenta de reintentos (retry storm):** si todos reintentan enseguida, un servicio con problemas recibe 2×, 3×… su carga normal y no puede recuperarse aunque el problema original ya pasó.
+
+            Defensas:
+            - **Timeouts** en toda llamada remota (y propagar el deadline).
+            - **Reintentos con backoff exponencial + jitter** y un máximo de intentos.
+            - **Retry budget:** reintentos limitados a un % del tráfico exitoso.
+            - **Circuit breaker:** si casi todo falla, deja de llamar un rato.
+            - **Colas acotadas** y rechazo temprano.
+            - Reintentar en UNA sola capa, no en todas (3 capas × 3 intentos = 27 llamadas a la base de datos).
+      - slug: ds-4-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de consenso y resiliencia
         required: true
+        estimated_min: 10
         skills:
           distributed_systems: 1
-      - slug: ds-4-expert-lab
+        payload:
+          terms:
+            - ds-consensus
+            - ds-raft
+            - ds-leader-election
+            - ds-split-brain
+            - ds-two-phase-commit
+            - gcp-saga
+            - gcp-compensating-action
+            - ds-saga-orchestration
+            - eda-backpressure
+            - ds-load-shedding
+            - ds-cascading-failure
+            - ds-retry-storm
+            - ds-jitter
+            - ds-retry-budget
+      - slug: ds-4-lab-retry-storm
         type: lab
-        title: "Lab: Consenso, sagas y backpressure"
+        title: "Lab: simulador de tormenta de reintentos"
         required: true
+        estimated_min: 60
         skills:
-          distributed_systems: 1
-      - slug: ds-4-expert-quiz
+          distributed_systems: 0.8
+          java: 0.2
+        payload:
+          goal: "Simular un servicio que se degrada durante 1 segundo y comparar cuánto tarda en recuperarse según cómo reintentan sus clientes: inmediato, backoff con jitter, y backoff con retry budget."
+          steps:
+            - title: Crea RetryStorm.java en $HOME\\ds-labs
+              body: |
+                Cada "tick" son 100 ms. El servicio atiende 100 peticiones por tick y recibe 80 nuevas por tick (80 % de su capacidad). Entre los ticks 20 y 30 su capacidad baja a 30.
+
+                ```java
+                import java.util.*;
+
+                public class RetryStorm {
+                    static final int CAPACITY = 100;      // peticiones que el servicio atiende por tick
+                    static final int NEW_PER_TICK = 80;   // carga normal: 80 % de la capacidad
+                    static final int TICKS = 70;
+                    static final int MAX_ATTEMPTS = 4;    // 1 original + 3 reintentos
+
+                    public static void main(String[] args) {
+                        String policy = args.length > 0 ? args[0] : "immediate";
+                        if (!List.of("immediate", "backoff", "budget").contains(policy))
+                            throw new IllegalArgumentException("usa immediate | backoff | budget");
+
+                        Random rnd = new Random(7);
+                        // pending[t][a] = peticiones que llegan en el tick t y van por su intento a
+                        int[][] pending = new int[TICKS + 100][MAX_ATTEMPTS + 1];
+                        long served = 0, gaveUp = 0;
+                        double budget = 0;
+                        int recoveredAt = -1;
+
+                        System.out.println("politica = " + policy);
+                        for (int t = 0; t < TICKS; t++) {
+                            int capacity = (t >= 20 && t < 30) ? 30 : CAPACITY;
+                            pending[t][1] += NEW_PER_TICK;
+
+                            int offered = Arrays.stream(pending[t]).sum();
+                            double okRatio = offered == 0 ? 1 : Math.min(1.0, (double) capacity / offered);
+                            int ok = Math.min(offered, capacity);
+                            served += ok;
+                            budget = Math.min(budget + ok * 0.1, 100);   // retry budget: 10 % del tráfico exitoso
+
+                            for (int a = 1; a <= MAX_ATTEMPTS; a++) {
+                                int failedHere = (int) Math.round(pending[t][a] * (1 - okRatio));
+                                for (int i = 0; i < failedHere; i++) {
+                                    if (policy.equals("immediate")) {
+                                        // Reintenta en el siguiente tick, siempre, sin límite de intentos
+                                        pending[t + 1][Math.min(a + 1, MAX_ATTEMPTS)]++;
+                                        continue;
+                                    }
+                                    if (a == MAX_ATTEMPTS) { gaveUp++; continue; }
+                                    if (policy.equals("budget")) {
+                                        if (budget < 1) { gaveUp++; continue; }
+                                        budget -= 1;
+                                    }
+                                    // Backoff exponencial con "full jitter": espera aleatoria entre 1 y 2^a ticks
+                                    int delay = 1 + rnd.nextInt(1 << a);
+                                    pending[t + delay][a + 1]++;
+                                }
+                            }
+
+                            if (t >= 30 && recoveredAt < 0 && offered <= CAPACITY) recoveredAt = t;
+                            if (t % 5 == 0 || (t >= 18 && t <= 40 && t % 2 == 0))
+                                System.out.printf("t=%2d cap=%3d ofrecido=%4d ok=%3d %s%n",
+                                    t, capacity, offered, ok, "#".repeat(Math.min(offered / 10, 60)));
+                        }
+                        System.out.printf("Atendidas=%d  abandonadas=%d  recuperado en t=%s (la falla termino en t=30)%n",
+                            served, gaveUp, recoveredAt < 0 ? "NUNCA" : String.valueOf(recoveredAt));
+                    }
+                }
+                ```
+            - title: Corre las tres políticas
+              commands:
+                - Set-Location $HOME\ds-labs
+                - java RetryStorm.java immediate
+                - java RetryStorm.java backoff
+                - java RetryStorm.java budget
+            - title: Analiza
+              body: |
+                Para cada política anota: la carga máxima ofrecida (el pico de `#`), en qué tick se recuperó y cuántas peticiones se abandonaron.
+
+                Luego experimenta:
+                - Sube `NEW_PER_TICK` a 95 (el servicio trabaja al 95 %). ¿Qué pasa con `immediate`?
+                - Cambia el retry budget de 0.1 a 0.5 (`ok * 0.5`). ¿Cambian mucho la recuperación y las abandonadas? ¿Por qué el pico sigue bajo?
+            - title: Llévalo a Spring (opcional)
+              body: Con Resilience4j, `Retry` admite `IntervalFunction.ofExponentialRandomBackoff(...)` para backoff con jitter, y se combina con `CircuitBreaker` y `TimeLimiter`. Revisa el recurso de circuit breaker de la Zona 6.
+          expected: "immediate: la carga ofrecida llega a ~580 por tick (7 veces la normal) y tarda hasta t≈55 en recuperarse, 25 ticks DESPUÉS de que terminó la falla. backoff: el pico baja a ~240 y se recupera en t≈43. budget: casi no hay pico (~85–140) y se recupera en t=30, a cambio de abandonar más peticiones. Con NEW_PER_TICK=95, immediate NO se recupera en los 70 ticks (sigue con ~570 por tick al final) y backoff tarda hasta t≈69: con solo 5 % de margen, los reintentos casi no se drenan."
+          checklist:
+            - Corrí las tres políticas y comparé pico, recuperación y abandonadas
+            - Puedo explicar por qué los reintentos inmediatos prolongan la caída
+            - Probé con 95 % de carga y entendí el riesgo de operar sin margen
+            - Sé qué es el trade-off del retry budget (menos amplificación, más errores visibles)
+          hints:
+            - "El simulador es simplificado: no modela timeouts ni clientes que abandonan por cansancio. En la vida real, la política 'immediate' puede no recuperarse nunca (falla metaestable)."
+          evidence_hint: Pega la última línea de cada política y el pico de carga ofrecida que viste.
+      - slug: ds-4-open-saga
+        type: open_answer
+        title: "Pregunta abierta: diseña la saga de checkout"
+        required: false
+        estimated_min: 25
+        skills:
+          distributed_systems: 0.5
+          microservices_gcp: 0.2
+          english: 0.3
+        payload:
+          prompt_en: Design the checkout flow across orders, payments and inventory services without distributed transactions. Would you use choreography or orchestration, and why? List each step with its compensating action, explain how you make steps idempotent, and what happens if a compensation itself fails.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+      - slug: ds-4-quiz
         type: quiz
-        title: Quiz — Consenso, sagas y backpressure
+        title: Quiz — consenso, sagas y backpressure
         required: true
+        estimated_min: 20
         skills:
           distributed_systems: 1
+        questions:
+          - slug: d4-q1
+            type: mcq
+            prompt: Un cluster Raft tiene 5 nodos. ¿Cuántos pueden caer sin que deje de aceptar escrituras?
+            options:
+              - "1"
+              - "2"
+              - "3"
+              - "4"
+            answer: 1
+            explanation: "Necesita mayoría: 3 de 5. Con 2 caídos quedan 3. Con 3 caídos, no hay mayoría."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d4-q2
+            type: mcq
+            prompt: ¿Por qué los clusters de consenso suelen tener un número impar de nodos?
+            options:
+              - Por costo de licencias
+              - Porque 4 nodos toleran las mismas caídas que 3 (una), así que el cuarto no suma tolerancia
+              - Porque Raft no funciona con pares
+              - Por el balanceador de carga
+            answer: 1
+            explanation: "Mayoría de 4 es 3: tolera 1 caída, igual que 3 nodos. 5 nodos toleran 2."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d4-q3
+            type: mcq
+            prompt: ¿Qué problema evita el consenso por mayoría durante una partición?
+            options:
+              - La latencia
+              - "El split-brain: dos líderes aceptando escrituras contradictorias"
+              - Los tombstones
+              - El replication lag
+            answer: 1
+            explanation: Solo el lado con mayoría puede elegir líder; el lado minoritario deja de aceptar escrituras.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d4-q4
+            type: mcq
+            prompt: En una saga, falla el paso 'reservar inventario' después de cobrar. ¿Qué se hace?
+            options:
+              - Rollback de la base de datos de payments
+              - Ejecutar la compensación del cobro (un reembolso) y marcar la orden como cancelada
+              - Reintentar para siempre
+              - Nada, el cliente reclamará
+            answer: 1
+            explanation: Una compensación es una acción nueva que deshace el efecto de negocio; no es un rollback técnico.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d4-q5
+            type: tf
+            prompt: "Las sagas dan el mismo aislamiento que una transacción ACID: nadie ve estados intermedios."
+            answer: false
+            explanation: Otros servicios y usuarios pueden ver estados como PENDING_PAYMENT. Hay que diseñar para eso.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d4-q6
+            type: mcq
+            prompt: ¿Cuál es el principal problema del two-phase commit entre microservicios?
+            options:
+              - Es lento de programar
+              - Si el coordinador cae después del prepare, los participantes quedan bloqueados con locks
+              - No es atómico
+              - No funciona con PostgreSQL
+            answer: 1
+            explanation: 2PC es atómico pero bloqueante y acopla la disponibilidad de todos los servicios.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d4-q7
+            type: mcq
+            prompt: Un servicio sobrecargado empieza a fallar. ¿Qué política de reintentos de los clientes lo ayuda a recuperarse?
+            options:
+              - Reintentar inmediatamente hasta que funcione
+              - Backoff exponencial con jitter, máximo de intentos y retry budget
+              - Reintentar en todas las capas
+              - Subir los timeouts a 5 minutos
+            answer: 1
+            explanation: "Lo viste en el lab: los reintentos inmediatos multiplican la carga y alargan la caída."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d4-q8
+            type: mcq
+            prompt: ¿Para qué sirve el jitter en el backoff?
+            options:
+              - Para que los reintentos sean más rápidos
+              - Para que los clientes no reintenten todos al mismo tiempo (desincronizarlos)
+              - Para cifrar las peticiones
+              - Para medir la latencia
+            answer: 1
+            explanation: Sin jitter, miles de clientes que fallaron juntos vuelven juntos, en oleadas.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d4-q9
+            type: fill
+            prompt: Rechazar pronto (con 503 o 429) las peticiones que no podrás atender, en vez de aceptarlas y fallar tarde, se llama load ______.
+            answer:
+              - shedding
+            explanation: Es mejor atender bien al 70 % que mal al 100 %.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d4-q10
+            type: mcq
+            prompt: Una llamada pasa por 3 capas (gateway → orders → payments → base de datos) y cada capa hace hasta 3 intentos. En el peor caso, ¿cuántas llamadas llegan a la base de datos?
+            options:
+              - "3"
+              - "9"
+              - "27"
+              - "81"
+            answer: 2
+            explanation: "3 × 3 × 3 = 27: los reintentos se multiplican entre capas. Por eso se reintenta en UNA sola capa (normalmente la más cercana al origen del fallo)."
+            skill: distributed_systems
+            difficulty: 3
   - slug: ds-5-boss
     number: 5
-    title: "Boss — Preguntas de diseño de sistemas"
+    title: Boss — Preguntas de diseño de sistemas
+    story: "En la cima de la ciudadela, el Arquitecto te espera frente a una pizarra en blanco. No quiere la respuesta perfecta: quiere ver cómo piensas, qué preguntas haces y qué sacrificas a propósito."
     quests:
-      - slug: ds-5-boss-learn-review
+      - slug: ds-5-learn-framework
         type: learn
-        title: Repaso para el jefe
+        title: Cómo responder una pregunta de system design
         required: true
+        estimated_min: 45
+        skills:
+          distributed_systems: 0.7
+          english: 0.3
+        resources:
+          - ref: res-kleppmann-notes
+          - ref: res-fowler-dist-patterns
+            required: false
+        payload:
+          note_prompt: "Practica en voz alta (en inglés, con Win+H si quieres dictar) los primeros 5 minutos de 'Design a URL shortener': solo requisitos y estimaciones. Escribe lo que dijiste."
+          summary_md: |
+            Un guion de 45 minutos que funciona:
+            1. **Requisitos (5 min):** funcionales ("el cliente reserva un producto para recoger en tienda") y NO funcionales: escala, latencia (p99), disponibilidad, consistencia. Pregunta, no supongas.
+            2. **Estimaciones rápidas (3 min):** peticiones por segundo, tamaño de datos, lectura vs escritura. Redondea sin miedo: 1 día ≈ 100.000 s.
+            3. **API (5 min):** 3–5 endpoints o eventos principales.
+            4. **Modelo de datos (5 min):** entidades, clave de partición, qué base y por qué.
+            5. **Diseño de alto nivel (10 min):** servicios, colas, caches, bases. Dibuja el camino de una petición.
+            6. **Profundizar (12 min):** el punto más difícil (consistencia del inventario, hot partitions, idempotencia, fallos).
+            7. **Trade-offs y cierre (5 min):** qué sacrificaste, cómo lo monitoreas (SLOs) y qué harías con más tiempo.
+
+            Frases útiles:
+            - "Before designing, let me clarify the requirements."
+            - "Let's do a quick back-of-the-envelope estimate."
+            - "The trade-off here is… I'd choose X because…"
+            - "If this component fails, …"
+            - "To keep it simple, I'll start with a single region and then discuss multi-region."
+
+            Lo que más evalúan: que hagas preguntas, que justifiques cada elección con un trade-off y que pienses en los fallos. Toda la ciudadela (CAP, quórums, replicación, idempotencia, sagas, backpressure) son tus herramientas para esa conversación.
+      - slug: ds-5-glossary
+        type: glossary
+        title: Vocabulario de diseño de sistemas
+        required: true
+        estimated_min: 10
         skills:
           distributed_systems: 1
-      - slug: ds-5-boss-quiz-final
+        payload:
+          terms:
+            - ds-back-of-envelope
+            - ds-functional-requirements
+            - ds-hot-key
+            - ds-fencing-token
+            - ds-read-replica-cache
+      - slug: ds-5-quiz-final
         type: quiz
-        title: Examen final de la zona
+        title: Examen final — Distributed Systems Citadel
         required: true
+        estimated_min: 25
         skills:
           distributed_systems: 1
-      - slug: ds-5-boss-boss-fight
+        questions:
+          - slug: d5-q1
+            type: mcq
+            prompt: Al empezar una pregunta de system design, ¿qué haces primero?
+            options:
+              - Dibujar microservicios y Kafka
+              - Aclarar requisitos funcionales y no funcionales (escala, latencia, consistencia)
+              - Elegir la base de datos
+              - Escribir código
+            answer: 1
+            explanation: Sin requisitos, cualquier diseño es una adivinanza. Los entrevistadores esperan preguntas.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d5-q2
+            type: mcq
+            prompt: Un sistema recibe 50 millones de pedidos de consulta de stock al día. ¿Cuántas peticiones por segundo son, aproximadamente, en promedio?
+            options:
+              - ~50
+              - ~500
+              - ~5.000
+              - ~50.000
+            answer: 1
+            explanation: "50.000.000 / 100.000 s ≈ 500 por segundo en promedio. El pico puede ser 3–10 veces mayor: diseña para el pico."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d5-q3
+            type: mcq
+            prompt: Dos clientes intentan reservar la ÚLTIMA unidad de un producto en la misma tienda al mismo tiempo. ¿Qué diseño evita venderla dos veces?
+            options:
+              - Leer el stock de una réplica y luego restar
+              - Un UPDATE condicional atómico (`UPDATE stock SET qty = qty - 1 WHERE sku = ? AND store = ? AND qty > 0`) en la fuente de verdad, revisando cuántas filas cambió
+              - Cachear el stock 5 minutos
+              - Last-write-wins
+            answer: 1
+            explanation: La operación de comparar y restar debe ser atómica y en un lugar con consistencia fuerte. Si cambió 0 filas, no había stock.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d5-q4
+            type: mcq
+            prompt: Durante Black Friday, un producto en oferta recibe el 40 % de todas las lecturas. ¿Qué problema es y qué haces?
+            options:
+              - Split-brain; agregar nodos
+              - Hot key; cachear ese producto (con TTL corto) o replicarlo en varias particiones
+              - Clock skew; sincronizar NTP
+              - Tombstones; compactar
+            answer: 1
+            explanation: Una clave caliente satura una sola partición aunque el cluster tenga capacidad de sobra.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d5-q5
+            type: mcq
+            prompt: Un servicio crea una orden en su base y luego publica `OrderCreated` en Pub/Sub. A veces la orden se guarda pero el evento se pierde. ¿Qué patrón lo resuelve?
+            options:
+              - Two-phase commit con Pub/Sub
+              - "Transactional outbox: guardar el evento en una tabla en la misma transacción y publicarlo después"
+              - Reintentar la publicación en un hilo aparte
+              - Publicar antes de guardar
+            answer: 1
+            explanation: La orden y el evento se guardan juntos; un proceso aparte publica la tabla outbox (al-menos-una-vez, con consumidores idempotentes).
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d5-q6
+            type: tf
+            prompt: En una entrevista de diseño, decir 'el trade-off es que perdemos X a cambio de Y' es una señal positiva.
+            answer: true
+            explanation: No hay diseños perfectos. Nombrar lo que sacrificas demuestra criterio de ingeniero senior.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d5-q7
+            type: mcq
+            prompt: Un proceso que tenía un lock distribuido se pausa 30 s por el garbage collector, el lock expira, otro lo toma… y el primero despierta y escribe. ¿Qué lo evita?
+            options:
+              - Un lock más largo
+              - "Un fencing token: un número que crece con cada lock y que el almacenamiento verifica, rechazando escrituras con un token viejo"
+              - Reiniciar el proceso
+              - Usar System.currentTimeMillis()
+            answer: 1
+            explanation: Ningún timeout te protege de pausas largas. El recurso debe rechazar al 'líder zombi' por su token viejo.
+            skill: distributed_systems
+            difficulty: 3
+          - slug: d5-q8
+            type: order
+            prompt: "Ordena las etapas de una respuesta de system design:"
+            options:
+              - Requisitos y preguntas
+              - Estimaciones rápidas
+              - API y modelo de datos
+              - Diseño de alto nivel
+              - Profundizar en lo más difícil y en los fallos
+              - Trade-offs y monitoreo
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+            explanation: "Es un guion, no una ley: si el entrevistador quiere ir directo a una parte, síguelo."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: d5-q9
+            type: mcq
+            prompt: La página de producto muestra 'quedan pocas unidades'. ¿Qué nivel de consistencia necesita ESA lectura?
+            options:
+              - Linearizable, siempre
+              - Eventual está bien (puede venir de caché o réplica); la consistencia fuerte se exige al reservar
+              - Ninguna, puede ser inventado
+              - 2PC
+            answer: 1
+            explanation: Mostrar y reservar son operaciones distintas con requisitos distintos. Así se escala sin sacrificar la corrección donde importa.
+            skill: distributed_systems
+            difficulty: 2
+          - slug: d5-q10
+            type: mcq
+            prompt: Tu servicio de reservas depende de `payments`, que está lento. ¿Qué combinación protege al resto del sistema?
+            options:
+              - Más hilos y timeouts largos
+              - Timeout corto basado en el p99, circuit breaker, reintentos con backoff y jitter, y colas acotadas
+              - Reintentar inmediatamente
+              - Desactivar los logs
+            answer: 1
+            explanation: Es la caja de herramientas del nivel 4 frente a las caídas en cascada.
+            skill: distributed_systems
+            difficulty: 2
+      - slug: ds-5-boss-fight
         type: boss
-        title: "Jefe: Preguntas de diseño de sistemas"
+        title: "Jefe: diseña el sistema de reserva de inventario"
         required: true
+        estimated_min: 120
         skills:
-          distributed_systems: 1
-      - slug: ds-5-boss-interview
+          distributed_systems: 0.7
+          english: 0.3
+        payload:
+          task: |
+            **Design a "buy online, pick up in store" inventory reservation system for a large home-improvement retailer.**
+
+            Contexto: ~2.000 tiendas, ~1 millón de SKUs por tienda (no todos con stock), las tiendas venden también en caja física. Picos de Black Friday de 10× el tráfico normal. El cliente ve el stock en la página del producto y, al pagar, se reserva la unidad en la tienda elegida; tiene 48 horas para recogerla.
+
+            Entrega un documento (puede ser Markdown en tu repo) con:
+            1. **Requisitos:** funcionales y no funcionales, con números (latencia p99 de lectura y de reserva, disponibilidad, consistencia). Escribe las preguntas que le harías al entrevistador y la respuesta que supones.
+            2. **Estimaciones:** lecturas y reservas por segundo (promedio y pico), tamaño aproximado de los datos de stock.
+            3. **API:** al menos `GET` de stock por SKU y tienda, `POST` de reserva (con idempotencia) y la cancelación o expiración.
+            4. **Modelo de datos y particionamiento:** qué base para la fuente de verdad, cuál clave de partición, qué se cachea y con qué TTL.
+            5. **Diagrama de alto nivel** (Mermaid o ASCII) con el camino de una lectura y de una reserva.
+            6. **Profundiza en 3 puntos:** (a) cómo evitas vender dos veces la última unidad, incluidas las ventas en caja física; (b) qué pasa durante una partición de red entre una tienda y la nube (¿AP o CP para cada operación?); (c) la saga reserva → pago → confirmación, con compensaciones y la expiración a las 48 horas.
+            7. **Resiliencia y operación:** backpressure en Black Friday, reintentos, hot keys, y 3 SLOs con su alerta.
+            8. **Trade-offs:** al menos 3 decisiones con lo que ganas y lo que pierdes.
+
+            Después, defiéndelo en una mini-entrevista en inglés.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - clarifying requirements and estimates
+            - consistency choices per operation (CAP/PACELC)
+            - preventing overselling and idempotent reservations
+            - sagas, compensations and expiration
+            - overload handling and hot keys
+            - trade-off communication in English
+      - slug: ds-5-interview
         type: interview
-        title: Mini-entrevista de la zona
+        title: "Mini-entrevista: distributed systems screen"
         required: false
+        estimated_min: 30
         skills:
-          distributed_systems: 1
+          distributed_systems: 0.6
+          english: 0.4
         payload:
           mode: technical_screen
           zone: distributed-citadel

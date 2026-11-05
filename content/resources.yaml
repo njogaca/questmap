@@ -1131,3 +1131,133 @@ resources:
     required: true
     why: El método de los experimentos de caos con hipótesis y radio de impacto acotado.
     verified: true
+  - slug: res-kleppmann-notes
+    title: Distributed Systems — lecture notes (Martin Kleppmann, Cambridge)
+    type: book
+    url: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/dist-sys-notes.pdf
+    language: en
+    duration_min: 300
+    cost: free
+    required: true
+    why: "Notas gratuitas (PDF) del curso de Kleppmann: fallos, relojes, replicación, consenso. La base teórica de toda la zona."
+    verified: true
+  - slug: res-fallacies
+    title: Fallacies of distributed computing (Wikipedia)
+    type: article
+    url: https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Las 8 suposiciones falsas que todo diseño distribuido debe evitar.
+    verified: true
+  - slug: res-latency-numbers
+    title: Latency Numbers Every Programmer Should Know
+    type: article
+    url: https://gist.github.com/jboner/2841832
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Órdenes de magnitud de latencia (memoria, disco, red). Los números son de ~2012, pero la escala sigue valiendo.
+    verified: true
+  - slug: res-aws-timeouts-retries
+    title: Timeouts, retries, and backoff with jitter (Amazon Builders' Library)
+    type: article
+    url: https://builder.aws.com/content/3EumjoZascWd1oZiEgL8ORlv3qE/timeouts-retries-and-backoff-with-jitter
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo elige Amazon timeouts y reintentos para no empeorar una caída.
+    verified: true
+  - slug: res-pacelc
+    title: PACELC design principle (Wikipedia)
+    type: article
+    url: https://en.wikipedia.org/wiki/PACELC_design_principle
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Explicación y clasificación de bases reales (Cassandra, Dynamo, PostgreSQL, Bigtable) según PACELC.
+    verified: true
+  - slug: res-jepsen-models
+    title: Consistency Models (Jepsen)
+    type: docs
+    url: https://jepsen.io/consistency/models
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Mapa de modelos de consistencia (linearizable, causal, read-your-writes…) de quienes prueban bases de datos reales.
+    verified: true
+  - slug: res-fowler-dist-patterns
+    title: Patterns of Distributed Systems (Unmesh Joshi, martinfowler.com)
+    type: article
+    url: https://martinfowler.com/articles/patterns-of-distributed-systems/
+    language: en
+    duration_min: 60
+    cost: free
+    required: true
+    why: "Catálogo de patrones reales: Leader and Followers, Write-Ahead Log, High-Water Mark, Lamport Clock…"
+    verified: true
+  - slug: res-aws-idempotent-apis
+    title: Making retries safe with idempotent APIs (Amazon Builders' Library)
+    type: article
+    url: https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo diseña Amazon APIs que se pueden reintentar sin efectos duplicados (client request tokens).
+    verified: true
+  - slug: res-lamport-clocks
+    title: Time, Clocks, and the Ordering of Events in a Distributed System (Lamport, 1978)
+    type: article
+    url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
+    language: en
+    duration_min: 45
+    cost: free
+    required: false
+    why: El artículo original de los relojes lógicos. Corto y clásico; lee al menos las primeras secciones.
+    verified: true
+  - slug: res-raft
+    title: The Raft Consensus Algorithm (raft.github.io)
+    type: docs
+    url: https://raft.github.io/
+    language: en
+    duration_min: 40
+    cost: free
+    required: true
+    why: "Sitio oficial de Raft con la visualización interactiva RaftScope: apaga nodos y mira cómo eligen líder."
+    verified: true
+  - slug: res-raft-visual
+    title: The Secret Lives of Data — Raft (visualización guiada)
+    type: course
+    url: https://thesecretlivesofdata.com/raft/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Animación paso a paso de la elección de líder y la replicación del log. Ideal para la intuición.
+    verified: true
+  - slug: res-sre-cascading
+    title: Addressing Cascading Failures (Google SRE Book, cap. 22)
+    type: book
+    url: https://sre.google/sre-book/addressing-cascading-failures/
+    language: en
+    duration_min: 45
+    cost: free
+    required: true
+    why: "Causas de caídas en cascada y defensas: load shedding, colas pequeñas, reintentos con presupuesto, deadlines."
+    verified: true
+  - slug: res-sre-overload
+    title: Handling Overload (Google SRE Book, cap. 21)
+    type: book
+    url: https://sre.google/sre-book/handling-overload/
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: Cómo Google limita la carga por cliente y rechaza trabajo de forma controlada.
+    verified: true

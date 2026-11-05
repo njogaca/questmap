@@ -94,7 +94,7 @@ export default async function Ajustes() {
             navegador) y reconstruye:
           </p>
           <pre className="overflow-x-auto rounded border border-line bg-bg p-3 font-mono text-xs text-done">{`ANTHROPIC_API_KEY=sk-ant-...
-CLAUDE_MODEL=claude-opus-5-5
+CLAUDE_MODEL=claude-sonnet-5-5
 MAX_API_CALLS_PER_DAY=50`}</pre>
           <pre className="overflow-x-auto rounded border border-line bg-bg p-3 font-mono text-xs text-done">docker compose up -d --build</pre>
           <p>

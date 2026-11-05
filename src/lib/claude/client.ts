@@ -99,7 +99,14 @@ export async function callClaude(input: {
     if (err instanceof Anthropic.AuthenticationError) return { ok: false, error: "La API key no es válida. Revisa ANTHROPIC_API_KEY." };
     if (err instanceof Anthropic.NotFoundError) return { ok: false, error: `El modelo "${model}" no existe. Revisa CLAUDE_MODEL.` };
     if (err instanceof Anthropic.RateLimitError) return { ok: false, error: "Límite de la API alcanzado. Intenta más tarde o usa el Modo A." };
-    if (err instanceof Anthropic.BadRequestError) return { ok: false, error: `Petición rechazada por la API: ${err.message}` };
+    if (err instanceof Anthropic.BadRequestError) {
+      if (/credit balance/i.test(err.message))
+        return {
+          ok: false,
+          error: "Tu cuenta de la API de Anthropic no tiene créditos. Recárgalos en console.anthropic.com (Plans & Billing) o usa el Modo A.",
+        };
+      return { ok: false, error: `Petición rechazada por la API: ${err.message}` };
+    }
     if (err instanceof Anthropic.APIError) return { ok: false, error: `Error de la API (${err.status ?? "?"}). Usa el Modo A.` };
     return { ok: false, error: "No se pudo conectar con la API de Claude. Usa el Modo A." };
   }

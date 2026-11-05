@@ -33,7 +33,7 @@ npm test                             # pruebas de la lógica (racha, SRS, XP, qu
 - **Modo B (API):** pon tu clave en `.env` y reconstruye. Todo ocurre dentro de la app; la clave nunca llega al navegador.
 
 ```powershell
-notepad .env   # ANTHROPIC_API_KEY=sk-ant-...   CLAUDE_MODEL=claude-opus-5-5   MAX_API_CALLS_PER_DAY=50
+notepad .env   # ANTHROPIC_API_KEY=sk-ant-...   CLAUDE_MODEL=claude-sonnet-5-5   MAX_API_CALLS_PER_DAY=50
 ```
 
 ```powershell

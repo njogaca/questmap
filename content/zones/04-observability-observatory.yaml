@@ -4,14 +4,171 @@ order: 4
 emoji: "🔭"
 status: outline
 map: { x: 590, y: 320 }
-prerequisites: [{ zone: java-forest, level: 3 }]
-skills: [observability, debugging_rca]
+prerequisites: [ { zone: java-forest, level: 3 } ]
+skills: [ observability, debugging_rca ]
 story: >
-  Sector 04. Un observatorio que vigila cada latido del sistema.
-  Métricas, logs y trazas: si algo falla, aquí se ve primero.
+  Sector 04. Un observatorio que vigila cada latido del sistema. Métricas, logs y trazas: si algo falla, aquí se ve primero.
 levels:
-  - { slug: obs-1-novice, number: 1, title: "Novice — Métricas, logs, trazas y golden signals" }
-  - { slug: obs-2-apprentice, number: 2, title: "Apprentice — Prometheus, exporters y Micrometer" }
-  - { slug: obs-3-journeyman, number: 3, title: "Journeyman — PromQL y dashboards de Grafana" }
-  - { slug: obs-4-expert, number: 4, title: "Expert — Alertas, Alertmanager, SLO/SLI y burn rate" }
-  - { slug: obs-5-boss, number: 5, title: "Boss — Diagnosticar un incidente (RCA)" }
+  - slug: obs-1-novice
+    number: 1
+    title: "Novice — Métricas, logs, trazas y golden signals"
+    quests:
+      - slug: obs-1-novice-learn-1
+        type: learn
+        title: "Conceptos: Métricas, logs, trazas y golden signals"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-1-novice-learn-2
+        type: learn
+        title: "Lectura guiada: Métricas, logs, trazas y golden signals"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-1-novice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-1-novice-quiz
+        type: quiz
+        title: Quiz — Métricas, logs, trazas y golden signals
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+  - slug: obs-2-apprentice
+    number: 2
+    title: "Apprentice — Prometheus, exporters y Micrometer"
+    quests:
+      - slug: obs-2-apprentice-learn
+        type: learn
+        title: Prometheus, exporters y Micrometer
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-2-apprentice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-2-apprentice-lab
+        type: lab
+        title: "Lab: Prometheus, exporters y Micrometer"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-2-apprentice-quiz
+        type: quiz
+        title: Quiz — Prometheus, exporters y Micrometer
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+  - slug: obs-3-journeyman
+    number: 3
+    title: "Journeyman — PromQL y dashboards de Grafana"
+    quests:
+      - slug: obs-3-journeyman-learn
+        type: learn
+        title: PromQL y dashboards de Grafana
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-3-journeyman-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-3-journeyman-lab
+        type: lab
+        title: "Lab: PromQL y dashboards de Grafana"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-3-journeyman-quiz
+        type: quiz
+        title: Quiz — PromQL y dashboards de Grafana
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+  - slug: obs-4-expert
+    number: 4
+    title: "Expert — Alertas, Alertmanager, SLO/SLI y burn rate"
+    quests:
+      - slug: obs-4-expert-learn
+        type: learn
+        title: Alertas, Alertmanager, SLO/SLI y burn rate
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-4-expert-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-4-expert-lab
+        type: lab
+        title: "Lab: Alertas, Alertmanager, SLO/SLI y burn rate"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-4-expert-quiz
+        type: quiz
+        title: Quiz — Alertas, Alertmanager, SLO/SLI y burn rate
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+  - slug: obs-5-boss
+    number: 5
+    title: "Boss — Diagnosticar un incidente (RCA)"
+    quests:
+      - slug: obs-5-boss-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-5-boss-quiz-final
+        type: quiz
+        title: Examen final de la zona
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-5-boss-boss-fight
+        type: boss
+        title: "Jefe: Diagnosticar un incidente (RCA)"
+        required: true
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+      - slug: obs-5-boss-interview
+        type: interview
+        title: Mini-entrevista de la zona
+        required: false
+        skills:
+          observability: 0.7
+          debugging_rca: 0.3
+        payload:
+          mode: technical_screen
+          zone: observability-observatory

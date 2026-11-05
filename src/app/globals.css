@@ -68,6 +68,44 @@ kbd {
   outline-offset: 2px;
 }
 
+/* ===== Neon Atlas — animaciones (Fase 6) ===== */
+@keyframes qm-glitch {
+  0% { transform: translate(0); text-shadow: none; }
+  15% { transform: translate(-2px, 1px); text-shadow: 2px 0 var(--na-progress), -2px 0 var(--na-available); }
+  30% { transform: translate(2px, -1px); text-shadow: -2px 0 var(--na-progress), 2px 0 var(--na-available); clip-path: inset(10% 0 40% 0); }
+  45% { transform: translate(-1px, 0); clip-path: inset(50% 0 5% 0); }
+  60% { transform: translate(1px, 1px); text-shadow: 1px 0 var(--na-progress); clip-path: none; }
+  100% { transform: translate(0); text-shadow: none; }
+}
+@keyframes qm-scan {
+  from { transform: translateY(-10%); }
+  to { transform: translateY(1100%); }
+}
+@keyframes qm-pop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes qm-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+html[data-motion="on"] .qm-glitch { animation: qm-glitch 0.6s steps(6, end) 2; }
+html[data-motion="on"] .qm-pop { animation: qm-pop 0.35s ease-out; }
+html[data-motion="on"] .qm-pulse { animation: qm-pulse 2.4s ease-in-out infinite; }
+.qm-scanline { display: none; }
+html[data-motion="on"] .qm-scanline {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 9%;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.08), transparent);
+  animation: qm-scan 6s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

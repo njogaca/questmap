@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Rajdhani } from "next/font/google";
+import { MotionRoot } from "@/components/effects/MotionRoot";
 import { Nav } from "@/components/Nav";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${inter.variable} ${rajdhani.variable} ${jetbrains.variable}`}>
       <body className="antialiased">
+        <MotionRoot />
         <Nav />
         {children}
       </body>

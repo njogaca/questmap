@@ -4,14 +4,171 @@ order: 6
 emoji: "☁️"
 status: outline
 map: { x: 600, y: 90 }
-prerequisites: [{ zone: java-forest, level: 3 }]
-skills: [microservices_gcp, cicd, security]
+prerequisites: [ { zone: java-forest, level: 3 } ]
+skills: [ microservices_gcp, cicd, security ]
 story: >
-  Sector 06. Picos entre las nubes donde viven los servicios pequeños e independientes.
-  Aquí despliegas, escalas y automatizas.
+  Sector 06. Picos entre las nubes donde viven los servicios pequeños e independientes. Aquí despliegas, escalas y automatizas.
 levels:
-  - { slug: gcp-1-novice, number: 1, title: "Novice — Nube, IAM, regiones y free tier" }
-  - { slug: gcp-2-apprentice, number: 2, title: "Apprentice — Cloud Run, GKE y contenedores" }
-  - { slug: gcp-3-journeyman, number: 3, title: "Journeyman — Patrones de microservicios y GitHub Actions" }
-  - { slug: gcp-4-expert, number: 4, title: "Expert — Auth servicio a servicio, secretos y despliegue" }
-  - { slug: gcp-5-boss, number: 5, title: "Boss — Microservicio en GCP con pipeline" }
+  - slug: gcp-1-novice
+    number: 1
+    title: "Novice — Nube, IAM, regiones y free tier"
+    quests:
+      - slug: gcp-1-novice-learn-1
+        type: learn
+        title: "Conceptos: Nube, IAM, regiones y free tier"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-1-novice-learn-2
+        type: learn
+        title: "Lectura guiada: Nube, IAM, regiones y free tier"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-1-novice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-1-novice-quiz
+        type: quiz
+        title: Quiz — Nube, IAM, regiones y free tier
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+  - slug: gcp-2-apprentice
+    number: 2
+    title: "Apprentice — Cloud Run, GKE y contenedores"
+    quests:
+      - slug: gcp-2-apprentice-learn
+        type: learn
+        title: Cloud Run, GKE y contenedores
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-2-apprentice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-2-apprentice-lab
+        type: lab
+        title: "Lab: Cloud Run, GKE y contenedores"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-2-apprentice-quiz
+        type: quiz
+        title: Quiz — Cloud Run, GKE y contenedores
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+  - slug: gcp-3-journeyman
+    number: 3
+    title: "Journeyman — Patrones de microservicios y GitHub Actions"
+    quests:
+      - slug: gcp-3-journeyman-learn
+        type: learn
+        title: Patrones de microservicios y GitHub Actions
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-3-journeyman-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-3-journeyman-lab
+        type: lab
+        title: "Lab: Patrones de microservicios y GitHub Actions"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-3-journeyman-quiz
+        type: quiz
+        title: Quiz — Patrones de microservicios y GitHub Actions
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+  - slug: gcp-4-expert
+    number: 4
+    title: "Expert — Auth servicio a servicio, secretos y despliegue"
+    quests:
+      - slug: gcp-4-expert-learn
+        type: learn
+        title: Auth servicio a servicio, secretos y despliegue
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-4-expert-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-4-expert-lab
+        type: lab
+        title: "Lab: Auth servicio a servicio, secretos y despliegue"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-4-expert-quiz
+        type: quiz
+        title: Quiz — Auth servicio a servicio, secretos y despliegue
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+  - slug: gcp-5-boss
+    number: 5
+    title: "Boss — Microservicio en GCP con pipeline"
+    quests:
+      - slug: gcp-5-boss-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-5-boss-quiz-final
+        type: quiz
+        title: Examen final de la zona
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-5-boss-boss-fight
+        type: boss
+        title: "Jefe: Microservicio en GCP con pipeline"
+        required: true
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+      - slug: gcp-5-boss-interview
+        type: interview
+        title: Mini-entrevista de la zona
+        required: false
+        skills:
+          microservices_gcp: 0.7
+          cicd: 0.3
+        payload:
+          mode: technical_screen
+          zone: gcp-peaks

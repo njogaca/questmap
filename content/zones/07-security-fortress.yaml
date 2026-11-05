@@ -4,14 +4,171 @@ order: 7
 emoji: "🏰"
 status: outline
 map: { x: 800, y: 190 }
-prerequisites: [{ zone: java-forest, level: 4 }, { zone: event-harbor, level: 3 }]
-skills: [security, testing, debugging_rca]
+prerequisites: [ { zone: java-forest, level: 4 }, { zone: event-harbor, level: 3 } ]
+skills: [ security, testing, debugging_rca ]
 story: >
-  Sector 07. La fortaleza que decide quién entra y qué puede hacer.
-  Lo que antes hacía DataPower en la puerta, ahora lo hacen tokens y pruebas.
+  Sector 07. La fortaleza que decide quién entra y qué puede hacer. Lo que antes hacía DataPower en la puerta, ahora lo hacen tokens y pruebas.
 levels:
-  - { slug: sec-1-novice, number: 1, title: "Novice — Authn vs authz, OAuth2, OIDC y JWT" }
-  - { slug: sec-2-apprentice, number: 2, title: "Apprentice — Proteger una API con JWT y roles" }
-  - { slug: sec-3-journeyman, number: 3, title: "Journeyman — Pirámide de pruebas y Testcontainers" }
-  - { slug: sec-4-expert, number: 4, title: "Expert — Performance (k6), chaos y RCA" }
-  - { slug: sec-5-boss, number: 5, title: "Boss — Auditar y probar un servicio" }
+  - slug: sec-1-novice
+    number: 1
+    title: "Novice — Authn vs authz, OAuth2, OIDC y JWT"
+    quests:
+      - slug: sec-1-novice-learn-1
+        type: learn
+        title: "Conceptos: Authn vs authz, OAuth2, OIDC y JWT"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-1-novice-learn-2
+        type: learn
+        title: "Lectura guiada: Authn vs authz, OAuth2, OIDC y JWT"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-1-novice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-1-novice-quiz
+        type: quiz
+        title: Quiz — Authn vs authz, OAuth2, OIDC y JWT
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+  - slug: sec-2-apprentice
+    number: 2
+    title: "Apprentice — Proteger una API con JWT y roles"
+    quests:
+      - slug: sec-2-apprentice-learn
+        type: learn
+        title: Proteger una API con JWT y roles
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-2-apprentice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-2-apprentice-lab
+        type: lab
+        title: "Lab: Proteger una API con JWT y roles"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-2-apprentice-quiz
+        type: quiz
+        title: Quiz — Proteger una API con JWT y roles
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+  - slug: sec-3-journeyman
+    number: 3
+    title: "Journeyman — Pirámide de pruebas y Testcontainers"
+    quests:
+      - slug: sec-3-journeyman-learn
+        type: learn
+        title: Pirámide de pruebas y Testcontainers
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-3-journeyman-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-3-journeyman-lab
+        type: lab
+        title: "Lab: Pirámide de pruebas y Testcontainers"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-3-journeyman-quiz
+        type: quiz
+        title: Quiz — Pirámide de pruebas y Testcontainers
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+  - slug: sec-4-expert
+    number: 4
+    title: "Expert — Performance (k6), chaos y RCA"
+    quests:
+      - slug: sec-4-expert-learn
+        type: learn
+        title: Performance (k6), chaos y RCA
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-4-expert-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-4-expert-lab
+        type: lab
+        title: "Lab: Performance (k6), chaos y RCA"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-4-expert-quiz
+        type: quiz
+        title: Quiz — Performance (k6), chaos y RCA
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+  - slug: sec-5-boss
+    number: 5
+    title: "Boss — Auditar y probar un servicio"
+    quests:
+      - slug: sec-5-boss-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-5-boss-quiz-final
+        type: quiz
+        title: Examen final de la zona
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-5-boss-boss-fight
+        type: boss
+        title: "Jefe: Auditar y probar un servicio"
+        required: true
+        skills:
+          security: 0.7
+          testing: 0.3
+      - slug: sec-5-boss-interview
+        type: interview
+        title: Mini-entrevista de la zona
+        required: false
+        skills:
+          security: 0.7
+          testing: 0.3
+        payload:
+          mode: technical_screen
+          zone: security-fortress

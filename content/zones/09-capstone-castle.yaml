@@ -9,13 +9,90 @@ prerequisites:
   - { zone: event-harbor, level: 3 }
   - { zone: cassandra-caverns, level: 3 }
   - { zone: observability-observatory, level: 3 }
-skills: [java, eda, cassandra, bigquery_sql, observability, microservices_gcp, cicd, security, testing, english]
+skills: [ java, eda, cassandra, bigquery_sql, observability, microservices_gcp, cicd, security, testing, english ]
 story: >
-  Sector 09. El castillo final. Construyes un sistema de órdenes completo, pieza por pieza,
-  y al final lo defiendes en una entrevista. Puedes usar Claude Code, pero debes poder explicar cada parte.
+  Sector 09. El castillo final. Construyes un sistema de órdenes completo, pieza por pieza, y al final lo defiendes en una entrevista. Puedes usar Claude Code, pero debes poder explicar cada parte.
 levels:
-  - { slug: capstone-1, number: 1, title: "Milestones 1–2 — API de órdenes en Spring Boot que publica a Pub/Sub" }
-  - { slug: capstone-2, number: 2, title: "Milestones 3–4 — Consumidor idempotente con DLQ y Cassandra" }
-  - { slug: capstone-3, number: 3, title: "Milestones 5–6 — Exportación a BigQuery, Prometheus y Grafana" }
-  - { slug: capstone-4, number: 4, title: "Milestones 7–8 — GitHub Actions a Cloud Run, JWT, Testcontainers y k6" }
-  - { slug: capstone-5, number: 5, title: "Milestones 9–10 — README en inglés y defensa del proyecto" }
+  - slug: capstone-1
+    number: 1
+    title: "Milestones 1–2 — API de órdenes en Spring Boot que publica a Pub/Sub"
+    quests:
+      - slug: capstone-1-milestone-1
+        type: lab
+        title: "Milestone 1: Servicio Spring Boot: API de órdenes"
+        required: true
+        skills:
+          java: 1
+      - slug: capstone-1-milestone-2
+        type: lab
+        title: "Milestone 2: Publicar eventos a Pub/Sub (emulador)"
+        required: true
+        skills:
+          eda: 1
+  - slug: capstone-2
+    number: 2
+    title: "Milestones 3–4 — Consumidor idempotente con DLQ y Cassandra"
+    quests:
+      - slug: capstone-2-milestone-3
+        type: lab
+        title: "Milestone 3: Consumidor idempotente con DLQ"
+        required: true
+        skills:
+          eda: 1
+      - slug: capstone-2-milestone-4
+        type: lab
+        title: "Milestone 4: Persistencia en Cassandra (3 nodos)"
+        required: true
+        skills:
+          cassandra: 1
+  - slug: capstone-3
+    number: 3
+    title: "Milestones 5–6 — Exportación a BigQuery, Prometheus y Grafana"
+    quests:
+      - slug: capstone-3-milestone-5
+        type: lab
+        title: "Milestone 5: Exportación a BigQuery"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: capstone-3-milestone-6
+        type: lab
+        title: "Milestone 6: Métricas Prometheus, dashboard Grafana y 2 alertas"
+        required: true
+        skills:
+          observability: 1
+  - slug: capstone-4
+    number: 4
+    title: "Milestones 7–8 — GitHub Actions a Cloud Run, JWT, Testcontainers y k6"
+    quests:
+      - slug: capstone-4-milestone-7
+        type: lab
+        title: "Milestone 7: GitHub Actions: build, test y deploy a Cloud Run"
+        required: true
+        skills:
+          cicd: 0.5
+          microservices_gcp: 0.5
+      - slug: capstone-4-milestone-8
+        type: lab
+        title: "Milestone 8: JWT, pruebas con Testcontainers y k6"
+        required: true
+        skills:
+          security: 0.5
+          testing: 0.5
+  - slug: capstone-5
+    number: 5
+    title: "Milestones 9–10 — README en inglés y defensa del proyecto"
+    quests:
+      - slug: capstone-5-milestone-9
+        type: lab
+        title: "Milestone 9: README en inglés con arquitectura y decisiones técnicas"
+        required: true
+        skills:
+          english: 1
+      - slug: capstone-5-boss-defense
+        type: boss
+        title: "Milestone 10 — Final del castillo: defiende tu proyecto"
+        required: true
+        skills:
+          english: 0.5
+          java: 0.5

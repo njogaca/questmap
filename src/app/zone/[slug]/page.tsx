@@ -66,7 +66,7 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
         {levels.map((l) => {
           const st = l.progress.state;
           const color = STATE_COLOR[st];
-          const clickable = st !== "outline";
+          const clickable = true;
           const body = (
             <>
               <span
@@ -94,7 +94,7 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
               {clickable ? (
                 <Link
                   href={`/level/${l.slug}`}
-                  className="block rounded-md border border-line bg-surface p-4 transition-colors hover:border-available"
+                  className={`block rounded-md border bg-surface p-4 transition-colors hover:border-available ${st === "outline" ? "border-dashed border-line opacity-70" : "border-line"}`}
                 >
                   {body}
                 </Link>

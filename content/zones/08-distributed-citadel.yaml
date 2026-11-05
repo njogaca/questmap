@@ -4,14 +4,151 @@ order: 8
 emoji: "🧠"
 status: outline
 map: { x: 640, y: 540 }
-prerequisites: [{ zone: event-harbor, level: 2 }, { zone: cassandra-caverns, level: 2 }]
-skills: [distributed_systems]
+prerequisites: [ { zone: event-harbor, level: 2 }, { zone: cassandra-caverns, level: 2 } ]
+skills: [ distributed_systems ]
 story: >
-  Sector 08. La ciudadela de la teoría. Aquí aprendes por qué todo lo anterior
-  funciona… y por qué a veces falla.
+  Sector 08. La ciudadela de la teoría. Aquí aprendes por qué todo lo anterior funciona… y por qué a veces falla.
 levels:
-  - { slug: ds-1-novice, number: 1, title: "Novice — Qué es un sistema distribuido, latencia y fallos" }
-  - { slug: ds-2-apprentice, number: 2, title: "Apprentice — CAP, PACELC y modelos de consistencia" }
-  - { slug: ds-3-journeyman, number: 3, title: "Journeyman — Replicación, particionamiento y relojes" }
-  - { slug: ds-4-expert, number: 4, title: "Expert — Consenso, sagas y backpressure" }
-  - { slug: ds-5-boss, number: 5, title: "Boss — Preguntas de diseño de sistemas" }
+  - slug: ds-1-novice
+    number: 1
+    title: "Novice — Qué es un sistema distribuido, latencia y fallos"
+    quests:
+      - slug: ds-1-novice-learn-1
+        type: learn
+        title: "Conceptos: Qué es un sistema distribuido, latencia y fallos"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-1-novice-learn-2
+        type: learn
+        title: "Lectura guiada: Qué es un sistema distribuido, latencia y fallos"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-1-novice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-1-novice-quiz
+        type: quiz
+        title: Quiz — Qué es un sistema distribuido, latencia y fallos
+        required: true
+        skills:
+          distributed_systems: 1
+  - slug: ds-2-apprentice
+    number: 2
+    title: "Apprentice — CAP, PACELC y modelos de consistencia"
+    quests:
+      - slug: ds-2-apprentice-learn
+        type: learn
+        title: CAP, PACELC y modelos de consistencia
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-2-apprentice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-2-apprentice-lab
+        type: lab
+        title: "Lab: CAP, PACELC y modelos de consistencia"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-2-apprentice-quiz
+        type: quiz
+        title: Quiz — CAP, PACELC y modelos de consistencia
+        required: true
+        skills:
+          distributed_systems: 1
+  - slug: ds-3-journeyman
+    number: 3
+    title: "Journeyman — Replicación, particionamiento y relojes"
+    quests:
+      - slug: ds-3-journeyman-learn
+        type: learn
+        title: Replicación, particionamiento y relojes
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-3-journeyman-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-3-journeyman-lab
+        type: lab
+        title: "Lab: Replicación, particionamiento y relojes"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-3-journeyman-quiz
+        type: quiz
+        title: Quiz — Replicación, particionamiento y relojes
+        required: true
+        skills:
+          distributed_systems: 1
+  - slug: ds-4-expert
+    number: 4
+    title: "Expert — Consenso, sagas y backpressure"
+    quests:
+      - slug: ds-4-expert-learn
+        type: learn
+        title: Consenso, sagas y backpressure
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-4-expert-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-4-expert-lab
+        type: lab
+        title: "Lab: Consenso, sagas y backpressure"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-4-expert-quiz
+        type: quiz
+        title: Quiz — Consenso, sagas y backpressure
+        required: true
+        skills:
+          distributed_systems: 1
+  - slug: ds-5-boss
+    number: 5
+    title: "Boss — Preguntas de diseño de sistemas"
+    quests:
+      - slug: ds-5-boss-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-5-boss-quiz-final
+        type: quiz
+        title: Examen final de la zona
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-5-boss-boss-fight
+        type: boss
+        title: "Jefe: Preguntas de diseño de sistemas"
+        required: true
+        skills:
+          distributed_systems: 1
+      - slug: ds-5-boss-interview
+        type: interview
+        title: Mini-entrevista de la zona
+        required: false
+        skills:
+          distributed_systems: 1
+        payload:
+          mode: technical_screen
+          zone: distributed-citadel

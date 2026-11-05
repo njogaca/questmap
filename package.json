@@ -10,7 +10,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "content:new": "tsx scripts/content-new.ts",
+    "content:apply": "tsx scripts/content-apply.ts",
+    "test:db": "tsx --test tests/db/*.test.ts"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.4",

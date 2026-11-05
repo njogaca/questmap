@@ -6,13 +6,150 @@ status: outline
 unlocked_from_start: true
 map: { x: 150, y: 540 }
 prerequisites: []
-skills: [bigquery_sql]
+skills: [ bigquery_sql ]
 story: >
-  Sector 05. Una bahía de datos sin fondo. Con SQL bien escrito
-  puedes cruzarla en segundos; con SQL malo, pagas cada byte.
+  Sector 05. Una bahía de datos sin fondo. Con SQL bien escrito puedes cruzarla en segundos; con SQL malo, pagas cada byte.
 levels:
-  - { slug: bq-1-novice, number: 1, title: "Novice — Repaso de SQL: joins y agregaciones" }
-  - { slug: bq-2-apprentice, number: 2, title: "Apprentice — BigQuery Sandbox y datasets públicos" }
-  - { slug: bq-3-journeyman, number: 3, title: "Journeyman — Particiones, clustering y costo" }
-  - { slug: bq-4-expert, number: 4, title: "Expert — Window functions y campos anidados" }
-  - { slug: bq-5-boss, number: 5, title: "Boss — Análisis de un dataset grande" }
+  - slug: bq-1-novice
+    number: 1
+    title: "Novice — Repaso de SQL: joins y agregaciones"
+    quests:
+      - slug: bq-1-novice-learn-1
+        type: learn
+        title: "Conceptos: Repaso de SQL: joins y agregaciones"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-1-novice-learn-2
+        type: learn
+        title: "Lectura guiada: Repaso de SQL: joins y agregaciones"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-1-novice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-1-novice-quiz
+        type: quiz
+        title: "Quiz — Repaso de SQL: joins y agregaciones"
+        required: true
+        skills:
+          bigquery_sql: 1
+  - slug: bq-2-apprentice
+    number: 2
+    title: "Apprentice — BigQuery Sandbox y datasets públicos"
+    quests:
+      - slug: bq-2-apprentice-learn
+        type: learn
+        title: BigQuery Sandbox y datasets públicos
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-2-apprentice-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-2-apprentice-lab
+        type: lab
+        title: "Lab: BigQuery Sandbox y datasets públicos"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-2-apprentice-quiz
+        type: quiz
+        title: Quiz — BigQuery Sandbox y datasets públicos
+        required: true
+        skills:
+          bigquery_sql: 1
+  - slug: bq-3-journeyman
+    number: 3
+    title: "Journeyman — Particiones, clustering y costo"
+    quests:
+      - slug: bq-3-journeyman-learn
+        type: learn
+        title: Particiones, clustering y costo
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-3-journeyman-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-3-journeyman-lab
+        type: lab
+        title: "Lab: Particiones, clustering y costo"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-3-journeyman-quiz
+        type: quiz
+        title: Quiz — Particiones, clustering y costo
+        required: true
+        skills:
+          bigquery_sql: 1
+  - slug: bq-4-expert
+    number: 4
+    title: "Expert — Window functions y campos anidados"
+    quests:
+      - slug: bq-4-expert-learn
+        type: learn
+        title: Window functions y campos anidados
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-4-expert-glossary
+        type: glossary
+        title: Vocabulario del nivel
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-4-expert-lab
+        type: lab
+        title: "Lab: Window functions y campos anidados"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-4-expert-quiz
+        type: quiz
+        title: Quiz — Window functions y campos anidados
+        required: true
+        skills:
+          bigquery_sql: 1
+  - slug: bq-5-boss
+    number: 5
+    title: "Boss — Análisis de un dataset grande"
+    quests:
+      - slug: bq-5-boss-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-5-boss-quiz-final
+        type: quiz
+        title: Examen final de la zona
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-5-boss-boss-fight
+        type: boss
+        title: "Jefe: Análisis de un dataset grande"
+        required: true
+        skills:
+          bigquery_sql: 1
+      - slug: bq-5-boss-interview
+        type: interview
+        title: Mini-entrevista de la zona
+        required: false
+        skills:
+          bigquery_sql: 1
+        payload:
+          mode: technical_screen
+          zone: bigquery-bay

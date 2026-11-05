@@ -1,5 +1,7 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
+import { BackupPanel } from "@/components/BackupPanel";
+import { EffectsSettings } from "@/components/effects/EffectsSettings";
 import { apiConfig, usageToday } from "@/lib/claude/client";
 
 export const dynamic = "force-dynamic";
@@ -52,7 +54,16 @@ export default async function Ajustes() {
   const status = await getStatus();
   const tz = process.env.TZ || "UTC";
   const api = apiConfig();
-  const [today, stats] = await Promise.all([usageToday().catch(() => ({ calls: 0, tokens: 0 })), getApiStats().catch(() => null)]);
+  const [today, stats, zones] = await Promise.all([
+    usageToday().catch(() => ({ calls: 0, tokens: 0 })),
+    getApiStats().catch(() => null),
+    db
+      .select({ slug: s.zones.slug, title: s.zones.title })
+      .from(s.zones)
+      .where(eq(s.zones.status, "published"))
+      .orderBy(asc(s.zones.order))
+      .catch(() => []),
+  ]);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
@@ -106,7 +117,21 @@ MAX_API_CALLS_PER_DAY=50`}</pre>
 
       <section className="mt-6 rounded-lg border border-line bg-surface p-5">
         <h2 className="text-xl font-semibold">Respaldo</h2>
-        <p className="mt-2 text-sm text-dim">Backup/restore y exportar/importar progreso (JSON) llegan en la Fase 6.</p>
+        <p className="mt-2 text-sm text-dim">
+          Red de seguridad principal: respaldo completo de la base de datos con PowerShell (desde la carpeta del repo).
+        </p>
+        <pre className="mt-2 overflow-x-auto rounded border border-line bg-bg p-3 font-mono text-xs text-done">.\scripts\backup.ps1</pre>
+        <pre className="mt-2 overflow-x-auto rounded border border-line bg-bg p-3 font-mono text-xs text-done">.\scripts\restore.ps1 backups\questmap_AAAAMMDD_HHmm.sql</pre>
+        <div className="mt-5">
+          <BackupPanel zones={zones} />
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-lg border border-line bg-surface p-5">
+        <h2 className="text-xl font-semibold">Efectos</h2>
+        <div className="mt-3">
+          <EffectsSettings />
+        </div>
       </section>
 
       <section className="mt-8 rounded-lg border border-line bg-surface p-5">

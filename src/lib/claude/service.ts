@@ -160,11 +160,29 @@ export async function startInterview(input: {
         durationMin: 45,
       };
     } else {
-      const slug = `technical-${p.zone === "event-harbor" ? "eda" : p.zone === "cassandra-caverns" ? "cassandra" : "java"}`;
-      const t = await templateBySlug(slug);
-      if (!t) throw new Error("No encontré la plantilla de entrevista de esta zona.");
-      templateId = t.id;
-      ctx = { ...contextFromTemplate(t), zoneTitle: zone.title };
+      // Plantilla por modo/zona: technical-<zona> (java, eda, cassandra…). Si la zona aún no tiene
+      // plantilla, el entrevistador improvisa sobre los temas de la zona.
+      const mode = (p.mode ?? "technical_screen") as InterviewMode;
+      const zoneKey: Record<string, string> = { "java-forest": "java", "event-harbor": "eda", "cassandra-caverns": "cassandra" };
+      const zoneForTemplate = p.zone ?? zone.slug;
+      const all = await db.select().from(s.interviewTemplates).where(eq(s.interviewTemplates.status, "published"));
+      const t =
+        mode === "technical_screen"
+          ? all.find((x) => x.slug === `technical-${zoneKey[zoneForTemplate] ?? zoneForTemplate}`)
+          : shuffle(all.filter((x) => x.mode === mode))[0];
+      if (t) {
+        templateId = t.id;
+        ctx = { ...contextFromTemplate(t), zoneTitle: zone.title };
+      } else {
+        ctx = {
+          mode,
+          title: `${quest.title}`,
+          zoneTitle: zone.title,
+          focus: [level.title, ...zone.skills],
+          durationMin: 30,
+          questions: [],
+        };
+      }
     }
   } else if (input.mode === "mock_loop") {
     ctx = await mockLoopContext();

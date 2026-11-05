@@ -47,7 +47,17 @@ export default async function QuestPage({ params }: { params: Promise<{ slug: st
 
   let body: React.ReactNode = null;
 
-  if (locked) {
+  if (quest.status === "outline") {
+    body = (
+      <div className="rounded-md border border-dashed border-line bg-surface p-4 text-sm text-dim">
+        <p>Esta quest es un esqueleto: su contenido todavía no está escrito.</p>
+        <p className="mt-2">Para generarlo (prompt para Claude, validación y carga):</p>
+        <pre className="mt-2 overflow-x-auto rounded border border-line bg-bg p-3 font-mono text-xs text-done">
+          npm run content:new -- --zone {zone.slug} --level {level.number}
+        </pre>
+      </div>
+    );
+  } else if (locked) {
     body = (
       <p className="rounded-md border border-locked bg-surface p-4 text-sm text-dim">
         Esta quest está bloqueada: completa los niveles anteriores para acceder.

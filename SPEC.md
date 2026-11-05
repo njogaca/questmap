@@ -352,6 +352,8 @@ Decisiones de implementación: `open_answer` y `boss`/`interview` se aprueban co
 
 **Fase 6 — Robustez y pulido:** scripts de backup/restore, export/import JSON, herramienta `content:new`, pruebas básicas (seed idempotente, desbloqueo de niveles, cálculo de XP, Cobertura vs Readiness real, regla de racha/congelación, parser del JSON de Claude). Animaciones de Neon Atlas y mecánica de "datos cifrados" (sección 12). **Opcional:** PWA con caché offline de la Daily Quest (flashcards y preguntas del día) que sincroniza al volver la conexión, para cuando el PC esté apagado o no haya señal.
 
+Implementación de la Fase 6 (2026-11-05): `scripts/backup.ps1` / `restore.ps1` (pg_dump dentro del contenedor, restore con la app detenida); export/import JSON por slug en Ajustes (`/api/export` + server action, límite 20 MB) y "reiniciar zona"; `content:new` (prompt para Claude, o `--api`) + `content:apply` (valida con Zod, publica el nivel, agrega glosario y recursos, y deshace si la validación global falla); quests esqueleto en las zonas 4–9 y en el Arena 2–5 (`scripts/gen-skeletons.ts`); animaciones (glitch, scanline, decrypt, sectores cifrados) con preferencia por navegador y sonidos WebAudio apagados por defecto; prueba de integración `npm run test:db`. La PWA opcional no se implementó: el usuario usa la app solo desde la PC.
+
 **Tiempo máximo de construcción:** el sistema es una herramienta para estudiar, no el objetivo. Entrega las Fases 1–4 primero para que el usuario pueda empezar a estudiar de inmediato; las Fases 5–6 pueden hacerse después, mientras él estudia la Zona 1.
 
 ## 14. Criterios de aceptación

@@ -24,8 +24,27 @@ Revisa en `.env` que `TZ` sea tu zona horaria (`America/New_York` para Atlanta):
 docker compose logs -f app           # ver logs (incluye el resultado del seed)
 docker compose down                  # detener (los datos NO se pierden: volumen questmap_pgdata)
 docker compose up -d --build         # reconstruir tras cambiar código o contenido
-npm test                             # pruebas de la lógica (racha, SRS, XP, quiz, readiness, desbloqueo)
+npm test                             # pruebas de la lógica (racha, SRS, XP, quiz, readiness, desbloqueo, parser de Claude)
+npm run test:db                      # pruebas de integración con Postgres (seed idempotente, export); requiere docker compose up
 ```
+
+## Respaldo (no pierdas tu progreso)
+
+Tu progreso vive en el volumen de Docker `questmap_pgdata`: sobrevive a `docker compose down` y a reconstruir. Aun así, haz respaldos:
+
+```powershell
+.\scripts\backup.ps1
+```
+
+Crea `backups\questmap_AAAAMMDD_HHmm.sql`. Para restaurarlo (reemplaza todo el progreso actual):
+
+```powershell
+.\scripts\restore.ps1 backups\questmap_20261105_2130.sql
+```
+
+Segunda red de seguridad: en **Ajustes → Respaldo** puedes **exportar** tu progreso a JSON (guárdalo en OneDrive o Google Drive) e **importarlo** después. El JSON usa slugs, así que sirve aunque la base se recree desde cero. Ahí también puedes **reiniciar una zona** (con confirmación).
+
+Nunca uses `docker compose down -v`: la `-v` borra el volumen con tu progreso.
 
 ## Claude (calificaciones y entrevistas)
 
@@ -55,6 +74,31 @@ Todo vive en `content/` (YAML):
 | `interviews/*.yaml` | Plantillas del Interview Arena (conductuales, técnicas por zona, system design, take-home) |
 
 Edita o agrega archivos y reconstruye. El seed valida todo con Zod (si algo está mal, el log dice el archivo y el campo), hace upsert por `slug`, nunca duplica ni borra tu progreso, y lo que quites del YAML queda `archived`.
+
+### Completar las zonas "próximamente" (content:new)
+
+Las zonas 4–9 y los niveles 2–5 del Arena tienen niveles y quests esqueleto. Para escribir un nivel completo:
+
+1. Genera el prompt (queda en `content\_drafts\`):
+
+```powershell
+npm run content:new -- --zone observability-observatory --level 1
+```
+
+2. Dáselo a Claude: pégalo en claude.ai (o pídeselo a Claude Code) y guarda el bloque YAML de la respuesta como `content\_drafts\observability-observatory-1.yaml`. Con la API configurada puedes saltarte este paso con `--api`.
+3. Valídalo e intégralo (si algo falla, no se escribe nada):
+
+```powershell
+npm run content:apply -- --file content\_drafts\observability-observatory-1.yaml
+```
+
+4. Reconstruye: `docker compose up -d --build`. Revisa el log del seed: si avisa que un `target_xp` se aleja más de 15 % del contenido real, ajústalo en `skills.yaml`.
+
+Para validar sin escribir agrega `--dry-run`.
+
+## Efectos
+
+En **Ajustes → Efectos** puedes apagar las animaciones (glitch al ganar XP, línea de escaneo del mapa, texto que se descifra) y activar los sonidos (apagados por defecto). Los sectores bloqueados del mapa aparecen como "datos cifrados" y se van descifrando a medida que cumples sus requisitos.
 
 ## Acceso desde otro dispositivo (opcional, Tailscale)
 

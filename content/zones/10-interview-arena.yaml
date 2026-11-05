@@ -5,11 +5,9 @@ emoji: "🎯"
 unlocked_from_start: true
 map: { x: 150, y: 100 }
 prerequisites: []
-skills: [english, ai_tools]
+skills: [ english, ai_tools ]
 story: >
-  Sector 10. La arena donde todo se pone a prueba en inglés.
-  Cada combate es una entrevista; cada victoria te acerca a la oferta.
-  El primer combate es el que todos los entrevistadores abren: "Tell me about yourself".
+  Sector 10. La arena donde todo se pone a prueba en inglés. Cada combate es una entrevista; cada victoria te acerca a la oferta. El primer combate es el que todos los entrevistadores abren: "Tell me about yourself".
 
 levels:
   # ================================================================ NIVEL 1
@@ -57,7 +55,7 @@ levels:
         estimated_min: 10
         skills: { english: 1.0 }
         payload:
-          terms: [arena-tmay, arena-bridge-story, arena-behavioral, arena-star, arena-technical-screen, arena-system-design, arena-take-home, arena-hiring-manager]
+          terms: [ arena-tmay, arena-bridge-story, arena-behavioral, arena-star, arena-technical-screen, arena-system-design, arena-take-home, arena-hiring-manager ]
 
       - slug: arena-1-write-tmay
         type: micro
@@ -89,7 +87,7 @@ levels:
           - slug: a1-q1
             type: mcq
             prompt: "¿Cuánto debería durar tu respuesta a 'Tell me about yourself'?"
-            options: ["10 segundos", "60–90 segundos", "5 minutos", "Lo que haga falta para contar todo el CV"]
+            options: [ "10 segundos", "60–90 segundos", "5 minutos", "Lo que haga falta para contar todo el CV" ]
             answer: 1
             explanation: "Lo justo para despertar interés y dejar que el entrevistador pregunte. Más de 2 minutos suele perder su atención."
             skill: english
@@ -109,14 +107,14 @@ levels:
           - slug: a1-q3
             type: fill
             prompt: "Completa en inglés: 'I have eight years ______ experience in integration.'"
-            answer: ["of"]
+            answer: [ "of" ]
             explanation: "'years of experience in…'. Error común en hispanohablantes: 'years experience' (sin 'of') o 'experience on'."
             skill: english
             difficulty: 1
           - slug: a1-q4
             type: mcq
             prompt: "¿Qué frase es correcta?"
-            options: ["I am working here since 2018.", "I have been working here since 2018.", "I work here since 2018.", "I worked here since 2018."]
+            options: [ "I am working here since 2018.", "I have been working here since 2018.", "I work here since 2018.", "I worked here since 2018." ]
             answer: 1
             explanation: "Para algo que empezó en el pasado y sigue hoy se usa present perfect continuous: 'I have been working… since/for…'. En español decimos 'trabajo aquí desde', y por eso el error es tan común."
             skill: english
@@ -144,7 +142,7 @@ levels:
           - slug: a1-q7
             type: mcq
             prompt: "Te hacen una pregunta y no entendiste una palabra. ¿Qué dices?"
-            options: ["Respondo cualquier cosa", "Sorry, could you rephrase the question? I want to make sure I answer what you're asking.", "What?", "Me quedo en silencio"]
+            options: [ "Respondo cualquier cosa", "Sorry, could you rephrase the question? I want to make sure I answer what you're asking.", "What?", "Me quedo en silencio" ]
             answer: 1
             explanation: "Pedir que reformulen es profesional y común en entrevistas remotas. Responder otra cosa es mucho peor."
             skill: english
@@ -152,8 +150,8 @@ levels:
           - slug: a1-q8
             type: order
             prompt: "Ordena las partes de un buen 'Tell me about yourself':"
-            options: ["Present: current role and impact", "Past: one or two key achievements", "Bridge: how your experience connects to this role", "Future: why this team and company"]
-            answer: [0, 1, 2, 3]
+            options: [ "Present: current role and impact", "Past: one or two key achievements", "Bridge: how your experience connects to this role", "Future: why this team and company" ]
+            answer: [ 0, 1, 2, 3 ]
             explanation: "Presente → pasado → puente → futuro. Termina mirando hacia el puesto para que la conversación siga ahí."
             skill: english
             difficulty: 1
@@ -166,10 +164,124 @@ levels:
         skills: { english: 1.0 }
         payload:
           prompt_en: "Tell me about yourself."
-          rubric: [correctness, depth, clarity, tradeoffs]
+          rubric: [ correctness, depth, clarity, tradeoffs ]
 
   # ================================================================ NIVELES 2–5 (esqueleto)
-  - { slug: arena-2-apprentice, number: 2, status: outline, title: "Apprentice — Preguntas conductuales con STAR" }
-  - { slug: arena-3-journeyman, number: 3, status: outline, title: "Journeyman — Screens técnicos por zona" }
-  - { slug: arena-4-expert, number: 4, status: outline, title: "Expert — System design y mini take-home" }
-  - { slug: arena-5-boss, number: 5, status: outline, title: "Boss — Mock Loop completo" }
+  - slug: arena-2-apprentice
+    number: 2
+    status: outline
+    title: "Apprentice — Preguntas conductuales con STAR"
+    quests:
+      - slug: arena-2-apprentice-learn-star
+        type: learn
+        title: El método STAR
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+      - slug: arena-2-apprentice-open-star
+        type: open_answer
+        title: Responde una pregunta conductual con STAR
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+      - slug: arena-2-apprentice-interview-behavioral
+        type: interview
+        title: Mini-entrevista conductual
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: behavioral
+  - slug: arena-3-journeyman
+    number: 3
+    status: outline
+    title: "Journeyman — Screens técnicos por zona"
+    quests:
+      - slug: arena-3-journeyman-interview-java
+        type: interview
+        title: "Screen técnico: Java"
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: technical_screen
+          zone: java-forest
+      - slug: arena-3-journeyman-interview-eda
+        type: interview
+        title: "Screen técnico: Pub/Sub"
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: technical_screen
+          zone: event-harbor
+      - slug: arena-3-journeyman-interview-cassandra
+        type: interview
+        title: "Screen técnico: Cassandra"
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: technical_screen
+          zone: cassandra-caverns
+      - slug: arena-3-journeyman-learn-ai
+        type: learn
+        title: Uso responsable de asistentes de IA en el desarrollo
+        required: true
+        skills:
+          ai_tools: 1
+  - slug: arena-4-expert
+    number: 4
+    status: outline
+    title: "Expert — System design y mini take-home"
+    quests:
+      - slug: arena-4-expert-learn-design
+        type: learn
+        title: Cómo abordar una entrevista de system design
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+      - slug: arena-4-expert-interview-design
+        type: interview
+        title: "System design: pipeline de eventos de órdenes"
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: system_design
+      - slug: arena-4-expert-interview-takehome
+        type: interview
+        title: Mini take-home bajo tiempo
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+        payload:
+          mode: coding_task
+  - slug: arena-5-boss
+    number: 5
+    status: outline
+    title: "Boss — Mock Loop completo"
+    quests:
+      - slug: arena-5-boss-learn-negotiation
+        type: learn
+        title: Negociación y preguntas para el entrevistador
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2
+      - slug: arena-5-boss-boss-mock-loop
+        type: boss
+        title: "Jefe: Mock Loop completo"
+        required: true
+        skills:
+          english: 0.8
+          ai_tools: 0.2

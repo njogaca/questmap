@@ -60,12 +60,12 @@ skills:
     name: Microservicios en GCP
     description: Microservicios y cloud (GCP preferido)
     core: true
-    target_xp: 580 # 875×.60 = 525 + capstone 50
+    target_xp: 410 # REAL: Z6 379 + Z1 9 + capstone milestone 7 (×.5) 25
   - code: cicd
     name: CI/CD
     description: CI/CD y pipelines de despliegue
     core: false
-    target_xp: 270 # 875×.25 = 219 + capstone 50
+    target_xp: 210 # REAL: Z6 187 + capstone milestone 7 (×.5) 25
   - code: git
     name: Git
     description: Control de versiones
@@ -80,7 +80,7 @@ skills:
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
-    target_xp: 510 # 875×.15 = 131 + 875×.40 = 350 + capstone 25
+    target_xp: 510 # REAL Z6 145 + Z7 estimado 875×.40 = 350 + capstone 25
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance

@@ -741,3 +741,233 @@ resources:
     required: false
     why: Referencia completa de SELECT, incluida la cláusula QUALIFY.
     verified: true
+  - slug: res-gcp-regions
+    title: Google Cloud — Geography and regions
+    type: docs
+    url: https://docs.cloud.google.com/docs/geography-and-regions
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Regiones, zonas y por qué una zona es un dominio de falla.
+    verified: true
+  - slug: res-gcp-free-tier
+    title: Google Cloud — Free cloud features (free tier)
+    type: docs
+    url: https://docs.cloud.google.com/free/docs/free-cloud-features
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Qué es gratis cada mes (incluido Cloud Run) y qué requisitos tiene.
+    verified: true
+  - slug: res-gcp-budgets
+    title: Google Cloud — Create, edit or delete budgets and budget alerts
+    type: docs
+    url: https://docs.cloud.google.com/billing/docs/how-to/budgets
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Configurar alertas de gasto antes de crear cualquier recurso.
+    verified: true
+  - slug: res-gcp-iam
+    title: Google Cloud — IAM overview
+    type: docs
+    url: https://docs.cloud.google.com/iam/docs/overview
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Principals, roles y políticas, la base de la seguridad en GCP.
+    verified: true
+  - slug: res-cloud-run-overview
+    title: Google Cloud — What is Cloud Run
+    type: docs
+    url: https://docs.cloud.google.com/run/docs/overview/what-is-cloud-run
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Servicios, escalado a cero y contenedores sin administrar servidores.
+    verified: true
+  - slug: res-cloud-run-java-quickstart
+    title: "Cloud Run — Quickstart: Java Spring Boot"
+    type: lab
+    url: https://docs.cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-java-service
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: El despliegue oficial con `gcloud run deploy --source .`.
+    verified: true
+  - slug: res-gke-overview
+    title: Google Kubernetes Engine — Overview
+    type: docs
+    url: https://docs.cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview
+    language: en
+    duration_min: 25
+    cost: free
+    required: false
+    why: GKE (Autopilot y Standard), para comparar con Cloud Run.
+    verified: true
+  - slug: res-artifact-registry
+    title: Google Cloud — Artifact Registry overview
+    type: docs
+    url: https://docs.cloud.google.com/artifact-registry/docs/overview
+    language: en
+    duration_min: 15
+    cost: free
+    required: false
+    why: Dónde se guardan las imágenes Docker en GCP.
+    verified: true
+  - slug: res-spring-container-images
+    title: Spring Boot — Container Images
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/packaging/container-images/index.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Dockerfiles eficientes y buildpacks para apps Spring Boot.
+    verified: true
+  - slug: res-gh-actions-intro
+    title: GitHub Docs — Understanding GitHub Actions
+    type: docs
+    url: https://docs.github.com/en/actions/get-started/understand-github-actions
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Workflows, eventos, jobs, steps y runners.
+    verified: true
+  - slug: res-gh-setup-java
+    title: actions/setup-java (GitHub)
+    type: docs
+    url: https://github.com/actions/setup-java
+    language: en
+    duration_min: 10
+    cost: free
+    required: false
+    why: Instalar Java y cachear Maven en un workflow.
+    verified: true
+  - slug: res-gh-secrets
+    title: GitHub Docs — Using secrets in GitHub Actions
+    type: docs
+    url: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Crear secretos de repositorio y usarlos con `secrets.NOMBRE`.
+    verified: true
+  - slug: res-gh-auth-action
+    title: google-github-actions/auth (GitHub)
+    type: docs
+    url: https://github.com/google-github-actions/auth
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Autenticarse en GCP desde GitHub Actions sin llaves (Workload Identity Federation).
+    verified: true
+  - slug: res-gcp-wif
+    title: Google Cloud — Workload Identity Federation
+    type: docs
+    url: https://docs.cloud.google.com/iam/docs/workload-identity-federation
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Por qué y cómo evitar las llaves de service account.
+    verified: true
+  - slug: res-gcp-secret-manager
+    title: Google Cloud — Secret Manager overview
+    type: docs
+    url: https://docs.cloud.google.com/secret-manager/docs/overview
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Secretos con versiones y acceso controlado por IAM.
+    verified: true
+  - slug: res-cloud-run-s2s
+    title: Cloud Run — Authenticating service-to-service
+    type: docs
+    url: https://docs.cloud.google.com/run/docs/authenticating/service-to-service
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: ID tokens y el rol run.invoker para que un servicio llame a otro.
+    verified: true
+  - slug: res-cloud-run-env
+    title: Cloud Run — Configure environment variables
+    type: docs
+    url: https://docs.cloud.google.com/run/docs/configuring/services/environment-variables
+    language: en
+    duration_min: 10
+    cost: free
+    required: false
+    why: Pasar configuración al contenedor con `--set-env-vars`.
+    verified: true
+  - slug: res-12factor-config
+    title: The Twelve-Factor App — III. Config
+    type: article
+    url: https://12factor.net/config
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Por qué la configuración va en variables de entorno y no en el código.
+    verified: true
+  - slug: res-pattern-saga
+    title: microservices.io — Pattern Saga
+    type: article
+    url: https://microservices.io/patterns/data/saga.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Transacciones entre servicios con coreografía u orquestación.
+    verified: true
+  - slug: res-pattern-circuit-breaker
+    title: microservices.io — Pattern Circuit Breaker
+    type: article
+    url: https://microservices.io/patterns/reliability/circuit-breaker.html
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Cortar llamadas a un servicio que falla para no arrastrar al resto.
+    verified: true
+  - slug: res-pattern-api-gateway
+    title: microservices.io — Pattern API Gateway / Backends for Frontends
+    type: article
+    url: https://microservices.io/patterns/apigateway.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Un punto de entrada único para los clientes.
+    verified: true
+  - slug: res-pattern-outbox
+    title: microservices.io — Pattern Transactional outbox
+    type: article
+    url: https://microservices.io/patterns/data/transactional-outbox.html
+    language: en
+    duration_min: 10
+    cost: free
+    required: false
+    why: Repaso del outbox que viste en Event Harbor.
+    verified: true
+  - slug: res-resilience4j-cb
+    title: Resilience4j — CircuitBreaker
+    type: docs
+    url: https://resilience4j.readme.io/docs/circuitbreaker
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: La librería Java para circuit breakers (estados CLOSED, OPEN, HALF_OPEN).
+    verified: true

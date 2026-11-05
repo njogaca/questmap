@@ -2,7 +2,6 @@ slug: gcp-peaks
 title: GCP & Microservices Peaks
 order: 6
 emoji: "☁️"
-status: outline
 map: { x: 600, y: 90 }
 prerequisites: [ { zone: java-forest, level: 3 } ]
 skills: [ microservices_gcp, cicd, security ]
@@ -11,164 +10,1075 @@ story: >
 levels:
   - slug: gcp-1-novice
     number: 1
-    title: "Novice — Nube, IAM, regiones y free tier"
+    title: Novice — Nube, IAM, regiones y free tier
+    story: Subes a los picos. Arriba hay recursos casi infinitos… y una factura que también puede serlo. Aprende primero quién puede hacer qué, dónde viven las cosas y cuánto cuestan.
     quests:
-      - slug: gcp-1-novice-learn-1
+      - slug: gcp-1-learn-cloud
         type: learn
-        title: "Conceptos: Nube, IAM, regiones y free tier"
+        title: Regiones, zonas y el modelo de costos
         required: true
+        estimated_min: 35
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-1-novice-learn-2
+          microservices_gcp: 1
+        resources:
+          - ref: res-gcp-regions
+          - ref: res-gcp-free-tier
+          - ref: res-gcp-budgets
+        payload:
+          note_prompt: "Explica la diferencia entre región y zona, y por qué un servicio importante debería correr en varias zonas. Luego: ¿qué harías ANTES de crear cualquier recurso en una cuenta de GCP para no llevarte sorpresas en la factura?"
+          summary_md: |
+            - Región = un área geográfica (us-central1). Zona = un centro de datos aislado dentro de la región (us-central1-a). Una zona es un dominio de falla: si cae, las demás siguen.
+            - Servicios regionales (Cloud Run, Pub/Sub, BigQuery) ya reparten entre zonas por ti.
+            - Free tier: hay cuotas gratis cada mes (ej. Cloud Run: 2 millones de peticiones), pero se necesita una cuenta de facturación.
+            - Antes de crear nada: crea un presupuesto con alertas (budget alert). Las alertas avisan, no cortan el gasto.
+      - slug: gcp-1-learn-iam
         type: learn
-        title: "Lectura guiada: Nube, IAM, regiones y free tier"
+        title: IAM — principals, roles y mínimo privilegio
         required: true
+        estimated_min: 40
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-1-novice-glossary
+          microservices_gcp: 0.5
+          security: 0.5
+        resources:
+          - ref: res-gcp-iam
+        payload:
+          note_prompt: Explica qué es un principal, un rol y una política de IAM. ¿Por qué no deberías dar el rol Owner o Editor a la cuenta de servicio de tu aplicación? Compáralo con cómo se manejaban los permisos en tu trabajo actual.
+          summary_md: |
+            - Principal: QUIÉN (un usuario, un grupo o una service account, la identidad de una aplicación).
+            - Rol: un conjunto de permisos (ej. roles/run.invoker = puede invocar servicios de Cloud Run).
+            - Política (allow policy): asigna roles a principals SOBRE un recurso (proyecto, servicio, bucket).
+            - Mínimo privilegio: cada identidad recibe solo lo que necesita. Evita los roles básicos (Owner, Editor, Viewer) en producción.
+      - slug: gcp-1-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de la nube
         required: true
+        estimated_min: 15
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-1-novice-quiz
+          microservices_gcp: 0.8
+          security: 0.2
+        payload:
+          terms:
+            - gcp-region-zone
+            - gcp-iam
+            - gcp-principal
+            - gcp-role
+            - gcp-service-account
+            - gcp-least-privilege
+            - gcp-free-tier
+            - gcp-budget-alert
+      - slug: gcp-1-quiz
         type: quiz
-        title: Quiz — Nube, IAM, regiones y free tier
+        title: Quiz — Fundamentos de GCP
         required: true
+        estimated_min: 15
         skills:
           microservices_gcp: 0.7
-          cicd: 0.3
+          security: 0.3
+        questions:
+          - slug: g1-q1
+            type: mcq
+            prompt: ¿Qué es una zona en Google Cloud?
+            options:
+              - Un país
+              - Un área de despliegue aislada dentro de una región (un dominio de falla)
+              - Una cuenta de facturación
+              - Un tipo de máquina
+            answer: 1
+            explanation: Una región tiene varias zonas. Repartir réplicas entre zonas protege contra la caída de un centro de datos.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g1-q2
+            type: mcq
+            prompt: Tu aplicación en Cloud Run solo necesita publicar en un topic de Pub/Sub. ¿Qué permisos le das a su service account?
+            options:
+              - Owner del proyecto
+              - Editor del proyecto
+              - Solo el rol de publisher sobre ese topic
+              - "Ninguno: Cloud Run tiene todos los permisos"
+            answer: 2
+            explanation: "Mínimo privilegio: el permiso exacto sobre el recurso exacto. Si la app es comprometida, el daño queda acotado."
+            skill: security
+            difficulty: 1
+          - slug: g1-q3
+            type: tf
+            prompt: Una alerta de presupuesto (budget alert) detiene automáticamente el gasto cuando llegas al límite.
+            answer: false
+            explanation: Las alertas de presupuesto solo notifican. Para cortar el gasto hay que automatizar una acción aparte (o apagar recursos).
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g1-q4
+            type: mcq
+            prompt: ¿Qué es una service account?
+            options:
+              - Una cuenta de soporte de Google
+              - La identidad de una aplicación o carga de trabajo, no de una persona
+              - Una cuenta de facturación
+              - Un usuario administrador
+            answer: 1
+            explanation: Las aplicaciones se autentican como service accounts. A ellas se les asignan roles igual que a las personas.
+            skill: security
+            difficulty: 1
+          - slug: g1-q5
+            type: fill
+            prompt: En IAM, al conjunto de permisos que se asigna a un principal se le llama ______ (en inglés).
+            answer:
+              - role
+              - rol
+              - roles
+            explanation: Un rol agrupa permisos (ej. run.services.get). Se asigna mediante una allow policy sobre un recurso.
+            skill: security
+            difficulty: 1
+          - slug: g1-q6
+            type: mcq
+            prompt: ¿Cuál es el primer paso recomendado al abrir una cuenta de GCP para practicar?
+            options:
+              - Crear un cluster de GKE
+              - Configurar un presupuesto con alertas por correo
+              - Dar Owner a todos
+              - Desactivar la facturación
+            answer: 1
+            explanation: Un presupuesto con alertas al 50 %, 90 % y 100 % te avisa antes de una sorpresa. Hábito profesional básico.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g1-q7
+            type: mcq
+            prompt: ¿Qué ventaja tiene un servicio regional (como Cloud Run) frente a una VM en una sola zona?
+            options:
+              - Es siempre más barato
+              - "Google lo reparte entre zonas: sobrevive a la caída de una zona sin que hagas nada"
+              - No necesita IAM
+              - No tiene límites
+            answer: 1
+            explanation: Los servicios gestionados regionales ya traen alta disponibilidad entre zonas; con VMs tendrías que diseñarla tú.
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g1-q8
+            type: order
+            prompt: "Ordena de más amplio a más específico:"
+            options:
+              - Organización
+              - Carpeta
+              - Proyecto
+              - Recurso (ej. un servicio de Cloud Run)
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: "Es la jerarquía de recursos de GCP. Las políticas de IAM se heredan hacia abajo: un rol a nivel de proyecto aplica a todos sus recursos."
+            skill: microservices_gcp
+            difficulty: 2
+      - slug: gcp-1-micro-flashcards
+        type: micro
+        title: Repaso rápido de la nube
+        required: false
+        estimated_min: 10
+        skills:
+          microservices_gcp: 1
+        payload:
+          kind: flashcards
+          terms:
+            - gcp-region-zone
+            - gcp-service-account
+            - gcp-least-privilege
+            - gcp-budget-alert
   - slug: gcp-2-apprentice
     number: 2
-    title: "Apprentice — Cloud Run, GKE y contenedores"
+    title: Apprentice — Cloud Run, GKE y contenedores
+    story: "Empacas tu servicio de órdenes en un contenedor sellado: el mismo paquete correrá igual en tu PC, en el pipeline y en la nube."
     quests:
-      - slug: gcp-2-apprentice-learn
+      - slug: gcp-2-learn-containers
         type: learn
-        title: Cloud Run, GKE y contenedores
+        title: Contenedores para apps Spring Boot
         required: true
+        estimated_min: 35
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-2-apprentice-glossary
+          microservices_gcp: 0.8
+          cicd: 0.2
+        resources:
+          - ref: res-spring-container-images
+        payload:
+          note_prompt: "Ya conoces Docker y OpenShift. Explica qué cambia en una imagen para producción: build multi-stage, imagen base JRE, usuario no root y por qué el puerto debe venir de una variable de entorno."
+      - slug: gcp-2-learn-cloud-run
+        type: learn
+        title: Cloud Run vs GKE
+        required: true
+        estimated_min: 40
+        skills:
+          microservices_gcp: 1
+        resources:
+          - ref: res-cloud-run-overview
+          - ref: res-gke-overview
+            required: false
+          - ref: res-artifact-registry
+            required: false
+        payload:
+          note_prompt: ¿Cuándo elegirías Cloud Run y cuándo GKE para un microservicio de órdenes? Menciona escalado a cero, cold starts, control y costo operativo.
+          summary_md: |
+            - Cloud Run: le das un contenedor que escucha en el puerto `$PORT`; Google lo escala (incluso a cero) y te cobra por uso. Sin clusters que operar.
+            - GKE: Kubernetes administrado. Más control (sidecars, redes, cargas con estado, controladores propios), más operación. Autopilot reduce esa carga.
+            - Regla práctica: empieza por Cloud Run para servicios HTTP sin estado; ve a GKE cuando necesites lo que Cloud Run no da.
+            - Escalar a cero ahorra dinero pero trae cold starts (la primera petición tarda más). Se mitiga con `min-instances`.
+            - Las imágenes se guardan en Artifact Registry.
+      - slug: gcp-2-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de contenedores y plataformas
         required: true
+        estimated_min: 10
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-2-apprentice-lab
+          microservices_gcp: 1
+        payload:
+          terms:
+            - gcp-container-image
+            - gcp-multi-stage
+            - gcp-cloud-run
+            - gcp-gke
+            - gcp-artifact-registry
+            - gcp-scale-to-zero
+            - gcp-cold-start
+      - slug: gcp-2-lab-container
         type: lab
-        title: "Lab: Cloud Run, GKE y contenedores"
+        title: "Lab: tu servicio de órdenes en un contenedor listo para Cloud Run"
         required: true
+        estimated_min: 75
         skills:
           microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-2-apprentice-quiz
+          cicd: 0.2
+          security: 0.1
+        payload:
+          goal: Crear una imagen de producción del servicio `orders` (multi-stage, JRE, usuario no root, puerto desde `$PORT`) y probarla localmente como la correría Cloud Run.
+          steps:
+            - title: El puerto viene del entorno
+              body: |
+                Cloud Run le indica al contenedor en qué puerto escuchar con la variable `PORT`. En `application.properties`:
+
+                ```properties
+                server.port=${PORT:8080}
+                ```
+            - title: Dockerfile multi-stage
+              body: |
+                En la raíz de `orders` crea `Dockerfile`:
+
+                ```dockerfile
+                # 1) Compilar con el JDK
+                FROM eclipse-temurin:21-jdk AS build
+                WORKDIR /src
+                COPY mvnw pom.xml ./
+                COPY .mvn .mvn
+                RUN ./mvnw -B dependency:go-offline
+                COPY src src
+                RUN ./mvnw -B package -DskipTests
+
+                # 2) Ejecutar solo con el JRE y sin root
+                FROM eclipse-temurin:21-jre
+                RUN useradd --system --uid 10001 app
+                WORKDIR /app
+                COPY --from=build /src/target/*.jar app.jar
+                USER app
+                ENV PORT=8080
+                EXPOSE 8080
+                ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]
+                ```
+
+                Y un `.dockerignore` con `target/`, `.git/` y `.idea/`.
+            - title: Construye y mide
+              commands:
+                - cd $HOME\questmap-labs\orders; docker build -t orders:local .
+                - docker images orders:local
+            - title: Córrela como lo haría Cloud Run
+              body: Le pasamos otro puerto con `PORT` para comprobar que la app lo respeta.
+              commands:
+                - docker run --rm -d --name orders-local -p 127.0.0.1:8081:9090 -e PORT=9090 orders:local
+                - Start-Sleep -Seconds 15; Invoke-RestMethod -Method Post -Uri http://localhost:8081/orders -ContentType 'application/json' -Body '{"customer":"ana","total":42}'
+                - docker exec orders-local whoami
+                - docker rm -f orders-local
+            - title: Commit
+              commands:
+                - 'git add Dockerfile .dockerignore src/main/resources/application.properties; git commit -m "orders: production container image"'
+          expected: La imagen final usa solo el JRE (pesa bastante menos que la etapa de build). La API responde en el puerto 8081 de tu PC aunque dentro del contenedor escuche en 9090, y `whoami` devuelve `app` (no root).
+          checklist:
+            - La app lee el puerto de la variable PORT
+            - La imagen es multi-stage y la etapa final usa el JRE
+            - El contenedor corre con un usuario no root
+            - Probé la API dentro del contenedor con PORT=9090
+            - Hice commit del Dockerfile
+          hints:
+            - Si `./mvnw` falla con 'permission denied' dentro de la imagen, agrega `RUN chmod +x mvnw` después del primer COPY.
+            - Si `.mvn` no existe en tu proyecto, quita esa línea COPY (Initializr normalmente la incluye).
+          evidence_hint: Pega la salida de `docker images orders:local`, la respuesta del POST y el resultado de `whoami`.
+      - slug: gcp-2-lab-cloud-run-deploy
+        type: lab
+        title: "Lab (opcional, puede tener costo): despliegue real a Cloud Run"
+        required: false
+        estimated_min: 60
+        skills:
+          microservices_gcp: 0.8
+          security: 0.2
+        payload:
+          goal: Desplegar `orders` en Cloud Run de verdad, privado (sin acceso público), dentro del free tier y con una alerta de presupuesto activa.
+          steps:
+            - title: Antes de nada, el presupuesto
+              body: Necesitas una cuenta de facturación (el free tier la exige). Crea un presupuesto de USD 5 con alertas al 50 %, 90 % y 100 % (recurso de presupuestos del nivel 1). Las alertas avisan; no cortan el gasto.
+            - title: Instala y configura gcloud
+              commands:
+                - winget install --id Google.CloudSDK -e
+                - gcloud init
+            - title: Despliega desde el código fuente
+              body: Cloud Build construye la imagen con tu Dockerfile y la guarda en Artifact Registry. `--no-allow-unauthenticated` deja el servicio privado.
+              commands:
+                - cd $HOME\questmap-labs\orders; gcloud run deploy orders --source . --region us-central1 --no-allow-unauthenticated --max-instances 1
+            - title: Llama a tu servicio privado con tu identidad
+              commands:
+                - $token = gcloud auth print-identity-token; $url = gcloud run services describe orders --region us-central1 --format 'value(status.url)'
+                - Invoke-RestMethod -Method Post -Uri "$url/orders" -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body '{"customer":"ana","total":42}'
+            - title: Limpia para no gastar
+              commands:
+                - gcloud run services delete orders --region us-central1
+          expected: Sin token, la URL responde 403; con tu identity token, la API responde. Al terminar borraste el servicio.
+          checklist:
+            - Tenía la alerta de presupuesto creada antes de desplegar
+            - El servicio quedó privado (403 sin token)
+            - Lo invoqué con un identity token
+            - Borré el servicio al terminar
+          hints:
+            - "Si gcloud pide habilitar APIs (Cloud Run, Cloud Build, Artifact Registry), acepta: es parte del primer despliegue."
+          evidence_hint: Pega la URL del servicio (ya borrado), la respuesta con token y el 403 sin token.
+      - slug: gcp-2-quiz
         type: quiz
-        title: Quiz — Cloud Run, GKE y contenedores
+        title: Quiz — Contenedores, Cloud Run y GKE
         required: true
+        estimated_min: 15
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
+          microservices_gcp: 1
+        questions:
+          - slug: g2-q1
+            type: mcq
+            prompt: ¿Qué debe hacer un contenedor para funcionar en Cloud Run?
+            options:
+              - Escuchar en el puerto 80 siempre
+              - Escuchar peticiones HTTP en el puerto indicado por la variable PORT
+              - Tener un volumen persistente
+              - Correr como root
+            answer: 1
+            explanation: Cloud Run inyecta `PORT` y envía las peticiones a ese puerto. Por eso `server.port=${PORT:8080}`.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g2-q2
+            type: mcq
+            prompt: ¿Qué ventaja tiene un Dockerfile multi-stage?
+            options:
+              - Compila más rápido siempre
+              - La imagen final lleva solo lo necesario para ejecutar (JRE + jar), no el JDK ni Maven
+              - Permite usar varios lenguajes
+              - Es obligatorio en Cloud Run
+            answer: 1
+            explanation: Imagen más pequeña = se descarga y arranca más rápido y tiene menos superficie de ataque.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g2-q3
+            type: tf
+            prompt: Con escalado a cero, la primera petición después de un rato sin tráfico puede tardar más (cold start).
+            answer: true
+            explanation: Hay que arrancar una instancia (JVM incluida). Se mitiga con min-instances, imágenes pequeñas o arranques más rápidos.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g2-q4
+            type: mcq
+            prompt: Necesitas sidecars personalizados, control fino de la red y una carga con estado. ¿Qué plataforma encaja mejor?
+            options:
+              - Cloud Run
+              - GKE
+              - Cloud Functions
+              - BigQuery
+            answer: 1
+            explanation: GKE (Kubernetes) da ese control a cambio de más operación. Para servicios HTTP sin estado, Cloud Run suele bastar.
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g2-q5
+            type: fill
+            prompt: En GCP, las imágenes de contenedor se guardan en Artifact ______.
+            answer:
+              - Registry
+              - registry
+            explanation: Artifact Registry guarda imágenes Docker y otros paquetes (Maven, npm) con control de acceso por IAM.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g2-q6
+            type: mcq
+            prompt: ¿Por qué correr el contenedor con un usuario no root?
+            options:
+              - Para que arranque más rápido
+              - Si alguien explota una vulnerabilidad de la app, tiene menos privilegios dentro del contenedor
+              - Porque Docker no permite root
+              - Para ahorrar memoria
+            answer: 1
+            explanation: "Es defensa en profundidad: limita lo que un atacante puede hacer si logra ejecutar código."
+            skill: security
+            difficulty: 1
+          - slug: g2-q7
+            type: mcq
+            prompt: "`--no-allow-unauthenticated` en un servicio de Cloud Run significa…"
+            options:
+              - Que nadie puede llamarlo nunca
+              - Que solo principals con el rol run.invoker (y un token válido) pueden invocarlo
+              - Que no tiene logs
+              - Que no escala
+            answer: 1
+            explanation: "Es lo correcto para servicios internos: otros servicios lo llaman con un ID token de una service account con run.invoker."
+            skill: security
+            difficulty: 2
+          - slug: g2-q8
+            type: order
+            prompt: "Ordena lo que pasa con `gcloud run deploy --source .`:"
+            options:
+              - Se sube el código fuente
+              - Cloud Build construye la imagen (con tu Dockerfile)
+              - La imagen se guarda en Artifact Registry
+              - Cloud Run crea una nueva revisión y le envía el tráfico
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Cada despliegue crea una revisión inmutable; puedes repartir el tráfico entre revisiones o volver a una anterior.
+            skill: microservices_gcp
+            difficulty: 2
   - slug: gcp-3-journeyman
     number: 3
-    title: "Journeyman — Patrones de microservicios y GitHub Actions"
+    title: Journeyman — Patrones de microservicios y GitHub Actions
+    story: "Tu servicio ya no está solo: llama a pagos, a inventario, a envíos. Aprende los patrones que evitan que una falla tumbe toda la montaña, y deja que un robot pruebe cada cambio."
     quests:
-      - slug: gcp-3-journeyman-learn
+      - slug: gcp-3-learn-patterns
         type: learn
-        title: Patrones de microservicios y GitHub Actions
+        title: API gateway, circuit breaker, saga y outbox
         required: true
+        estimated_min: 50
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-3-journeyman-glossary
+          microservices_gcp: 1
+        resources:
+          - ref: res-pattern-api-gateway
+          - ref: res-pattern-circuit-breaker
+          - ref: res-pattern-saga
+          - ref: res-pattern-outbox
+            required: false
+          - ref: res-resilience4j-cb
+            required: false
+        payload:
+          note_prompt: Elige 2 de los 4 patrones y explica, para un flujo de órdenes (orden → pago → inventario → envío), qué problema resuelve cada uno y qué costo agrega.
+          summary_md: |
+            - API gateway: un punto de entrada único para los clientes (rutas, autenticación, límites de tasa). Lo que en tu mundo hacía DataPower en el borde.
+            - Circuit breaker: si un servicio dependiente falla mucho, deja de llamarlo un rato (OPEN) y responde rápido con un fallback; luego prueba de nuevo (HALF_OPEN). Evita fallas en cascada.
+            - Saga: una "transacción" repartida entre servicios como una secuencia de pasos locales, cada uno con su acción compensatoria (ej. reembolsar si no hay stock). Por coreografía (eventos) u orquestación (un coordinador).
+            - Outbox: guardar el cambio y el evento en la misma transacción para no perder eventos (lo viste en Event Harbor).
+      - slug: gcp-3-learn-ci
+        type: learn
+        title: CI con GitHub Actions
+        required: true
+        estimated_min: 35
+        skills:
+          cicd: 1
+        resources:
+          - ref: res-gh-actions-intro
+          - ref: res-gh-setup-java
+            required: false
+        payload:
+          note_prompt: "Compara un pipeline de CI que hayas usado en tu trabajo con GitHub Actions: ¿qué equivale a un workflow, un job, un step y un runner?"
+      - slug: gcp-3-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de patrones y CI
         required: true
+        estimated_min: 10
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-3-journeyman-lab
+          microservices_gcp: 0.6
+          cicd: 0.4
+        payload:
+          terms:
+            - gcp-microservice
+            - gcp-api-gateway
+            - gcp-circuit-breaker
+            - gcp-saga
+            - gcp-compensating-action
+            - gcp-ci
+            - gcp-gh-workflow
+      - slug: gcp-3-lab-ci
         type: lab
-        title: "Lab: Patrones de microservicios y GitHub Actions"
+        title: "Lab: pipeline de CI para `orders` en GitHub Actions"
         required: true
+        estimated_min: 75
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-3-journeyman-quiz
+          cicd: 0.8
+          microservices_gcp: 0.2
+        payload:
+          goal: Que cada push y cada pull request compilen, prueben y empaqueten la imagen de `orders` automáticamente en GitHub Actions, y ver un pipeline fallar a propósito.
+          steps:
+            - title: Sube el proyecto a GitHub
+              body: Crea un repositorio vacío en GitHub llamado `orders` (privado o público; los públicos tienen minutos ilimitados de Actions, los privados una cuota gratis mensual).
+              commands:
+                - cd $HOME\questmap-labs\orders; git branch -M main; git remote add origin https://github.com/<tu-usuario>/orders.git; git push -u origin main
+            - title: Que mvnw sea ejecutable en Linux
+              body: Los runners son Linux. Si commiteaste desde Windows, `mvnw` puede no tener permiso de ejecución.
+              commands:
+                - git update-index --chmod=+x mvnw; git commit -m "make mvnw executable"
+            - title: El workflow
+              body: |
+                Crea `.github\workflows\ci.yml`:
+
+                ```yaml
+                name: ci
+                on:
+                  push:
+                    branches: [main]
+                  pull_request:
+
+                jobs:
+                  build:
+                    runs-on: ubuntu-latest
+                    steps:
+                      - uses: actions/checkout@v7
+                      - uses: actions/setup-java@v6
+                        with:
+                          distribution: temurin
+                          java-version: "21"
+                          cache: maven
+                      - name: Build and test
+                        run: ./mvnw -B verify
+                      - name: Build container image
+                        run: docker build -t orders:${{ github.sha }} .
+                ```
+              commands:
+                - 'git add .github; git commit -m "ci: build, test and image"; git push'
+            - title: Mira el pipeline
+              body: "En GitHub, pestaña Actions: abre la ejecución y revisa cada step. Debe terminar en verde."
+            - title: Rómpelo a propósito con un pull request
+              body: Crea una rama, cambia una aserción de un test para que falle, súbela y abre un pull request. Observa el check rojo en el PR. Luego arréglalo y mira cómo pasa a verde.
+              commands:
+                - git checkout -b break-a-test
+                - "# edita un test para que falle y luego:"
+                - 'git commit -am "test: break on purpose"; git push -u origin break-a-test'
+          expected: El workflow en main pasa en verde (tests + imagen). En el PR con el test roto el check sale rojo y GitHub muestra qué step falló; al arreglarlo pasa a verde.
+          checklist:
+            - El workflow corre en cada push a main y en cada pull request
+            - Usa cache de Maven y Java 21 Temurin
+            - Vi un check rojo en un PR por un test roto y lo arreglé
+            - Puedo explicar qué es un job, un step y un runner
+          hints:
+            - Si el step de Maven falla con 'Permission denied', te faltó el `git update-index --chmod=+x mvnw`.
+            - "Para que el PR no pueda fusionarse con un check rojo: Settings → Branches → regla de protección de main → Require status checks."
+          evidence_hint: Pega la URL de una ejecución verde de Actions y la del PR con el check rojo.
+      - slug: gcp-3-quiz
         type: quiz
-        title: Quiz — Patrones de microservicios y GitHub Actions
+        title: Quiz — Patrones y CI
         required: true
+        estimated_min: 15
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
+          microservices_gcp: 0.6
+          cicd: 0.4
+        questions:
+          - slug: g3-q1
+            type: mcq
+            prompt: El servicio de pagos tarda 30 s en responder y todos los hilos de `orders` quedan esperando. ¿Qué patrón evita que `orders` también caiga?
+            options:
+              - Saga
+              - Circuit breaker con timeout y fallback
+              - API gateway
+              - Outbox
+            answer: 1
+            explanation: El circuit breaker (con timeouts) corta las llamadas a una dependencia enferma y responde rápido. Así evitas la falla en cascada.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g3-q2
+            type: mcq
+            prompt: En una saga, el inventario falla después de que el pago fue cobrado. ¿Qué pasa?
+            options:
+              - Rollback automático de la base de datos de pagos
+              - "Se ejecuta la acción compensatoria: reembolsar el pago"
+              - Se ignora
+              - Se reintenta para siempre
+            answer: 1
+            explanation: "No hay transacción distribuida: cada paso confirmado tiene una compensación de negocio (reembolso, liberar stock)."
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g3-q3
+            type: tf
+            prompt: En una saga por coreografía, un orquestador central le dice a cada servicio qué hacer.
+            answer: false
+            explanation: En coreografía cada servicio reacciona a eventos de los demás; con orquestación sí hay un coordinador.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g3-q4
+            type: mcq
+            prompt: ¿Qué estado del circuit breaker permite unas pocas llamadas de prueba para ver si la dependencia se recuperó?
+            options:
+              - CLOSED
+              - OPEN
+              - HALF_OPEN
+              - DISABLED
+            answer: 2
+            explanation: CLOSED = pasa todo; OPEN = corta y falla rápido; HALF_OPEN = deja pasar algunas pruebas para decidir si volver a CLOSED.
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g3-q5
+            type: mcq
+            prompt: ¿Qué responsabilidad suele estar en un API gateway?
+            options:
+              - La lógica de negocio de cada servicio
+              - Enrutamiento, autenticación de clientes, límites de tasa y TLS en el borde
+              - Guardar los datos de las órdenes
+              - Compilar el código
+            answer: 1
+            explanation: Es el portero del sistema. La lógica de negocio se queda en los servicios para no crear un monolito en el gateway.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g3-q6
+            type: fill
+            prompt: En GitHub Actions, la máquina que ejecuta un job se llama ______ (en inglés).
+            answer:
+              - runner
+              - runners
+            explanation: Workflow (archivo YAML) → jobs (corren en runners) → steps (comandos o actions).
+            skill: cicd
+            difficulty: 1
+          - slug: g3-q7
+            type: mcq
+            prompt: "¿Para qué sirve `cache: maven` en `actions/setup-java`?"
+            options:
+              - Para guardar el código
+              - Para reutilizar las dependencias descargadas entre ejecuciones y acelerar el pipeline
+              - Para publicar el jar
+              - Para firmar la imagen
+            answer: 1
+            explanation: Sin cache, cada ejecución descarga todo internet de Maven otra vez. Un pipeline rápido se usa más.
+            skill: cicd
+            difficulty: 1
+          - slug: g3-q8
+            type: order
+            prompt: "Ordena los pasos de un buen pipeline de CI:"
+            options:
+              - Checkout del código
+              - Preparar el entorno (Java + cache)
+              - Compilar y correr las pruebas
+              - Construir el artefacto o la imagen
+              - Publicar el resultado (check verde o rojo en el PR)
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Si las pruebas fallan, no tiene sentido construir ni publicar: el pipeline se detiene y avisa."
+            skill: cicd
+            difficulty: 1
   - slug: gcp-4-expert
     number: 4
-    title: "Expert — Auth servicio a servicio, secretos y despliegue"
+    title: Expert — Auth servicio a servicio, secretos y despliegue
+    story: En la cima, los servicios hablan entre sí y guardan llaves valiosas. Aprende a que se reconozcan sin contraseñas compartidas y a que ningún secreto termine en git.
     quests:
-      - slug: gcp-4-expert-learn
+      - slug: gcp-4-learn-config-secrets
         type: learn
-        title: Auth servicio a servicio, secretos y despliegue
+        title: Configuración 12-factor y gestión de secretos
         required: true
+        estimated_min: 35
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-4-expert-glossary
+          security: 0.6
+          microservices_gcp: 0.4
+        resources:
+          - ref: res-12factor-config
+          - ref: res-gcp-secret-manager
+          - ref: res-cloud-run-env
+            required: false
+        payload:
+          note_prompt: ¿Por qué la configuración y los secretos no van en el código ni en el repositorio? ¿Qué diferencia hay entre una variable de entorno normal y un secreto en Secret Manager?
+      - slug: gcp-4-learn-workload-identity
+        type: learn
+        title: Identidad de cargas de trabajo y auth entre servicios
+        required: true
+        estimated_min: 45
+        skills:
+          security: 0.6
+          cicd: 0.2
+          microservices_gcp: 0.2
+        resources:
+          - ref: res-gcp-wif
+          - ref: res-cloud-run-s2s
+          - ref: res-gh-auth-action
+            required: false
+        payload:
+          note_prompt: Explica cómo `orders` llama de forma segura a un servicio privado `payments` en Cloud Run (identidad, rol y token). Luego explica por qué un pipeline de GitHub Actions no debería usar una llave JSON de service account.
+          summary_md: |
+            - Servicio a servicio en Cloud Run: `orders` corre con su propia service account; esa cuenta recibe `roles/run.invoker` sobre `payments`; `orders` pide un ID token (con la URL de payments como audience) y lo manda en `Authorization: Bearer`.
+            - Sin llaves: el código no guarda credenciales; la plataforma le da la identidad a la carga de trabajo.
+            - CI/CD sin llaves: Workload Identity Federation permite que GitHub Actions cambie su token OIDC por credenciales de GCP de corta duración. No hay JSON que se pueda filtrar.
+            - Secretos de verdad (API keys de terceros): Secret Manager, con acceso por IAM y versiones; montados como variable o archivo en Cloud Run.
+      - slug: gcp-4-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de seguridad en la nube y despliegue
         required: true
+        estimated_min: 10
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-4-expert-lab
+          security: 0.6
+          cicd: 0.4
+        payload:
+          terms:
+            - gcp-twelve-factor
+            - gcp-secret-manager
+            - gcp-wif
+            - gcp-id-token
+            - gcp-cd
+            - gcp-canary
+            - gcp-revision
+      - slug: gcp-4-lab-config
         type: lab
-        title: "Lab: Auth servicio a servicio, secretos y despliegue"
+        title: "Lab: configuración fuera del código y secretos en el pipeline"
         required: true
+        estimated_min: 75
         skills:
-          microservices_gcp: 0.7
+          security: 0.5
           cicd: 0.3
-      - slug: gcp-4-expert-quiz
+          microservices_gcp: 0.2
+        payload:
+          goal: Sacar la configuración de `orders` a variables de entorno, demostrar que ningún secreto llega a git y usar un secreto de GitHub en el pipeline sin exponerlo.
+          steps:
+            - title: Configuración desde el entorno
+              body: |
+                Imagina que `orders` llama a un proveedor de fraude. En `application.properties`:
+
+                ```properties
+                fraud.api.url=${FRAUD_API_URL:http://localhost:9999}
+                fraud.api.key=${FRAUD_API_KEY:}
+                ```
+
+                Crea `FraudProperties` con `@ConfigurationProperties(prefix = "fraud.api")` y al arrancar registra un log con la URL y SOLO si la llave está presente (nunca su valor):
+
+                ```java
+                log.info("Fraud API {} (key configured: {})", props.url(), !props.key().isBlank());
+                ```
+            - title: Un .env local que nunca se sube
+              commands:
+                - Set-Content .env 'FRAUD_API_KEY=local-dev-key'; Add-Content .gitignore '.env'
+                - "git status --short   # .env NO debe aparecer"
+            - title: Corre el contenedor con la configuración inyectada
+              commands:
+                - docker build -t orders:local .; docker run --rm -d --name orders-cfg -p 127.0.0.1:8081:8080 --env-file .env -e FRAUD_API_URL=https://fraud.example.test orders:local
+                - Start-Sleep -Seconds 15; docker logs orders-cfg | Select-String 'Fraud API'
+                - docker rm -f orders-cfg
+            - title: Busca secretos en tu historial
+              body: Comprueba que la llave nunca entró al repositorio (si aparece, habría que rotarla y limpiar el historial).
+              commands:
+                - git log -p --all | Select-String 'local-dev-key'
+            - title: Un secreto de GitHub en el pipeline
+              body: |
+                En GitHub: Settings → Secrets and variables → Actions → New repository secret: `FRAUD_API_KEY` con un valor de prueba. En `ci.yml`, agrega al step de pruebas:
+
+                ```yaml
+                      - name: Build and test
+                        run: ./mvnw -B verify
+                        env:
+                          FRAUD_API_KEY: ${{ secrets.FRAUD_API_KEY }}
+                ```
+
+                Haz push y revisa el log: si algo imprime el secreto, GitHub lo enmascara como `***`.
+            - title: (Lectura) Así se desplegaría sin llaves
+              body: |
+                Un job de despliegue a Cloud Run con Workload Identity Federation se ve así (no hace falta ejecutarlo; requiere configurar el pool de identidades en GCP):
+
+                ```yaml
+                  deploy:
+                    needs: build
+                    runs-on: ubuntu-latest
+                    permissions:
+                      contents: read
+                      id-token: write
+                    steps:
+                      - uses: actions/checkout@v7
+                      - uses: google-github-actions/auth@v3
+                        with:
+                          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+                          service_account: ${{ vars.DEPLOY_SA }}
+                      - run: gcloud run deploy orders --source . --region us-central1 --no-allow-unauthenticated
+                ```
+          expected: "El log muestra la URL de fraude y 'key configured: true', nunca el valor. `.env` no aparece en git status y la búsqueda en el historial no encuentra la llave. El pipeline sigue en verde usando el secreto de GitHub."
+          checklist:
+            - La URL y la llave salen de variables de entorno
+            - El log nunca imprime el valor de la llave
+            - .env está en .gitignore y no está en el historial
+            - El pipeline usa el secreto de GitHub y sigue en verde
+            - "Puedo explicar por qué el job de despliegue necesita `id-token: write` y no una llave JSON"
+          hints:
+            - Si `@ConfigurationProperties` no se carga, agrega `@ConfigurationPropertiesScan` a la clase principal o `@EnableConfigurationProperties(FraudProperties.class)`.
+            - 'Un record funciona bien: `@ConfigurationProperties(prefix = "fraud.api") public record FraudProperties(String url, String key) {}`.'
+          evidence_hint: Pega la línea del log 'Fraud API …', la salida de git status y la URL de la ejecución verde del pipeline.
+      - slug: gcp-4-quiz
         type: quiz
-        title: Quiz — Auth servicio a servicio, secretos y despliegue
+        title: Quiz — Seguridad y despliegue en la nube
         required: true
+        estimated_min: 15
         skills:
-          microservices_gcp: 0.7
+          security: 0.5
           cicd: 0.3
+          microservices_gcp: 0.2
+        questions:
+          - slug: g4-q1
+            type: mcq
+            prompt: Según 12-factor, ¿dónde va la URL de la base de datos de producción?
+            options:
+              - En el código
+              - En application.properties commiteado
+              - En variables de entorno (o un gestor de secretos) del entorno de despliegue
+              - En el README
+            answer: 2
+            explanation: La configuración que cambia entre entornos va en el entorno. El mismo artefacto sirve para dev, staging y prod.
+            skill: security
+            difficulty: 1
+          - slug: g4-q2
+            type: mcq
+            prompt: "`orders` (Cloud Run) debe llamar a `payments` (Cloud Run, privado). ¿Qué necesita?"
+            options:
+              - Una contraseña compartida en el código
+              - Que su service account tenga roles/run.invoker sobre payments y enviar un ID token en Authorization
+              - Que payments sea público
+              - Una VPN
+            answer: 1
+            explanation: Identidad (service account) + autorización (run.invoker) + prueba de identidad (ID token firmado por Google).
+            skill: security
+            difficulty: 2
+          - slug: g4-q3
+            type: tf
+            prompt: Workload Identity Federation permite que GitHub Actions obtenga credenciales de GCP de corta duración sin guardar una llave JSON de service account.
+            answer: true
+            explanation: GitHub emite un token OIDC por ejecución y GCP lo cambia por credenciales temporales. Nada de llaves de larga vida que se puedan filtrar.
+            skill: security
+            difficulty: 2
+          - slug: g4-q4
+            type: mcq
+            prompt: Descubres que una API key se commiteó hace 3 meses. ¿Qué haces primero?
+            options:
+              - Borrar el commit y listo
+              - Revocar/rotar la llave inmediatamente; después limpiar el historial y revisar su uso
+              - Hacer el repo privado
+              - Nada si nadie se dio cuenta
+            answer: 1
+            explanation: "Asume que está comprometida: se rota primero. Limpiar el historial no deshace las copias que ya existan."
+            skill: security
+            difficulty: 1
+          - slug: g4-q5
+            type: mcq
+            prompt: ¿Qué es un despliegue canary?
+            options:
+              - Desplegar de noche
+              - Enviar un pequeño porcentaje del tráfico a la nueva versión y aumentarlo si las métricas están bien
+              - Desplegar sin pruebas
+              - Desplegar en otra región
+            answer: 1
+            explanation: En Cloud Run se hace repartiendo tráfico entre revisiones (ej. 5 % a la nueva). Si el error rate sube, vuelves todo a la anterior.
+            skill: cicd
+            difficulty: 1
+          - slug: g4-q6
+            type: fill
+            prompt: "Para que un job de GitHub Actions pueda pedir un token OIDC necesita el permiso `id-token: ______`."
+            answer:
+              - write
+            explanation: "Sin `id-token: write` el job no puede obtener el token que GCP intercambia por credenciales."
+            skill: cicd
+            difficulty: 2
+          - slug: g4-q7
+            type: mcq
+            prompt: ¿Qué diferencia hay entre CI y CD?
+            options:
+              - Ninguna
+              - CI integra y verifica cada cambio; CD lleva automáticamente los cambios verificados a un entorno (y a veces a producción)
+              - CD es solo para Java
+              - CI es manual
+            answer: 1
+            explanation: "Continuous Delivery: siempre listo para desplegar (con aprobación). Continuous Deployment: despliega solo si todo pasa."
+            skill: cicd
+            difficulty: 1
+          - slug: g4-q8
+            type: order
+            prompt: "Ordena un despliegue seguro a Cloud Run:"
+            options:
+              - CI verde (pruebas + imagen)
+              - Desplegar una nueva revisión sin tráfico
+              - Mover un pequeño % del tráfico (canary)
+              - Observar error rate y latencia
+              - Subir al 100 % o volver a la revisión anterior
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: Las revisiones inmutables de Cloud Run hacen que el rollback sea mover el tráfico de vuelta, en segundos.
+            skill: cicd
+            difficulty: 2
   - slug: gcp-5-boss
     number: 5
-    title: "Boss — Microservicio en GCP con pipeline"
+    title: Boss — Microservicio en GCP con pipeline
+    story: "El guardián de los picos quiere ver tu servicio volar: empaquetado, probado por un robot, configurado sin secretos en el código y listo para la nube. Y quiere que se lo expliques en inglés."
     quests:
-      - slug: gcp-5-boss-learn-review
+      - slug: gcp-5-learn-review
         type: learn
-        title: Repaso para el jefe
+        title: Repaso — de mi PC a producción
         required: true
+        estimated_min: 30
         skills:
-          microservices_gcp: 0.7
+          microservices_gcp: 0.5
           cicd: 0.3
-      - slug: gcp-5-boss-quiz-final
+          security: 0.2
+        resources:
+          - ref: res-cloud-run-java-quickstart
+          - ref: res-gcp-wif
+            required: false
+        payload:
+          note_prompt: "Dibuja (en texto o Mermaid) el camino de un commit de `orders` hasta Cloud Run: qué pasa en CI, dónde se guarda la imagen, qué identidad despliega, con qué identidad corre el servicio y cómo harías rollback."
+          summary_md: |
+            Checklist de un servicio listo para producción en GCP:
+            - Imagen multi-stage, no root, que escucha en `$PORT`.
+            - CI en cada PR: compila, prueba y construye la imagen; protección de la rama main.
+            - CD sin llaves (Workload Identity Federation) y despliegue por revisiones (canary y rollback).
+            - El servicio corre con su propia service account de mínimo privilegio.
+            - Configuración por entorno y secretos en Secret Manager; nada sensible en git.
+            - Privado por defecto (`--no-allow-unauthenticated`) y llamadas entre servicios con ID tokens.
+            - Health checks, métricas y alertas (Observatory) y presupuesto con alertas.
+      - slug: gcp-5-quiz-final
         type: quiz
-        title: Examen final de la zona
+        title: Examen final — GCP & Microservices Peaks
         required: true
+        estimated_min: 20
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-5-boss-boss-fight
+          microservices_gcp: 0.5
+          cicd: 0.25
+          security: 0.25
+        questions:
+          - slug: g5-q1
+            type: mcq
+            prompt: Una nueva versión de `orders` sube el error rate al 8 % justo después del despliegue. En Cloud Run, ¿cuál es la mitigación más rápida?
+            options:
+              - Depurar en producción
+              - Enviar el 100 % del tráfico a la revisión anterior
+              - Borrar el servicio
+              - Aumentar las instancias
+            answer: 1
+            explanation: "Las revisiones son inmutables: el rollback es mover el tráfico en segundos. Después se investiga con calma."
+            skill: cicd
+            difficulty: 1
+          - slug: g5-q2
+            type: mcq
+            prompt: ¿Cuál es el principal riesgo de dar `roles/editor` a la service account con la que corre tu servicio?
+            options:
+              - Que sea más lento
+              - Si el servicio es comprometido, el atacante puede modificar casi todo el proyecto
+              - Que no pueda leer secretos
+              - Ninguno
+            answer: 1
+            explanation: Mínimo privilegio limita el radio de explosión de un incidente de seguridad.
+            skill: security
+            difficulty: 1
+          - slug: g5-q3
+            type: tf
+            prompt: Separar un monolito en 20 microservices siempre mejora la velocidad del equipo.
+            answer: false
+            explanation: Los microservicios agregan red, consistencia eventual, observabilidad y despliegues que operar. Convienen cuando hay equipos y dominios independientes; si no, un monolito modular suele ser mejor.
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g5-q4
+            type: mcq
+            prompt: "Pregunta de entrevista: '¿Cloud Run o GKE para la API de órdenes de Home Depot?' ¿Mejor estructura de respuesta?"
+            options:
+              - Siempre GKE porque es más profesional
+              - "Depende: Cloud Run si es HTTP sin estado y quieres poca operación; GKE si necesitas control fino, cargas con estado o el estándar de la empresa es Kubernetes. Y explico los trade-offs."
+              - Siempre Cloud Run porque es más barato
+              - Cualquiera, da igual
+            answer: 1
+            explanation: Los entrevistadores buscan criterios y trade-offs, no una respuesta absoluta.
+            skill: microservices_gcp
+            difficulty: 1
+          - slug: g5-q5
+            type: mcq
+            prompt: El pipeline necesita desplegar a GCP. ¿Qué es lo más seguro?
+            options:
+              - Guardar una llave JSON en el repo
+              - Guardar la llave JSON como secreto de GitHub
+              - Workload Identity Federation con una service account de despliegue de mínimo privilegio
+              - Usar tu cuenta personal
+            answer: 2
+            explanation: Sin llaves de larga vida y con permisos acotados. La llave como secreto de GitHub es mejor que en el repo, pero sigue siendo una llave que se puede filtrar.
+            skill: security
+            difficulty: 2
+          - slug: g5-q6
+            type: fill
+            prompt: Repartir una pequeña parte del tráfico a la versión nueva para probarla en producción se llama despliegue ______ (en inglés).
+            answer:
+              - canary
+            explanation: "El nombre viene del canario que usaban los mineros para detectar gases: si algo sale mal, lo ves con poco tráfico afectado."
+            skill: cicd
+            difficulty: 1
+          - slug: g5-q7
+            type: mcq
+            prompt: En una saga de órdenes, el servicio de envíos recibe dos veces el mismo evento OrderPaid. ¿Qué te protege?
+            options:
+              - El circuit breaker
+              - Un consumidor idempotente con clave de negocio (orderId)
+              - El API gateway
+              - Cloud Run
+            answer: 1
+            explanation: "Los patrones se combinan: las sagas sobre mensajería at-least-once necesitan consumidores idempotentes (Event Harbor)."
+            skill: microservices_gcp
+            difficulty: 2
+          - slug: g5-q8
+            type: order
+            prompt: "Ordena el camino de un cambio hasta producción:"
+            options:
+              - Pull request con CI verde y revisión de código
+              - Merge a main
+              - CD construye y publica la imagen en Artifact Registry
+              - Despliegue de una nueva revisión con canary
+              - Monitoreo y promoción al 100 %
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Cada etapa es una red de seguridad: revisión humana, pruebas automáticas, despliegue gradual y observación."
+            skill: cicd
+            difficulty: 1
+      - slug: gcp-5-boss-fight
         type: boss
-        title: "Jefe: Microservicio en GCP con pipeline"
+        title: "Jefe: tu microservicio listo para la nube"
         required: true
+        estimated_min: 120
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
-      - slug: gcp-5-boss-interview
+          microservices_gcp: 0.4
+          cicd: 0.25
+          security: 0.15
+          english: 0.2
+        payload:
+          task: |
+            Entrega la URL del repositorio de `orders` con:
+            1. Dockerfile multi-stage, usuario no root y puerto desde `$PORT`.
+            2. Workflow de GitHub Actions que compila, prueba y construye la imagen en cada PR, con la rama main protegida.
+            3. Configuración por variables de entorno y ningún secreto en git (explica cómo usarías Secret Manager).
+            4. Un README en inglés con: diagrama (Mermaid) del camino commit → CI → Artifact Registry → Cloud Run, identidades y permisos (quién despliega, con qué cuenta corre el servicio, cómo llama a otros servicios), estrategia de despliegue y rollback, y costos esperados con las alertas de presupuesto.
+            5. (Opcional) La evidencia de un despliegue real a Cloud Run privado, ya borrado.
+            Luego defiende tus decisiones en una mini-entrevista en inglés.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - Cloud Run vs GKE trade-offs
+            - least privilege and keyless CI/CD
+            - rollout and rollback strategy
+            - service-to-service authentication
+      - slug: gcp-5-interview
         type: interview
-        title: Mini-entrevista de la zona
+        title: "Mini-entrevista: cloud & microservices screen"
         required: false
+        estimated_min: 30
         skills:
-          microservices_gcp: 0.7
-          cicd: 0.3
+          microservices_gcp: 0.6
+          english: 0.4
         payload:
           mode: technical_screen
           zone: gcp-peaks

@@ -30,7 +30,7 @@ skills:
     name: Java / OOP
     description: Lenguaje orientado a objetos (preferiblemente Java)
     core: true
-    target_xp: 660 # 875×.70 = 612 + capstone 50
+    target_xp: 730 # REAL publicado (Z1 + labs de otras zonas): 677 + capstone milestone 1: 50
   - code: eda
     name: Event-driven / Pub/Sub
     description: Event-driven y colas/streaming (Google Cloud Pub/Sub)
@@ -75,17 +75,17 @@ skills:
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
-    target_xp: 360 # REAL Z4: 183 + Z1: 4 + Z7 estimado 875×.20 = 175
+    target_xp: 260 # REAL publicado: Z4 + Z7 + Z1 = 257
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
-    target_xp: 510 # REAL Z6 145 + Z7 estimado 875×.40 = 350 + capstone 25
+    target_xp: 490 # REAL publicado Z6 + Z7 = 466 + capstone milestone 8 (×.5) 25
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance
     core: false
-    target_xp: 550 # 875×.20 = 175 + 875×.40 = 350 + capstone 25
+    target_xp: 440 # REAL publicado Z1 + Z7 = 413 + capstone milestone 8 (×.5) 25
   - code: english
     name: Inglés técnico
     description: Comunicación y entrevistas en inglés

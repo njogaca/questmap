@@ -971,3 +971,163 @@ resources:
     required: false
     why: La librería Java para circuit breakers (estados CLOSED, OPEN, HALF_OPEN).
     verified: true
+  - slug: res-oauth2
+    title: OAuth 2.0 — oauth.net
+    type: docs
+    url: https://oauth.net/2/
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: El índice de referencia de OAuth 2.0 y sus flujos (incluidos PKCE y Client Credentials).
+    verified: true
+  - slug: res-oidc
+    title: How OpenID Connect Works — OpenID Foundation
+    type: article
+    url: https://openid.net/developers/how-connect-works/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Qué agrega OIDC sobre OAuth 2.0 (el ID token).
+    verified: true
+  - slug: res-jwt-intro
+    title: JSON Web Token Introduction — jwt.io
+    type: article
+    url: https://jwt.io/introduction
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Las tres partes de un JWT y cómo se usa.
+    verified: true
+  - slug: res-keycloak-docker
+    title: Keycloak — Getting started with Docker
+    type: lab
+    url: https://www.keycloak.org/getting-started/getting-started-docker
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Levantar un proveedor de identidad local para los labs.
+    verified: true
+  - slug: res-keycloak-oidc-endpoints
+    title: Keycloak — OIDC endpoints and grants
+    type: docs
+    url: https://www.keycloak.org/securing-apps/oidc-layers
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: El endpoint de token y el flujo Client Credentials en Keycloak.
+    verified: true
+  - slug: res-spring-resource-server-jwt
+    title: Spring Security — OAuth 2.0 Resource Server JWT
+    type: docs
+    url: https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Validar JWT con issuer-uri y cómo los scopes se vuelven authorities SCOPE_.
+    verified: true
+  - slug: res-spring-authorize-requests
+    title: Spring Security — Authorize HttpServletRequests
+    type: docs
+    url: https://docs.spring.io/spring-security/reference/servlet/authorization/authorize-http-requests.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Reglas por endpoint con requestMatchers, hasAuthority y hasRole.
+    verified: true
+  - slug: res-owasp-api-top10
+    title: OWASP API Security Top 10 — 2023
+    type: docs
+    url: https://api-security.owasp.org/editions/2023/en/0x11-t10
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Los 10 riesgos más comunes en APIs, empezando por BOLA (API1).
+    verified: true
+  - slug: res-owasp-top10
+    title: OWASP Top 10 (2025)
+    type: docs
+    url: https://top10.owasp.org/
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: Los riesgos más comunes en aplicaciones web.
+    verified: true
+  - slug: res-test-pyramid
+    title: The Practical Test Pyramid — Ham Vocke (martinfowler.com)
+    type: article
+    url: https://martinfowler.com/articles/practical-test-pyramid.html
+    language: en
+    duration_min: 60
+    cost: free
+    required: true
+    why: El artículo de referencia sobre qué probar en cada nivel.
+    verified: true
+  - slug: res-testcontainers
+    title: Testcontainers for Java
+    type: docs
+    url: https://java.testcontainers.org/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Bases de datos y brokers reales en Docker dentro de tus pruebas.
+    verified: true
+  - slug: res-testcontainers-postgres
+    title: Testcontainers — Postgres module
+    type: docs
+    url: https://java.testcontainers.org/modules/databases/postgres/
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Dependencia y uso del contenedor de PostgreSQL.
+    verified: true
+  - slug: res-spring-testcontainers
+    title: Spring Boot — Testcontainers
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/testing/testcontainers.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: "@ServiceConnection: Spring configura la conexión al contenedor automáticamente."
+    verified: true
+  - slug: res-k6-running
+    title: Grafana k6 — Running k6
+    type: docs
+    url: https://grafana.com/docs/k6/latest/get-started/running-k6/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Tu primera prueba de carga (incluido cómo correrla con Docker).
+    verified: true
+  - slug: res-k6-thresholds
+    title: Grafana k6 — Thresholds
+    type: docs
+    url: https://grafana.com/docs/k6/latest/using-k6/thresholds/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Criterios de aprobado o fallido para pruebas de rendimiento (p95, tasa de error).
+    verified: true
+  - slug: res-chaos-principles
+    title: Principles of Chaos Engineering
+    type: article
+    url: https://principlesofchaos.org/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: El método de los experimentos de caos con hipótesis y radio de impacto acotado.
+    verified: true

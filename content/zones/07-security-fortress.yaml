@@ -2,7 +2,6 @@ slug: security-fortress
 title: Security & Testing Fortress
 order: 7
 emoji: "🏰"
-status: outline
 map: { x: 800, y: 190 }
 prerequisites: [ { zone: java-forest, level: 4 }, { zone: event-harbor, level: 3 } ]
 skills: [ security, testing, debugging_rca ]
@@ -11,164 +10,1093 @@ story: >
 levels:
   - slug: sec-1-novice
     number: 1
-    title: "Novice — Authn vs authz, OAuth2, OIDC y JWT"
+    title: Novice — Authn vs authz, OAuth2, OIDC y JWT
+    story: "Llegas a la puerta de la fortaleza. El guardia hace dos preguntas distintas: ¿quién eres? y ¿qué puedes hacer aquí? Lo que antes resolvía DataPower en la entrada, ahora lo resuelven tokens."
     quests:
-      - slug: sec-1-novice-learn-1
+      - slug: sec-1-learn-authn-authz
         type: learn
-        title: "Conceptos: Authn vs authz, OAuth2, OIDC y JWT"
+        title: Autenticación, autorización y OAuth 2.0
         required: true
+        estimated_min: 45
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-1-novice-learn-2
+          security: 1
+        resources:
+          - ref: res-oauth2
+          - ref: res-oidc
+        payload:
+          note_prompt: "Explica con un ejemplo de tu trabajo la diferencia entre autenticación y autorización. Luego: ¿qué flujo de OAuth 2.0 usarías para que un servicio (sin usuario) llame a otro, y cuál para una app web donde inicia sesión una persona?"
+          summary_md: |
+            - Autenticación (authn): probar QUIÉN eres. Autorización (authz): decidir QUÉ puedes hacer.
+            - OAuth 2.0 es un marco de AUTORIZACIÓN: un servidor de autorización emite access tokens para que un cliente acceda a un recurso.
+            - OpenID Connect (OIDC) agrega AUTENTICACIÓN encima de OAuth 2.0: el ID token dice quién es el usuario.
+            - Flujos clave: Authorization Code + PKCE (apps con usuario) y Client Credentials (servicio a servicio, sin usuario).
+            - Puente con tu mundo: DataPower validaba credenciales y políticas en el borde; hoy un API gateway o cada servicio valida tokens emitidos por un proveedor de identidad (Keycloak, Okta, Google).
+      - slug: sec-1-learn-jwt
         type: learn
-        title: "Lectura guiada: Authn vs authz, OAuth2, OIDC y JWT"
+        title: Qué hay dentro de un JWT
         required: true
+        estimated_min: 30
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-1-novice-glossary
+          security: 1
+        resources:
+          - ref: res-jwt-intro
+        payload:
+          note_prompt: Describe las 3 partes de un JWT. ¿Por qué no debes guardar datos secretos en el payload aunque el token esté firmado? ¿Qué valida un servicio antes de confiar en un JWT?
+          summary_md: |
+            - JWT = header.payload.signature, cada parte en Base64URL.
+            - El payload está FIRMADO, no CIFRADO: cualquiera puede leerlo. Nunca pongas secretos ahí.
+            - Antes de confiar en un JWT, el servicio valida: la firma (con la llave pública del emisor), `iss` (emisor esperado), `exp` (no vencido) y, idealmente, `aud` (es para mí).
+            - Claims típicos: `sub` (sujeto), `scope` (permisos), `exp`, `iat`, `iss`, `aud`.
+      - slug: sec-1-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de identidad
         required: true
+        estimated_min: 15
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-1-novice-quiz
+          security: 1
+        payload:
+          terms:
+            - sec-authn
+            - sec-authz
+            - sec-oauth2
+            - sec-oidc
+            - sec-jwt
+            - sec-access-token
+            - sec-scope
+            - sec-client-credentials
+            - sec-pkce
+      - slug: sec-1-quiz
         type: quiz
-        title: Quiz — Authn vs authz, OAuth2, OIDC y JWT
+        title: Quiz — Identidad y tokens
         required: true
+        estimated_min: 15
         skills:
-          security: 0.7
-          testing: 0.3
+          security: 1
+        questions:
+          - slug: s1-q1
+            type: mcq
+            prompt: Un usuario con un token válido intenta borrar una orden que no es suya y la API lo rechaza. ¿Qué falló?
+            options:
+              - La autenticación
+              - La autorización
+              - El TLS
+              - El DNS
+            answer: 1
+            explanation: Sabemos quién es (autenticado), pero no tiene permiso para esa acción sobre ese recurso (autorización).
+            skill: security
+            difficulty: 1
+          - slug: s1-q2
+            type: mcq
+            prompt: ¿Qué flujo de OAuth 2.0 usa un microservicio que llama a otro SIN un usuario de por medio?
+            options:
+              - Authorization Code + PKCE
+              - Client Credentials
+              - Implicit
+              - Device Code
+            answer: 1
+            explanation: "Client Credentials: el servicio se autentica como sí mismo (client_id + secreto o una identidad de la plataforma) y recibe un access token."
+            skill: security
+            difficulty: 1
+          - slug: s1-q3
+            type: tf
+            prompt: El payload de un JWT firmado está cifrado y nadie puede leerlo sin la llave.
+            answer: false
+            explanation: "Firmado no es cifrado: el payload es Base64URL legible. La firma solo garantiza que nadie lo modificó."
+            skill: security
+            difficulty: 1
+          - slug: s1-q4
+            type: mcq
+            prompt: ¿Qué agrega OpenID Connect sobre OAuth 2.0?
+            options:
+              - Cifrado de discos
+              - "Autenticación: un ID token que dice quién es el usuario"
+              - Balanceo de carga
+              - Rate limiting
+            answer: 1
+            explanation: OAuth 2.0 trata de autorizar el acceso a recursos; OIDC estandariza el login (ID token, userinfo, discovery).
+            skill: security
+            difficulty: 1
+          - slug: s1-q5
+            type: fill
+            prompt: El claim de un JWT que indica cuándo vence se llama `______`.
+            answer:
+              - exp
+            explanation: "`exp` (expiration). Los access tokens deben durar poco (minutos) para limitar el daño si se filtran."
+            skill: security
+            difficulty: 1
+          - slug: s1-q6
+            type: mcq
+            prompt: ¿Qué debe validar un servicio antes de confiar en un JWT?
+            options:
+              - Solo que tenga tres partes
+              - Firma con la llave pública del emisor, emisor (iss), vencimiento (exp) y audiencia (aud)
+              - Que el usuario exista en su base de datos
+              - Que el token sea largo
+            answer: 1
+            explanation: Sin validar la firma, cualquiera podría fabricar un token. Spring Security hace estas validaciones por ti con `issuer-uri`.
+            skill: security
+            difficulty: 2
+          - slug: s1-q7
+            type: mcq
+            prompt: ¿Por qué una app web con usuario debe usar Authorization Code con PKCE y no el flujo Implicit?
+            options:
+              - Porque es más rápido
+              - PKCE protege el intercambio del código y el token no viaja en la URL; Implicit está desaconsejado
+              - Porque Implicit no existe
+              - Porque PKCE no usa tokens
+            answer: 1
+            explanation: Implicit exponía el token en la URL del navegador. La recomendación actual es Authorization Code + PKCE incluso para apps públicas.
+            skill: security
+            difficulty: 2
+          - slug: s1-q8
+            type: order
+            prompt: "Ordena el flujo Client Credentials:"
+            options:
+              - El servicio A envía client_id y su credencial al servidor de autorización
+              - El servidor de autorización devuelve un access token (JWT)
+              - "A llama a B con `Authorization: Bearer <token>`"
+              - B valida firma, emisor, vencimiento y scopes antes de responder
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: B nunca ve la credencial de A, solo un token de corta duración que puede validar por sí mismo.
+            skill: security
+            difficulty: 1
+      - slug: sec-1-micro-flashcards
+        type: micro
+        title: Repaso rápido de identidad
+        required: false
+        estimated_min: 10
+        skills:
+          security: 1
+        payload:
+          kind: flashcards
+          terms:
+            - sec-authn
+            - sec-authz
+            - sec-jwt
+            - sec-client-credentials
   - slug: sec-2-apprentice
     number: 2
-    title: "Apprentice — Proteger una API con JWT y roles"
+    title: Apprentice — Proteger una API con JWT y roles
+    story: "Construyes tu propia garita: un proveedor de identidad emite pases y tu servicio de órdenes revisa cada uno antes de abrir la puerta."
     quests:
-      - slug: sec-2-apprentice-learn
+      - slug: sec-2-learn-spring-security
         type: learn
-        title: Proteger una API con JWT y roles
+        title: Spring Security como resource server
         required: true
+        estimated_min: 45
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-2-apprentice-glossary
+          security: 1
+        resources:
+          - ref: res-spring-resource-server-jwt
+          - ref: res-spring-authorize-requests
+        payload:
+          note_prompt: Explica qué hace Spring cuando configuras `issuer-uri` y por qué un token con el scope `orders.read` recibe 403 (y no 401) al intentar crear una orden.
+          summary_md: |
+            - 401 Unauthorized = no sé quién eres (sin token, token inválido o vencido).
+            - 403 Forbidden = sé quién eres, pero no tienes permiso.
+            - Con `spring.security.oauth2.resourceserver.jwt.issuer-uri`, Spring descubre las llaves públicas del emisor y valida firma, `iss` y `exp` en cada petición.
+            - Los scopes del token se vuelven authorities con prefijo `SCOPE_`: `orders.write` → `SCOPE_orders.write`.
+            - Las APIs con tokens son stateless: no hay sesión ni cookies, por eso se desactiva CSRF.
+      - slug: sec-2-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de la garita
         required: true
+        estimated_min: 10
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-2-apprentice-lab
+          security: 1
+        payload:
+          terms:
+            - sec-idp
+            - sec-resource-server
+            - sec-401-403
+            - sec-bearer
+            - sec-rbac
+      - slug: sec-2-lab-jwt
         type: lab
-        title: "Lab: Proteger una API con JWT y roles"
+        title: "Lab: `orders` protegido con Keycloak y scopes"
         required: true
+        estimated_min: 120
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-2-apprentice-quiz
+          security: 0.8
+          testing: 0.2
+        payload:
+          goal: Levantar Keycloak en Docker, emitir tokens con Client Credentials y proteger `orders` para que crear órdenes exija el scope `orders.write`, comprobando 401, 403 y 201.
+          steps:
+            - title: Levanta Keycloak (puerto 8180)
+              body: Usamos el puerto 8180 porque tu app usa el 8080. El usuario y la contraseña `admin` son solo para este contenedor local, como en la guía oficial.
+              commands:
+                - docker run -d --name keycloak -p 127.0.0.1:8180:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.8.2 start-dev
+            - title: Configura el realm (en http://localhost:8180)
+              body: |
+                1. Crea el realm `questmap`.
+                2. Client scopes → Create client scope: nombre `orders.write`, tipo None, "Include in token scope" activado.
+                3. Clients → Create client: Client ID `orders-writer`, Client authentication ON, Service accounts roles ON, Standard flow OFF. Guárdalo.
+                4. En `orders-writer` → Client scopes → Add client scope → `orders.write` como Default.
+                5. Crea un segundo cliente igual llamado `orders-reader`, pero SIN el scope `orders.write`.
+                6. Copia el Client secret de cada uno (pestaña Credentials).
+            - title: Agrega Spring Security a `orders`
+              body: |
+                En el `pom.xml`: `spring-boot-starter-oauth2-resource-server` y, para pruebas, `spring-security-test` (scope test). En `application.properties`:
+
+                ```properties
+                spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/questmap
+                ```
+
+                Crea `SecurityConfig`:
+
+                ```java
+                @Configuration
+                @EnableWebSecurity
+                class SecurityConfig {
+                    @Bean
+                    SecurityFilterChain api(HttpSecurity http) throws Exception {
+                        http
+                            .authorizeHttpRequests(auth -> auth
+                                .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/orders").hasAuthority("SCOPE_orders.write")
+                                .anyRequest().authenticated())
+                            .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
+                            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                            .csrf(csrf -> csrf.disable()); // API stateless con tokens, sin cookies
+                        return http.build();
+                    }
+                }
+                ```
+            - title: Pide tokens y prueba los tres casos
+              body: "`Read-Host -MaskInput` te pide el secreto sin mostrarlo en pantalla."
+              commands:
+                - $tokenUrl = 'http://localhost:8180/realms/questmap/protocol/openid-connect/token'
+                - $w = Read-Host 'secret de orders-writer' -MaskInput; $writer = (Invoke-RestMethod -Method Post -Uri $tokenUrl -Body @{ grant_type = 'client_credentials'; client_id = 'orders-writer'; client_secret = $w }).access_token
+                - $r = Read-Host 'secret de orders-reader' -MaskInput; $reader = (Invoke-RestMethod -Method Post -Uri $tokenUrl -Body @{ grant_type = 'client_credentials'; client_id = 'orders-reader'; client_secret = $r }).access_token
+                - $body = '{"customer":"ana","total":42}'
+                - "Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body $body -SkipHttpErrorCheck -StatusCodeVariable sc | Out-Null; \"sin token: $sc\""
+                - "Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body $body -Headers @{ Authorization = \"Bearer $reader\" } -SkipHttpErrorCheck -StatusCodeVariable sc | Out-Null; \"reader: $sc\""
+                - "Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body $body -Headers @{ Authorization = \"Bearer $writer\" } -SkipHttpErrorCheck -StatusCodeVariable sc | Out-Null; \"writer: $sc\""
+            - title: Mira por dentro el token (sin pegarlo en ningún sitio web)
+              commands:
+                - $p = $writer.Split('.')[1].Replace('-', '+').Replace('_', '/'); $p += '=' * ((4 - $p.Length % 4) % 4); [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($p)) | ConvertFrom-Json | Select-Object iss, azp, scope, exp
+            - title: Arregla tus pruebas y haz commit
+              body: |
+                Tus pruebas con MockMvc del nivel 4 de Java ahora reciben 401. Simula un token en la prueba:
+
+                ```java
+                mockMvc.perform(post("/orders")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("SCOPE_orders.write")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"customer\":\"ana\",\"total\":42}"))
+                    .andExpect(status().isCreated());
+                ```
+
+                Agrega también una prueba que verifique 403 sin el scope y otra que verifique 401 sin token.
+              commands:
+                - .\mvnw.cmd test
+                - 'git add .; git commit -m "orders: JWT resource server with scopes"'
+          expected: "sin token: 401 · reader: 403 · writer: 201. El payload del token muestra iss = http://localhost:8180/realms/questmap y un scope que incluye orders.write."
+          checklist:
+            - Keycloak corre y emite tokens con Client Credentials
+            - Obtuve 401 sin token, 403 con orders-reader y 201 con orders-writer
+            - Decodifiqué el payload en PowerShell y vi iss y scope
+            - Tengo pruebas automáticas para 401, 403 y 201 y todas pasan
+            - Hice commit
+          hints:
+            - Si todo da 401 con token, revisa que el `iss` del token sea EXACTAMENTE el issuer-uri (http://localhost:8180/realms/questmap).
+            - Si el writer recibe 403, revisa que el scope orders.write esté como Default en el cliente y que 'Include in token scope' esté activado.
+            - "`-MaskInput` en Read-Host requiere PowerShell 7.1 o superior."
+          evidence_hint: Pega las tres líneas de códigos (401, 403, 201), los campos iss y scope del payload y el resumen de `.\mvnw.cmd test`.
+      - slug: sec-2-quiz
         type: quiz
-        title: Quiz — Proteger una API con JWT y roles
+        title: Quiz — Proteger una API
         required: true
+        estimated_min: 15
         skills:
-          security: 0.7
-          testing: 0.3
+          security: 1
+        questions:
+          - slug: s2-q1
+            type: mcq
+            prompt: Una petición llega con un token vencido. ¿Qué código debe devolver la API?
+            options:
+              - "200"
+              - "401"
+              - "403"
+              - "500"
+            answer: 1
+            explanation: "401: la API no puede confirmar quién eres. 403 es para cuando sabe quién eres pero no tienes permiso."
+            skill: security
+            difficulty: 1
+          - slug: s2-q2
+            type: mcq
+            prompt: 'En Spring Security, un token con `scope: "orders.write profile"` produce la authority…'
+            options:
+              - ROLE_orders.write
+              - SCOPE_orders.write
+              - orders.write
+              - WRITE
+            answer: 1
+            explanation: El convertidor por defecto agrega el prefijo SCOPE_ a cada scope del claim `scope` (o `scp`).
+            skill: security
+            difficulty: 2
+          - slug: s2-q3
+            type: tf
+            prompt: Para una API REST stateless que usa Bearer tokens, es razonable desactivar la protección CSRF.
+            answer: true
+            explanation: CSRF explota las cookies que el navegador envía solo. Con tokens en el header Authorization (y sin sesión), ese ataque no aplica.
+            skill: security
+            difficulty: 2
+          - slug: s2-q4
+            type: mcq
+            prompt: ¿Qué hace `issuer-uri` en un resource server de Spring?
+            options:
+              - Emite tokens
+              - Descubre las llaves públicas del emisor y valida que el `iss` del token coincida
+              - Guarda las contraseñas
+              - Cifra el payload
+            answer: 1
+            explanation: Spring lee la configuración OIDC del emisor (incluido el endpoint de llaves JWKS) y valida firma, emisor y vencimiento.
+            skill: security
+            difficulty: 1
+          - slug: s2-q5
+            type: fill
+            prompt: "El header HTTP con el que se envía un access token es `Authorization: ______ <token>`."
+            answer:
+              - Bearer
+              - bearer
+            explanation: Bearer = 'el portador'. Quien tenga el token puede usarlo, por eso deben durar poco y viajar solo por HTTPS.
+            skill: security
+            difficulty: 1
+          - slug: s2-q6
+            type: mcq
+            prompt: ¿Cuál es la ventaja de que la API valide tokens firmados en lugar de consultar al proveedor de identidad en cada petición?
+            options:
+              - Ninguna
+              - "Cada servicio valida localmente con la llave pública: menos latencia y sin depender del IdP en cada llamada"
+              - Los tokens no vencen
+              - No hace falta HTTPS
+            answer: 1
+            explanation: "Es el gran beneficio de los JWT. El costo: revocar un token antes de que venza es difícil, por eso duran poco."
+            skill: security
+            difficulty: 2
+          - slug: s2-q7
+            type: mcq
+            prompt: ¿Qué prueba demuestra mejor que la autorización funciona?
+            options:
+              - Que el endpoint responda 201 con un token válido
+              - "Pruebas para el camino feliz Y para los casos negativos: sin token (401) y sin permiso (403)"
+              - Que compile
+              - Que el login funcione
+            answer: 1
+            explanation: La seguridad se prueba sobre todo por los casos que deben FALLAR. Un endpoint que acepta todo también pasaría la primera.
+            skill: testing
+            difficulty: 2
+          - slug: s2-q8
+            type: order
+            prompt: "Ordena lo que hace Spring Security con una petición protegida:"
+            options:
+              - Extrae el token del header Authorization
+              - Valida firma, emisor y vencimiento
+              - Convierte los scopes en authorities
+              - Evalúa la regla del endpoint (hasAuthority)
+              - Deja pasar al controller o responde 401/403
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Si falla la validación: 401. Si falla la regla de autorización: 403. Solo si todo pasa se ejecuta tu código."
+            skill: security
+            difficulty: 1
   - slug: sec-3-journeyman
     number: 3
-    title: "Journeyman — Pirámide de pruebas y Testcontainers"
+    title: Journeyman — Pirámide de pruebas y Testcontainers
+    story: Los muros de la fortaleza se prueban todos los días. Muchas pruebas pequeñas y rápidas en la base, algunas con piezas reales en el medio y pocas de punta a punta en la cima.
     quests:
-      - slug: sec-3-journeyman-learn
+      - slug: sec-3-learn-pyramid
         type: learn
-        title: Pirámide de pruebas y Testcontainers
+        title: La pirámide de pruebas
         required: true
+        estimated_min: 60
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-3-journeyman-glossary
+          testing: 1
+        resources:
+          - ref: res-test-pyramid
+        payload:
+          note_prompt: Para tu servicio `orders`, da un ejemplo concreto de prueba unitaria, de integración y end-to-end. ¿Por qué no conviene que la mayoría sean end-to-end?
+          summary_md: |
+            - Base: muchas pruebas UNITARIAS (milisegundos, sin infraestructura, con mocks).
+            - Medio: pruebas de INTEGRACIÓN con piezas reales (base de datos, broker) en contenedores desechables: Testcontainers.
+            - Cima: pocas pruebas END-TO-END o funcionales del sistema completo: lentas y frágiles, pero dan confianza final.
+            - Pruebas de contrato: verifican que productor y consumidor de una API o evento siguen de acuerdo, sin levantar todo el sistema.
+            - Una prueba "flaky" (a veces pasa, a veces no) destruye la confianza en el pipeline: se arregla o se borra.
+      - slug: sec-3-learn-testcontainers
+        type: learn
+        title: Testcontainers con Spring Boot
+        required: true
+        estimated_min: 30
+        skills:
+          testing: 1
+        resources:
+          - ref: res-testcontainers
+          - ref: res-testcontainers-postgres
+          - ref: res-spring-testcontainers
+        payload:
+          note_prompt: ¿Qué gana una prueba de repositorio con Testcontainers frente a una con H2 en memoria o con un mock del repositorio? ¿Qué cuesta?
+      - slug: sec-3-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de pruebas
         required: true
+        estimated_min: 10
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-3-journeyman-lab
+          testing: 1
+        payload:
+          terms:
+            - sec-test-pyramid
+            - sec-integration-test
+            - sec-testcontainers
+            - sec-e2e-test
+            - sec-contract-test
+            - sec-flaky-test
+      - slug: sec-3-lab-testcontainers
         type: lab
-        title: "Lab: Pirámide de pruebas y Testcontainers"
+        title: "Lab: repositorio Postgres probado con Testcontainers"
         required: true
+        estimated_min: 120
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-3-journeyman-quiz
+          testing: 0.8
+          java: 0.2
+        payload:
+          goal: Agregar a `orders` un repositorio JDBC sobre PostgreSQL y probarlo con un Postgres real que Testcontainers levanta y destruye en cada ejecución.
+          steps:
+            - title: Dependencias
+              body: |
+                En el `pom.xml` agrega (sin versiones: Spring Boot las administra):
+                - `spring-boot-starter-jdbc` y `org.postgresql:postgresql` (scope runtime)
+                - Para pruebas: `spring-boot-testcontainers`, `org.testcontainers:testcontainers-junit-jupiter` y `org.testcontainers:testcontainers-postgresql` (scope test)
+
+                Docker Desktop debe estar corriendo: Testcontainers lo usa para levantar el contenedor.
+            - title: Esquema y repositorio JDBC
+              body: |
+                `src/main/resources/schema.sql`:
+
+                ```sql
+                CREATE TABLE IF NOT EXISTS orders (
+                  id       VARCHAR(64) PRIMARY KEY,
+                  customer VARCHAR(200) NOT NULL,
+                  total    NUMERIC(12,2) NOT NULL CHECK (total > 0)
+                );
+                ```
+
+                `src/main/resources/application-jdbc.properties`:
+
+                ```properties
+                spring.sql.init.mode=always
+                ```
+
+                Crea `JdbcOrderRepository implements OrderRepository` anotado con `@Repository @Profile("jdbc")` (y marca el repositorio en memoria con `@Profile("!jdbc")`). Usa `JdbcClient` con parámetros, NUNCA concatenando strings:
+
+                ```java
+                public Optional<Order> findById(String id) {
+                    return jdbc.sql("SELECT id, customer, total FROM orders WHERE id = :id")
+                        .param("id", id)
+                        .query((rs, n) -> new Order(rs.getString("id"), rs.getString("customer"), rs.getDouble("total")))
+                        .optional();
+                }
+                ```
+            - title: La prueba de integración
+              body: |
+                `src/test/java/.../JdbcOrderRepositoryIT.java`:
+
+                ```java
+                @Testcontainers
+                @SpringBootTest
+                @ActiveProfiles("jdbc")
+                class JdbcOrderRepositoryIT {
+
+                    @Container
+                    @ServiceConnection
+                    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16");
+
+                    @Autowired OrderRepository repo;
+
+                    @Test
+                    void savesAndFindsAnOrder() {
+                        repo.save(new Order("o-1", "ana", 120.0));
+                        assertThat(repo.findById("o-1")).hasValueSatisfying(o -> assertThat(o.customer()).isEqualTo("ana"));
+                    }
+
+                    @Test
+                    void missingOrderIsEmpty() {
+                        assertThat(repo.findById("nope")).isEmpty();
+                    }
+
+                    @Test
+                    void databaseRejectsNonPositiveTotal() {
+                        assertThatThrownBy(() -> repo.save(new Order("o-2", "luis", 0.0)))
+                            .isInstanceOf(DataIntegrityViolationException.class);
+                    }
+                }
+                ```
+            - title: Córrelas
+              commands:
+                - .\mvnw.cmd test
+                - "docker ps   # mientras corre, verás un contenedor postgres:16 y otro de Testcontainers (ryuk)"
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "orders: JDBC repository with Testcontainers integration tests"'
+          expected: Las 3 pruebas pasan contra un PostgreSQL real que aparece y desaparece solo. La tercera demuestra que la restricción CHECK de la base protege los datos aunque el código tenga un bug.
+          checklist:
+            - El repositorio JDBC usa parámetros con nombre, no concatenación
+            - Las pruebas corren contra postgres:16 levantado por Testcontainers
+            - Probé un caso de éxito, uno vacío y uno que la base rechaza
+            - El perfil por defecto sigue usando el repositorio en memoria
+            - Hice commit
+          hints:
+            - "Si `PostgreSQLContainer` no se encuentra, revisa el import según tu versión de Testcontainers: en la 2.x está en el módulo `testcontainers-postgresql` (paquete `org.testcontainers.postgresql`)."
+            - Si Testcontainers no encuentra Docker, abre Docker Desktop y vuelve a correr las pruebas.
+            - "Si la prueba de seguridad del nivel 2 falla porque no hay Keycloak, en esta prueba no hace falta: @SpringBootTest no llama al emisor hasta que llega un token."
+          evidence_hint: Pega el resumen de `.\mvnw.cmd test` con JdbcOrderRepositoryIT y la línea de docker ps con postgres:16.
+      - slug: sec-3-quiz
         type: quiz
-        title: Quiz — Pirámide de pruebas y Testcontainers
+        title: Quiz — Estrategia de pruebas
         required: true
+        estimated_min: 15
         skills:
-          security: 0.7
-          testing: 0.3
+          testing: 1
+        questions:
+          - slug: s3-q1
+            type: mcq
+            prompt: Según la pirámide de pruebas, ¿de qué tipo deberías tener MÁS?
+            options:
+              - End-to-end
+              - Unitarias
+              - Manuales
+              - De carga
+            answer: 1
+            explanation: Son rápidas, baratas y precisas sobre la causa de la falla. Las E2E dan confianza global, pero son lentas y frágiles.
+            skill: testing
+            difficulty: 1
+          - slug: s3-q2
+            type: mcq
+            prompt: ¿Qué ventaja tiene probar el repositorio con Testcontainers en vez de con H2 en memoria?
+            options:
+              - Es más rápido
+              - Pruebas contra el mismo motor que producción (tipos, SQL y restricciones reales)
+              - No necesita Docker
+              - No requiere esquema
+            answer: 1
+            explanation: H2 se comporta distinto que PostgreSQL en muchos detalles. Testcontainers elimina el 'en mi prueba funcionaba'.
+            skill: testing
+            difficulty: 1
+          - slug: s3-q3
+            type: tf
+            prompt: Una prueba flaky (que falla a veces sin que cambie el código) es inofensiva si casi siempre pasa.
+            answer: false
+            explanation: El equipo aprende a ignorar los fallos rojos y deja pasar fallas reales. Se arregla la causa (tiempos, orden, estado compartido) o se elimina.
+            skill: testing
+            difficulty: 1
+          - slug: s3-q4
+            type: mcq
+            prompt: ¿Qué hace `@ServiceConnection` en una prueba de Spring Boot con Testcontainers?
+            options:
+              - Crea la tabla
+              - Configura automáticamente la conexión de la app al contenedor (URL, usuario, contraseña)
+              - Detiene Docker
+              - Desactiva la seguridad
+            answer: 1
+            explanation: "Evita escribir propiedades a mano: Spring lee los datos de conexión del contenedor ya iniciado."
+            skill: testing
+            difficulty: 2
+          - slug: s3-q5
+            type: fill
+            prompt: Una prueba que verifica que el productor y el consumidor de una API siguen de acuerdo en el formato se llama prueba de ______ (en español).
+            answer:
+              - contrato
+              - contract
+            explanation: Las pruebas de contrato detectan cambios incompatibles sin levantar ambos servicios a la vez.
+            skill: testing
+            difficulty: 1
+          - slug: s3-q6
+            type: mcq
+            prompt: ¿Por qué el repositorio usa `.param("id", id)` y no `"... WHERE id = '" + id + "'"`?
+            options:
+              - Por estilo
+              - "Los parámetros evitan la inyección SQL: el valor nunca se interpreta como código SQL"
+              - Es más corto
+              - Porque Postgres lo exige
+            answer: 1
+            explanation: Concatenar entrada del usuario en SQL es la receta clásica de la inyección SQL. Siempre parámetros.
+            skill: security
+            difficulty: 1
+          - slug: s3-q7
+            type: mcq
+            prompt: Tus pruebas E2E tardan 40 minutos y fallan al azar. ¿Qué haces primero?
+            options:
+              - Agregar más pruebas E2E
+              - Mover la mayoría de los casos a pruebas unitarias y de integración y dejar pocas E2E para los flujos críticos
+              - Desactivarlas todas
+              - Correrlas solo una vez al mes
+            answer: 1
+            explanation: Es invertir la pirámide al revés ('cono de helado'). Bajar los casos a niveles más rápidos y estables.
+            skill: testing
+            difficulty: 2
+          - slug: s3-q8
+            type: order
+            prompt: "Ordena de más rápida a más lenta:"
+            options:
+              - Prueba unitaria con mocks
+              - Prueba de integración con Testcontainers
+              - Prueba de API con la app completa levantada
+              - Prueba end-to-end entre varios servicios desplegados
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Cuanto más arriba en la pirámide, más realismo y más costo (tiempo, fragilidad, mantenimiento).
+            skill: testing
+            difficulty: 1
   - slug: sec-4-expert
     number: 4
-    title: "Expert — Performance (k6), chaos y RCA"
+    title: Expert — Performance (k6), chaos y RCA
+    story: "Pones a prueba la fortaleza con un asedio controlado: miles de visitantes a la vez y una torre que cae a propósito. Si algo se rompe, que sea hoy y bajo tu vigilancia."
     quests:
-      - slug: sec-4-expert-learn
+      - slug: sec-4-learn-performance
         type: learn
-        title: Performance (k6), chaos y RCA
+        title: Pruebas de rendimiento con k6
         required: true
+        estimated_min: 40
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-4-expert-glossary
+          testing: 1
+        resources:
+          - ref: res-k6-running
+          - ref: res-k6-thresholds
+        payload:
+          note_prompt: Explica la diferencia entre una prueba de carga, una de estrés y una de resistencia (soak). ¿Qué thresholds pondrías para la API de órdenes y por qué?
+          summary_md: |
+            - Carga (load): el tráfico esperado, para confirmar que cumples tus objetivos.
+            - Estrés (stress): subir hasta romper, para saber dónde y cómo falla.
+            - Resistencia (soak): carga normal durante horas, para encontrar fugas de memoria o conexiones.
+            - Picos (spike): saltos bruscos de tráfico.
+            - Thresholds de k6 = criterios de aprobado o fallido, ej. `http_req_duration: ['p(95)<300']` y `http_req_failed: ['rate<0.01']`. Si no se cumplen, k6 termina con error y puede romper el pipeline.
+      - slug: sec-4-learn-chaos
+        type: learn
+        title: Chaos engineering y pruebas destructivas
+        required: true
+        estimated_min: 30
+        skills:
+          testing: 0.6
+          debugging_rca: 0.4
+        resources:
+          - ref: res-chaos-principles
+          - ref: res-sre-postmortems
+            required: false
+        payload:
+          note_prompt: "Diseña un experimento de caos para `orders`: estado estable, hipótesis, qué falla vas a inyectar, cómo limitas el radio de impacto y qué métricas observarás."
+          summary_md: |
+            Un experimento de caos:
+            1. Define el estado estable con métricas (ej. p95 < 300 ms, errores < 1 %).
+            2. Hipótesis: "si cae una instancia o una dependencia, el sistema sigue en estado estable o se recupera en menos de X".
+            3. Inyecta una falla real (matar un proceso, cortar la red, apagar un nodo de Cassandra).
+            4. Limita el radio de impacto (blast radius) y ten un botón para abortar.
+            5. Compara con la hipótesis; lo que falle se convierte en trabajo de mejora.
+      - slug: sec-4-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de rendimiento y caos
         required: true
+        estimated_min: 10
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-4-expert-lab
+          testing: 0.8
+          debugging_rca: 0.2
+        payload:
+          terms:
+            - sec-load-test
+            - sec-stress-test
+            - sec-soak-test
+            - sec-threshold
+            - sec-chaos-engineering
+            - sec-blast-radius
+            - sec-steady-state
+      - slug: sec-4-lab-k6
         type: lab
-        title: "Lab: Performance (k6), chaos y RCA"
+        title: "Lab: prueba de carga con k6 y una caída a propósito"
         required: true
+        estimated_min: 90
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-4-expert-quiz
+          testing: 0.6
+          debugging_rca: 0.4
+        payload:
+          goal: Medir `orders` bajo carga con k6 y thresholds, y luego tumbar la app a mitad de la prueba para medir el impacto y el tiempo de recuperación.
+          steps:
+            - title: Prepara la app y un token
+              body: "Arranca `orders` (puerto 8080) y Keycloak (nivel 2), y pide un token de `orders-writer` en `$writer` como en el nivel 2. Los tokens de Keycloak duran 5 minutos por defecto: la prueba dura menos."
+            - title: El script de k6
+              body: |
+                Crea `$HOME\questmap-labs\load\orders.js`:
+
+                ```javascript
+                import http from 'k6/http';
+                import { check, sleep } from 'k6';
+
+                export const options = {
+                  stages: [
+                    { duration: '30s', target: 20 },
+                    { duration: '1m', target: 20 },
+                    { duration: '15s', target: 0 },
+                  ],
+                  thresholds: {
+                    http_req_failed: ['rate<0.01'],
+                    http_req_duration: ['p(95)<300'],
+                  },
+                };
+
+                const BASE = __ENV.BASE_URL || 'http://host.docker.internal:8080';
+                const params = {
+                  headers: { Authorization: `Bearer ${__ENV.TOKEN}`, 'Content-Type': 'application/json' },
+                };
+
+                export default function () {
+                  const res = http.post(`${BASE}/orders`, JSON.stringify({ customer: `c${__VU}`, total: 42 }), params);
+                  check(res, { 'status 201': (r) => r.status === 201 });
+                  sleep(0.5);
+                }
+                ```
+            - title: Corrida 1 — línea base
+              commands:
+                - cd $HOME\questmap-labs\load; Get-Content orders.js | docker run --rm -i -e TOKEN=$writer grafana/k6 run -
+            - title: Corrida 2 — caos controlado
+              body: Repite la prueba. Cuando k6 vaya por el segundo 45, detén la app (Ctrl+C en su ventana), espera 15 segundos y vuelve a arrancarla. Anota a qué hora la detuviste y cuándo volvió a responder.
+              commands:
+                - Get-Content orders.js | docker run --rm -i -e TOKEN=$writer grafana/k6 run -
+            - title: (Opcional) Míralo en el Observatory
+              body: "Si tienes Prometheus y Grafana del Observatory corriendo, abre el dashboard RED durante la corrida 2: verás el hueco de tráfico, los errores y la recuperación."
+            - title: Escribe un mini RCA
+              body: "En `load\\rca.md` (5–10 líneas): qué pasó, impacto (porcentaje de errores, duración), cuánto tardó en recuperarse, por qué (una sola instancia, sin reintentos en el cliente) y 2 mejoras (ej. más de una instancia, readiness probe, reintentos con backoff en el cliente)."
+          expected: "Corrida 1: los thresholds pasan (✓) y el p95 queda bajo 300 ms en tu PC. Corrida 2: `http_req_failed` supera el 1 %, el threshold falla (✗) y k6 termina con error; las peticiones vuelven a 201 unos segundos después de reiniciar la app."
+          checklist:
+            - La corrida 1 pasó los thresholds
+            - La corrida 2 falló los thresholds por la caída provocada
+            - Medí el tiempo de recuperación
+            - Escribí el mini RCA con impacto, causa y 2 mejoras
+          hints:
+            - "Si todas las peticiones dan 401, el token venció o no llegó: revisa `-e TOKEN=$writer` y pide uno nuevo."
+            - Si k6 no llega a la app, usa `-e BASE_URL=http://host.docker.internal:8080` y confirma que la app escucha en el 8080.
+          evidence_hint: Pega el resumen final de k6 de ambas corridas (thresholds ✓/✗, p95 y http_req_failed) y tu mini RCA.
+      - slug: sec-4-quiz
         type: quiz
-        title: Quiz — Performance (k6), chaos y RCA
+        title: Quiz — Rendimiento, caos y RCA
         required: true
+        estimated_min: 15
         skills:
-          security: 0.7
-          testing: 0.3
+          testing: 0.6
+          debugging_rca: 0.4
+        questions:
+          - slug: s4-q1
+            type: mcq
+            prompt: Quieres saber en qué punto se rompe tu servicio y cómo falla. ¿Qué prueba haces?
+            options:
+              - Carga
+              - Estrés
+              - Unitaria
+              - De contrato
+            answer: 1
+            explanation: La prueba de estrés sube la carga más allá de lo esperado hasta encontrar el límite y el modo de falla.
+            skill: testing
+            difficulty: 1
+          - slug: s4-q2
+            type: mcq
+            prompt: La memoria de la JVM sube lentamente durante 6 horas de carga normal hasta un OutOfMemoryError. ¿Qué prueba lo habría detectado?
+            options:
+              - Spike
+              - Soak (resistencia)
+              - Smoke
+              - Unitaria
+            answer: 1
+            explanation: Las fugas solo aparecen con el tiempo. Una prueba de resistencia corre carga normal durante horas.
+            skill: testing
+            difficulty: 2
+          - slug: s4-q3
+            type: fill
+            prompt: "En k6, para exigir que el 95 % de las peticiones tarde menos de 300 ms escribes `http_req_duration: ['p(95)<______']`."
+            answer:
+              - "300"
+            explanation: "Los thresholds convierten una prueba de carga en una prueba con resultado claro: pasa o no pasa."
+            skill: testing
+            difficulty: 1
+          - slug: s4-q4
+            type: tf
+            prompt: En chaos engineering, se inyectan fallas al azar en producción sin hipótesis ni plan para abortar.
+            answer: false
+            explanation: "Es un experimento controlado: estado estable medible, hipótesis, radio de impacto acotado y forma de detenerlo."
+            skill: testing
+            difficulty: 1
+          - slug: s4-q5
+            type: mcq
+            prompt: ¿Qué significa reducir el 'blast radius' de un experimento?
+            options:
+              - Usar menos servidores
+              - Limitar cuántos usuarios o sistemas pueden verse afectados (ej. una instancia, un % del tráfico)
+              - Apagar las alertas
+              - Hacerlo de noche
+            answer: 1
+            explanation: Empiezas pequeño (una instancia, entorno de pruebas) y amplías solo cuando confías en el resultado.
+            skill: testing
+            difficulty: 1
+          - slug: s4-q6
+            type: mcq
+            prompt: Durante la prueba el p95 sube de 120 ms a 2 s, pero la CPU de la app está al 30 %. ¿Qué investigas?
+            options:
+              - Comprar más CPU
+              - "Saturación de algo que espera: pool de conexiones a la BD, hilos bloqueados o una dependencia lenta"
+              - El tamaño del jar
+              - Nada, el CPU está bien
+            answer: 1
+            explanation: "Latencia alta con CPU baja suele significar espera (USE: saturación). Mira las métricas del pool y las trazas."
+            skill: debugging_rca
+            difficulty: 2
+          - slug: s4-q7
+            type: mcq
+            prompt: ¿Cuál es una buena acción preventiva tras ver errores cuando cae la única instancia?
+            options:
+              - Esperar que no vuelva a pasar
+              - Correr al menos 2 instancias en zonas distintas + readiness probe + reintentos con backoff en los clientes
+              - Desactivar las pruebas
+              - Aumentar el timeout a 10 minutos
+            answer: 1
+            explanation: Redundancia, señal de readiness para no enviar tráfico a instancias que aún no están listas, y clientes tolerantes a fallos breves.
+            skill: debugging_rca
+            difficulty: 1
+          - slug: s4-q8
+            type: order
+            prompt: "Ordena un experimento de caos:"
+            options:
+              - Definir el estado estable con métricas
+              - Formular la hipótesis
+              - Inyectar la falla con un radio de impacto acotado
+              - Observar y comparar con la hipótesis
+              - Corregir lo que falló y repetir
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: Sin estado estable medible no hay forma de saber si el experimento confirmó o refutó la hipótesis.
+            skill: testing
+            difficulty: 1
   - slug: sec-5-boss
     number: 5
-    title: "Boss — Auditar y probar un servicio"
+    title: Boss — Auditar y probar un servicio
+    story: "El guardián de la fortaleza te entrega el código de un servicio heredado y una orden: encuentra cada grieta, demuéstrala con una prueba y ciérrala antes del amanecer."
     quests:
-      - slug: sec-5-boss-learn-review
+      - slug: sec-5-learn-owasp
         type: learn
-        title: Repaso para el jefe
+        title: OWASP API Security Top 10
         required: true
+        estimated_min: 45
         skills:
-          security: 0.7
-          testing: 0.3
-      - slug: sec-5-boss-quiz-final
+          security: 0.8
+          testing: 0.2
+        resources:
+          - ref: res-owasp-api-top10
+          - ref: res-owasp-top10
+            required: false
+        payload:
+          note_prompt: Explica con un ejemplo de API de órdenes qué es BOLA (API1) y qué es Broken Function Level Authorization (API5). ¿Qué prueba automática escribirías para cada una?
+          summary_md: |
+            Los que más vas a ver en entrevistas y auditorías:
+            - API1 BOLA: GET /orders/123 devuelve la orden de OTRO cliente porque solo se valida el token, no que la orden sea suya.
+            - API2 Broken Authentication: tokens que no se validan bien, que no vencen o credenciales débiles.
+            - API3 Broken Object Property Level Authorization: exponer o permitir modificar campos que no deberían (ej. `role`, `price`).
+            - API4 Unrestricted Resource Consumption: sin límites de paginación ni tamaño ni tasa.
+            - API5 Broken Function Level Authorization: un usuario normal puede llamar endpoints de administración.
+            Más la inyección (SQL y de otros tipos) y los secretos en logs: errores clásicos de cualquier aplicación.
+      - slug: sec-5-glossary
+        type: glossary
+        title: Vocabulario de auditoría
+        required: true
+        estimated_min: 10
+        skills:
+          security: 1
+        payload:
+          terms:
+            - sec-bola
+            - sec-bfla
+            - sec-sql-injection
+            - sec-rate-limiting
+            - sec-threat-modeling
+      - slug: sec-5-quiz-final
         type: quiz
-        title: Examen final de la zona
+        title: Examen final — Security & Testing Fortress
         required: true
+        estimated_min: 20
         skills:
-          security: 0.7
+          security: 0.5
           testing: 0.3
-      - slug: sec-5-boss-boss-fight
+          debugging_rca: 0.2
+        questions:
+          - slug: s5-q1
+            type: mcq
+            prompt: "`GET /orders/{id}` valida el token pero no verifica que la orden pertenezca al cliente del token. ¿Qué vulnerabilidad es?"
+            options:
+              - SQL injection
+              - BOLA (Broken Object Level Authorization)
+              - CSRF
+              - XSS
+            answer: 1
+            explanation: Es la número 1 de OWASP API. Se corrige comprobando la propiedad del recurso en cada acceso (ej. `WHERE id = :id AND customer = :sub`).
+            skill: security
+            difficulty: 1
+          - slug: s5-q2
+            type: mcq
+            prompt: ¿Qué prueba demuestra que se corrigió el BOLA?
+            options:
+              - Que el dueño reciba 200
+              - Que un cliente con token válido reciba 404 (o 403) al pedir la orden de OTRO cliente
+              - Que compile
+              - Que el endpoint sea rápido
+            answer: 1
+            explanation: Muchos prefieren 404 para no revelar que la orden existe. Lo importante es que la prueba negativa exista y corra en CI.
+            skill: testing
+            difficulty: 2
+          - slug: s5-q3
+            type: tf
+            prompt: Registrar en los logs el header Authorization completo es aceptable si los logs son internos.
+            answer: false
+            explanation: Los logs se copian, se exportan y los leen muchas personas. Un bearer token en un log es una credencial filtrada.
+            skill: security
+            difficulty: 1
+          - slug: s5-q4
+            type: mcq
+            prompt: "`GET /orders?limit=1000000` tumba la base de datos. ¿Qué riesgo de OWASP API es y cómo se corrige?"
+            options:
+              - API1 — validar el token
+              - API4 Unrestricted Resource Consumption — límite máximo de paginación y rate limiting
+              - API2 — cambiar contraseñas
+              - Ninguno
+            answer: 1
+            explanation: "Toda API pública necesita límites: tamaño de página, de payload y de tasa por cliente."
+            skill: security
+            difficulty: 2
+          - slug: s5-q5
+            type: fill
+            prompt: Un usuario normal puede llamar `DELETE /admin/orders/{id}`. Eso es Broken ______ Level Authorization (API5).
+            answer:
+              - Function
+              - function
+            explanation: "Falta la regla de autorización por función: el endpoint de administración debe exigir un rol o scope de administrador."
+            skill: security
+            difficulty: 1
+          - slug: s5-q6
+            type: mcq
+            prompt: ¿Cuál es el orden correcto al encontrar una vulnerabilidad en un servicio?
+            options:
+              - Arreglar en silencio
+              - Escribir una prueba que la reproduzca (falla), corregir, ver la prueba pasar y dejarla en CI
+              - Abrir un ticket y esperar
+              - Borrar el endpoint
+            answer: 1
+            explanation: La prueba que falla primero demuestra el problema y evita que vuelva (regresión).
+            skill: testing
+            difficulty: 1
+          - slug: s5-q7
+            type: mcq
+            prompt: "Pregunta de entrevista: '¿cómo asegurarías la comunicación entre `orders` y `payments`?' ¿Mejor respuesta?"
+            options:
+              - Con una contraseña compartida en el código
+              - Identidad por servicio (service account), tokens de corta duración (client credentials o ID tokens), autorización por scope o rol, TLS y mínimo privilegio
+              - Poniendo ambos en la misma red
+              - No hace falta, son internos
+            answer: 1
+            explanation: "Zero trust: estar en la red interna no da confianza. Cada llamada se autentica y autoriza."
+            skill: security
+            difficulty: 2
+          - slug: s5-q8
+            type: order
+            prompt: "Ordena una auditoría de seguridad de una API:"
+            options:
+              - Inventario de endpoints y datos sensibles
+              - Modelado de amenazas (quién podría atacar y cómo)
+              - Revisión de código y pruebas negativas por cada riesgo
+              - Priorizar hallazgos por severidad
+              - Corregir con pruebas de regresión en CI
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "No puedes proteger lo que no sabes que existe: el inventario va primero."
+            skill: security
+            difficulty: 2
+      - slug: sec-5-boss-fight
         type: boss
-        title: "Jefe: Auditar y probar un servicio"
+        title: "Jefe: la auditoría del servicio heredado"
         required: true
+        estimated_min: 120
         skills:
-          security: 0.7
+          security: 0.4
           testing: 0.3
-      - slug: sec-5-boss-interview
+          debugging_rca: 0.1
+          english: 0.2
+        payload:
+          task: |
+            Audita este controller heredado (cópialo a tu proyecto `orders` en un paquete `legacy` o analízalo en texto):
+
+            ```java
+            @RestController
+            @RequestMapping("/v1/orders")
+            class LegacyOrderController {
+                private static final Logger log = LoggerFactory.getLogger(LegacyOrderController.class);
+                private final JdbcTemplate jdbc;
+                LegacyOrderController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+
+                @GetMapping("/{id}")
+                Map<String, Object> get(@PathVariable String id, HttpServletRequest req) {
+                    log.info("GET order {} auth={}", id, req.getHeader("Authorization"));
+                    return jdbc.queryForMap("SELECT * FROM orders WHERE id = '" + id + "'");
+                }
+
+                @GetMapping
+                List<Map<String, Object>> list(@RequestParam(defaultValue = "100000") int limit) {
+                    return jdbc.queryForList("SELECT * FROM orders LIMIT " + limit);
+                }
+
+                @PutMapping("/{id}")
+                void update(@PathVariable String id, @RequestBody Map<String, Object> body) {
+                    jdbc.update("UPDATE orders SET customer = ?, total = ? WHERE id = ?",
+                        body.get("customer"), body.get("total"), id);
+                }
+
+                @DeleteMapping("/{id}")
+                void delete(@PathVariable String id) {
+                    jdbc.update("DELETE FROM orders WHERE id = ?", id);
+                }
+            }
+            ```
+
+            Entrega: (1) una tabla de hallazgos con la categoría OWASP, la severidad y el impacto; (2) para al menos 4 hallazgos, una prueba automática que falla con el código original y pasa con tu corrección; (3) el código corregido; (4) un plan corto de pruebas de rendimiento para el endpoint de listado con thresholds de k6. Luego defiéndelo en una mini-entrevista en inglés.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - finding and prioritizing vulnerabilities
+            - negative tests that prove fixes
+            - authorization design (ownership and roles)
+            - performance limits and testing strategy
+      - slug: sec-5-interview
         type: interview
-        title: Mini-entrevista de la zona
+        title: "Mini-entrevista: security & testing screen"
         required: false
+        estimated_min: 30
         skills:
-          security: 0.7
-          testing: 0.3
+          security: 0.4
+          testing: 0.2
+          english: 0.4
         payload:
           mode: technical_screen
           zone: security-fortress

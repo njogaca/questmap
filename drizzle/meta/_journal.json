@@ -22,6 +22,13 @@
       "when": 1793902679973,
       "tag": "0002_glossary_analogy",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793904606168,
+      "tag": "0003_claude_phase5",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 import "server-only";
 import { asc, desc, eq, gte, sql } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
+import { openReviewItems } from "./claude/service";
 import { getStreak, getXpTotal } from "./game";
 import { dueCount, newCards } from "./glossary";
 import { computeReadiness } from "./readiness";
@@ -62,7 +63,7 @@ export async function loadDashboard() {
   const weekday = localWeekday();
   const world = await loadWorld();
 
-  const [skills, progress, xpTotal, streak, due, fresh, badges, weekly] = await Promise.all([
+  const [skills, progress, xpTotal, streak, due, fresh, badges, weekly, reviews] = await Promise.all([
     db.select().from(s.skills).where(eq(s.skills.status, "published")).orderBy(asc(s.skills.order)),
     db.select().from(s.questProgress),
     getXpTotal(),
@@ -79,6 +80,7 @@ export async function loadDashboard() {
       .from(s.studyLog)
       .where(gte(s.studyLog.date, addDays(weekStart(today), -7 * 7)))
       .groupBy(s.studyLog.date),
+    openReviewItems(5),
   ]);
 
   const readiness = computeReadiness(
@@ -135,6 +137,7 @@ export async function loadDashboard() {
       newCards: fresh.length,
       english: englishMicro ? toRec(world, englishMicro) : null,
       next: nextQuest ? toRec(world, nextQuest) : null,
+      reviews: reviews.map((r) => ({ id: r.id, topic: r.topic })),
     },
     actions,
   };

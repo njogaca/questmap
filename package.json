@@ -24,6 +24,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.5.0",
     "drizzle-orm": "^0.45.4",
     "next": "^15.5.29",
     "pg": "^8.23.1",

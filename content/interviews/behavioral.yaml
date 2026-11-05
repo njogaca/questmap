@@ -1,0 +1,28 @@
+# Preguntas conductuales (STAR). Cada sesión elige 5 al azar.
+templates:
+  - slug: behavioral-core
+    mode: behavioral
+    title: Behavioral interview (STAR)
+    zone: interview-arena
+    payload:
+      pick: 5
+      duration_min: 30
+      questions:
+        - "Tell me about a time you had to debug a critical production issue under pressure. What was the root cause and what did you change afterwards?"
+        - "Describe a situation where you disagreed with a technical decision made by your team or your manager. How did you handle it?"
+        - "Tell me about a project you're most proud of. What was your specific contribution?"
+        - "Give me an example of a time you had to learn a new technology quickly to deliver something."
+        - "Tell me about a mistake you made in production. How did you communicate it and what did you learn?"
+        - "Describe a time you improved the reliability or performance of a system. How did you measure the improvement?"
+        - "Tell me about a time you had to work with a difficult stakeholder or another team that had different priorities."
+        - "Describe a situation where requirements were unclear. What did you do?"
+        - "Tell me about a time you had to make a trade-off between delivering fast and doing it right."
+        - "Give me an example of when you mentored or helped a teammate grow."
+        - "Tell me about a time you received critical feedback. What did you do with it?"
+        - "Describe a time you automated a manual or repetitive process. What was the impact?"
+        - "Tell me about a time a deployment went wrong. How did you roll back or recover?"
+        - "Describe a situation where you took ownership of something outside your formal responsibilities."
+        - "Tell me about a time you had to explain a complex technical problem to a non-technical person."
+        - "Give me an example of how you used an AI assistant in your work. How did you verify its output?"
+        - "Tell me about a time you had to support a system you didn't build. How did you get up to speed?"
+        - "Describe a time you had to prioritize several urgent tasks at once. How did you decide?"

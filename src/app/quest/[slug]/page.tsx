@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { db, schema as s } from "@/db/client";
 import type { Card } from "@/components/Flashcards";
 import { GlossaryQuest } from "@/components/quest/GlossaryQuest";
+import { InterviewStart } from "@/components/quest/InterviewStart";
 import { LabQuest, type LabPayload } from "@/components/quest/LabQuest";
+import { OpenAnswerQuest } from "@/components/quest/OpenAnswerQuest";
 import { LearnQuest } from "@/components/quest/LearnQuest";
 import { MicroQuest } from "@/components/quest/MicroQuest";
 import { QuizRunner, type ClientQuestion } from "@/components/quest/QuizRunner";
@@ -149,8 +151,52 @@ export default async function QuestPage({ params }: { params: Promise<{ slug: st
   } else {
     body = (
       <p className="rounded-md border border-dashed border-line bg-surface p-4 text-sm text-dim">
-        Las quests de tipo &ldquo;{QUEST_TYPE_TEXT[quest.type]}&rdquo; (calificadas por Claude) llegan en la Fase 5.
+        Tipo de quest no soportado: {quest.type}.
       </p>
+    );
+  }
+
+  if (!locked && quest.type === "open_answer") {
+    const history = await db
+      .select({ id: s.evaluations.id, score: s.evaluations.score, createdAt: s.evaluations.createdAt })
+      .from(s.evaluations)
+      .where(eq(s.evaluations.questId, quest.id))
+      .orderBy(desc(s.evaluations.createdAt))
+      .limit(10);
+    body = (
+      <OpenAnswerQuest
+        slug={quest.slug}
+        promptEn={String(payload.prompt_en ?? quest.title)}
+        completed={completed}
+        history={history.map((h) => ({ id: h.id, score: h.score, createdAt: h.createdAt.toISOString() }))}
+      />
+    );
+  } else if (!locked && (quest.type === "boss" || quest.type === "interview")) {
+    const sessions = await db
+      .select({
+        id: s.interviewSessions.id,
+        score: s.interviewSessions.score,
+        startedAt: s.interviewSessions.startedAt,
+        finishedAt: s.interviewSessions.finishedAt,
+      })
+      .from(s.interviewSessions)
+      .where(eq(s.interviewSessions.questId, quest.id))
+      .orderBy(desc(s.interviewSessions.startedAt))
+      .limit(10);
+    body = (
+      <InterviewStart
+        slug={quest.slug}
+        type={quest.type}
+        task={payload.task as string | undefined}
+        focus={payload.interview_focus as string[] | undefined}
+        completed={completed}
+        sessions={sessions.map((x) => ({
+          id: x.id,
+          score: x.score,
+          startedAt: x.startedAt.toISOString(),
+          finishedAt: x.finishedAt?.toISOString() ?? null,
+        }))}
+      />
     );
   }
 

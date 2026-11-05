@@ -27,6 +27,21 @@ docker compose up -d --build         # reconstruir tras cambiar código o conten
 npm test                             # pruebas de la lógica (racha, SRS, XP, quiz, readiness, desbloqueo)
 ```
 
+## Claude (calificaciones y entrevistas)
+
+- **Modo A (por defecto, $0):** la app genera un prompt; lo pegas en claude.ai y pegas la respuesta de vuelta.
+- **Modo B (API):** pon tu clave en `.env` y reconstruye. Todo ocurre dentro de la app; la clave nunca llega al navegador.
+
+```powershell
+notepad .env   # ANTHROPIC_API_KEY=sk-ant-...   CLAUDE_MODEL=claude-opus-5-5   MAX_API_CALLS_PER_DAY=50
+```
+
+```powershell
+docker compose up -d --build
+```
+
+En **Ajustes** ves si la API está activa, las llamadas de hoy contra el tope y los tokens aproximados por sesión. Si la API falla o llegas al tope, la app cae al Modo A sin perder lo que escribiste.
+
 ## Contenido
 
 Todo vive en `content/` (YAML):
@@ -37,6 +52,7 @@ Todo vive en `content/` (YAML):
 | `resources.yaml` | Recursos de estudio. Solo `verified: true` si la URL se abrió; si no, `url: null` + `how_to_find` |
 | `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss) |
 | `glossary/*.yaml` | Términos con definición en español, en inglés, ejemplo y analogía |
+| `interviews/*.yaml` | Plantillas del Interview Arena (conductuales, técnicas por zona, system design, take-home) |
 
 Edita o agrega archivos y reconstruye. El seed valida todo con Zod (si algo está mal, el log dice el archivo y el campo), hace upsert por `slug`, nunca duplica ni borra tu progreso, y lo que quites del YAML queda `archived`.
 

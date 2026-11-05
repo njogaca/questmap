@@ -1,0 +1,69 @@
+# Screens técnicos por zona (zonas 1–3). Cada sesión elige 6 al azar.
+templates:
+  - slug: technical-java
+    mode: technical_screen
+    title: "Technical screen: Java & Spring Boot"
+    zone: java-forest
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "What is the difference between an abstract class and an interface in Java? When would you use each?"
+        - "How do equals() and hashCode() relate, and what breaks if you override only one of them?"
+        - "Explain the difference between checked and unchecked exceptions. Which do you prefer in a REST service and why?"
+        - "What is a Java record, and when would you use one instead of a regular class?"
+        - "Explain how a Java stream pipeline is evaluated. What does it mean that streams are lazy?"
+        - "When should a method return Optional, and when is using Optional considered a bad practice?"
+        - "What is a race condition? Give an example and two ways to prevent it in Java."
+        - "Compare ExecutorService and CompletableFuture. How would you call three services in parallel and combine the results?"
+        - "What is dependency injection, and why is constructor injection preferred in Spring?"
+        - "Spring beans are singletons by default. What does that imply for the state you keep in a @Service?"
+        - "How would you return a 400 for invalid input and a 404 for a missing resource in Spring Boot?"
+        - "How do you test a Spring REST controller without starting the whole application context?"
+        - "What is the difference between a unit test and an integration test? Give an example of each for an order service."
+        - "What happens if two threads modify a HashMap concurrently? What would you use instead?"
+
+  - slug: technical-eda
+    mode: technical_screen
+    title: "Technical screen: Event-driven & Pub/Sub"
+    zone: event-harbor
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "Explain the difference between a topic and a subscription in Google Cloud Pub/Sub."
+        - "How would you have five workers share the load of one stream of messages, versus five services each receiving every message?"
+        - "What does at-least-once delivery mean, and how do you design a consumer for it?"
+        - "What is idempotency? How would you make a payment consumer idempotent?"
+        - "Pub/Sub offers exactly-once delivery. Why would you still need idempotent consumers?"
+        - "What is a dead-letter topic and when would a message end up there?"
+        - "How do ordering keys work in Pub/Sub, and what are their trade-offs?"
+        - "What happens if your subscriber takes longer than the ack deadline?"
+        - "Push vs pull subscriptions: when would you choose each?"
+        - "How would you evolve an event schema without breaking existing consumers?"
+        - "What is backpressure and how does subscriber flow control help?"
+        - "Explain the dual-write problem and how the transactional outbox pattern solves it."
+        - "Which metrics would you monitor for a Pub/Sub consumer, and what would you alert on?"
+        - "Coming from IBM MQ, what concepts transfer directly to Pub/Sub, and what is different?"
+
+  - slug: technical-cassandra
+    mode: technical_screen
+    title: "Technical screen: Apache Cassandra"
+    zone: cassandra-caverns
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "How does Cassandra decide which nodes store a given row?"
+        - "Explain the difference between the partition key and clustering columns, with an example."
+        - "What does 'query-first data modeling' mean? How is it different from relational modeling?"
+        - "Why does Cassandra ask for ALLOW FILTERING, and why is it dangerous in production?"
+        - "With replication factor 3, explain consistency levels ONE, QUORUM and ALL. Which combinations give strong consistency?"
+        - "What is a tombstone and why can too many of them hurt read performance?"
+        - "What is a hot partition and how would you fix one?"
+        - "Walk me through the write path inside a Cassandra node."
+        - "What happens when one of three replicas goes down? How does the node catch up when it comes back?"
+        - "What are lightweight transactions and when would you use them?"
+        - "Why is using a Cassandra table as a queue an anti-pattern?"
+        - "Design a table for 'the last 20 orders of a customer'. What is your primary key?"
+        - "When would you choose Cassandra over PostgreSQL for an order-events workload, and what would you give up?"

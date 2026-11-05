@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { completeLab } from "@/app/actions";
 import type { Reward } from "@/lib/game";
 import { BlockText, CodeBlock } from "../BlockText";
+import { EvaluationFlow } from "../claude/EvaluationFlow";
 import { ErrorText, RewardBanner } from "../RewardBanner";
 import { RichText } from "../RichText";
 import { btnGhost, btnPrimary } from "../ui";
@@ -130,7 +131,7 @@ export function LabQuest({
       <section>
         <h2 className="text-lg font-semibold">Evidencia</h2>
         <p className="mt-1 text-sm text-dim">
-          {payload.evidence_hint ?? "Pega la salida de tus comandos o la URL de tu commit/repo."} En la Fase 5 podrás pedirle a Claude que la revise.
+          {payload.evidence_hint ?? "Pega la salida de tus comandos o la URL de tu commit/repo."} Opcional: pide a Claude que la revise (no bloquea tu avance).
         </p>
         <textarea
           rows={6}
@@ -141,6 +142,15 @@ export function LabQuest({
           placeholder="PS> ..."
         />
       </section>
+
+      {evidence.trim().length >= 20 && (
+        <details className="rounded-md border border-line bg-surface p-3">
+          <summary className="cursor-pointer font-mono text-xs text-available">revisión de evidencia por Claude (opcional)</summary>
+          <div className="mt-3">
+            <EvaluationFlow kind="lab_review" questSlug={slug} answer={evidence} />
+          </div>
+        </details>
+      )}
 
       <RewardBanner reward={reward} />
       {completed && !reward ? (

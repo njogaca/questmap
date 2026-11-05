@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ManualMinutes } from "@/components/ManualMinutes";
 import { RadarChart } from "@/components/RadarChart";
+import { ReviewItem } from "@/components/ReviewItem";
 import { QUEST_TYPE_TEXT } from "@/components/state";
 import { btnPrimary } from "@/components/ui";
 import { loadDashboard, type Recommendation } from "@/lib/dashboard";
@@ -95,6 +96,16 @@ export default async function Dashboard() {
               </p>
             )}
           </div>
+          {d.daily.reviews.length > 0 && (
+            <div className="mt-4">
+              <p className="font-mono text-xs text-warn">refuerzos sugeridos por Claude</p>
+              <ul className="mt-2 space-y-1.5">
+                {d.daily.reviews.map((r) => (
+                  <ReviewItem key={r.id} id={r.id} topic={r.topic} />
+                ))}
+              </ul>
+            </div>
+          )}
         </Card>
 
         {/* ---------- Perfil ---------- */}

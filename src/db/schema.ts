@@ -316,8 +316,45 @@ export const interviewSessions = pgTable("interview_sessions", {
   rubric: jsonb("rubric"),
   feedbackMd: text("feedback_md"),
   modeSource: text("mode_source").notNull().default("manual"), // api | manual
+  /** Plan de la entrevista: preguntas, enunciado, entregable, foco (InterviewContext). */
+  context: jsonb("context").$type<Record<string, unknown>>(),
+  /** Prompt de Modo A generado para esta sesión. */
+  prompt: text("prompt"),
+  apiTokens: integer("api_tokens").notNull().default(0),
   ...timestamps,
 });
+
+/** Calificaciones de Claude para open_answer y revisión de evidencia de labs. */
+export const evaluations = pgTable(
+  "evaluations",
+  {
+    id: serial("id").primaryKey(),
+    questId: integer("quest_id").references(() => quests.id),
+    kind: text("kind").notNull(), // open_answer | lab_review
+    answer: text("answer").notNull(),
+    prompt: text("prompt").notNull(),
+    rawResponse: text("raw_response"),
+    score: integer("score"),
+    rubric: jsonb("rubric"),
+    modeSource: text("mode_source"), // api | manual
+    apiTokens: integer("api_tokens").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [index("evaluations_quest_idx").on(t.questId)],
+);
+
+/** Cola de refuerzo: los `gaps` de Claude se convierten en micro-tareas del día. */
+export const reviewQueue = pgTable(
+  "review_queue",
+  {
+    id: serial("id").primaryKey(),
+    topic: text("topic").notNull(),
+    source: text("source").notNull(), // ej. "interview:12" o "evaluation:4"
+    doneAt: timestamp("done_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [index("review_queue_done_idx").on(t.doneAt)],
+);
 
 export const interviewTurns = pgTable(
   "interview_turns",

@@ -1,0 +1,73 @@
+templates:
+  - slug: design-order-events
+    mode: system_design
+    title: "System design: order events pipeline"
+    zone: interview-arena
+    payload:
+      duration_min: 45
+      statement: |
+        Design the backend for order events at a large home-improvement retailer.
+        - Orders are placed online and in 2,000 stores: peak 3,000 orders per second.
+        - Payment, inventory, shipping and analytics teams need to react to order events.
+        - Customers must see "my last 20 orders" in under 100 ms.
+        - Analysts need daily reports over years of data.
+        - No order may be charged twice, and no event may be lost.
+        Deliver: components, events and topics, data stores and their keys, delivery guarantees, failure handling, observability, and the main trade-offs. You may draw a Mermaid diagram.
+      focus: ["Pub/Sub topics and subscriptions", "idempotency and the outbox pattern", "Cassandra data model", "BigQuery for analytics", "monitoring and alerting"]
+
+  - slug: design-inventory-sync
+    mode: system_design
+    title: "System design: real-time inventory sync"
+    zone: interview-arena
+    payload:
+      duration_min: 40
+      statement: |
+        Design a system that keeps product inventory in sync between 2,000 stores, warehouses and the website.
+        - Each store sends stock changes when items are sold or received (bursts at opening/closing).
+        - The website must not oversell popular items.
+        - Some stores lose connectivity for minutes or hours.
+        Deliver: event flow, consistency model, how you handle offline stores and duplicates, data model, and trade-offs.
+      focus: ["eventual vs strong consistency", "ordering and deduplication", "offline replay", "hot items / hot partitions"]
+
+  - slug: design-notifications
+    mode: system_design
+    title: "System design: customer notifications"
+    zone: interview-arena
+    payload:
+      duration_min: 35
+      statement: |
+        Design a notification service that sends email/SMS/push when an order changes status.
+        - 50 million notifications per day, with peaks during promotions.
+        - Customers have channel preferences and quiet hours.
+        - A third-party SMS provider sometimes fails or rate-limits.
+        Deliver: components, retry strategy, dead-letter handling, idempotency, and observability.
+      focus: ["retries with backoff and DLQ", "rate limiting third parties", "idempotent sends", "metrics and alerts"]
+
+  - slug: coding-orders-service
+    mode: coding_task
+    title: "Take-home: orders REST service"
+    zone: java-forest
+    payload:
+      duration_min: 90
+      statement: |
+        Build a small Spring Boot service (Java 21) with:
+        - POST /orders (validate customer and positive total) and GET /orders/{id} (404 if missing).
+        - An idempotency key header on POST: the same key must not create two orders.
+        - Unit tests for the service and a web-layer test for the controller.
+        - A short README explaining your decisions and what you would do for production.
+        Deliver the repository URL (or paste the main classes).
+      focus: ["validation and error handling", "idempotency implementation", "test quality", "production readiness"]
+
+  - slug: coding-idempotent-consumer
+    mode: coding_task
+    title: "Take-home: idempotent event consumer"
+    zone: event-harbor
+    payload:
+      duration_min: 75
+      statement: |
+        Write a Java consumer for PaymentRequested events (JSON) coming from Pub/Sub (the emulator is fine).
+        - Charge each payment exactly once even if the message is delivered several times.
+        - Messages with invalid data must go to a dead-letter path after 3 attempts.
+        - Include tests that prove duplicates are ignored.
+        Deliver the repository URL (or paste the main classes) and explain where you store the idempotency keys.
+      focus: ["deduplication strategy", "transaction boundaries and ack timing", "poison messages", "tests"]

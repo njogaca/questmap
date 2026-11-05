@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { addCustomResource, completeLearn, setResourceSeen } from "@/app/actions";
 import type { Reward } from "@/lib/game";
 import { LEARN_NOTE_MIN_CHARS } from "@/lib/rules";
-import { RichText } from "../RichText";
+import { BlockText } from "../BlockText";
 import { ErrorText, RewardBanner } from "../RewardBanner";
 import { btnGhost, btnPrimary } from "../ui";
 
@@ -74,9 +74,9 @@ export function LearnQuest({
       {summary && (
         <section className="rounded-md border-l-2 border-available bg-surface p-4">
           <p className="font-mono text-xs text-available">resumen</p>
-          <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">
-            <RichText text={summary} />
-          </p>
+          <div className="mt-1 text-sm leading-relaxed">
+            <BlockText text={summary} />
+          </div>
         </section>
       )}
       <section>

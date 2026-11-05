@@ -30,27 +30,27 @@ skills:
     name: Java / OOP
     description: Lenguaje orientado a objetos (preferiblemente Java)
     core: true
-    target_xp: 730 # REAL publicado (Z1 + labs de otras zonas): 677 + capstone milestone 1: 50
+    target_xp: 790 # REAL publicado con Z1–Z9 completas (2026-11-05): 788
   - code: eda
     name: Event-driven / Pub/Sub
     description: Event-driven y colas/streaming (Google Cloud Pub/Sub)
     core: true
-    target_xp: 760 # 875×.75 = 656 + capstone 100
+    target_xp: 640 # REAL publicado con Z1–Z9 completas (2026-11-05): 644
   - code: cassandra
     name: Apache Cassandra
     description: NoSQL, Apache Cassandra, alto throughput
     core: true
-    target_xp: 710 # 656 + capstone 50
+    target_xp: 580 # REAL publicado con Z1–Z9 completas (2026-11-05): 584
   - code: bigquery_sql
     name: BigQuery y SQL
     description: BigQuery y SQL, datasets grandes
     core: true
-    target_xp: 760 # REAL Z5 publicada (2026-11-05): 710 + capstone milestone 5: 50
+    target_xp: 750 # REAL publicado con Z1–Z9 completas (2026-11-05): 750
   - code: observability
     name: Observabilidad
     description: Prometheus + Grafana, métricas y alertas
     core: true
-    target_xp: 580 # REAL Z4 publicada (2026-11-05): 528 + capstone milestone 6: 50
+    target_xp: 570 # REAL publicado con Z1–Z9 completas (2026-11-05): 568
   - code: ai_tools
     name: Herramientas de IA
     description: Uso de herramientas de IA (Claude, asistentes LLM) en el desarrollo
@@ -60,32 +60,32 @@ skills:
     name: Microservicios en GCP
     description: Microservicios y cloud (GCP preferido)
     core: true
-    target_xp: 410 # REAL: Z6 379 + Z1 9 + capstone milestone 7 (×.5) 25
+    target_xp: 420 # REAL publicado con Z1–Z9 completas (2026-11-05): 417
   - code: cicd
     name: CI/CD
     description: CI/CD y pipelines de despliegue
     core: false
-    target_xp: 210 # REAL: Z6 187 + capstone milestone 7 (×.5) 25
+    target_xp: 210 # REAL publicado con Z1–Z9 completas (2026-11-05): 212
   - code: git
     name: Git
     description: Control de versiones
     core: false
-    target_xp: 28 # real Z1 (commits en labs: 4 labs × 50 × peso .1–.2 = 25) + margen; Johan ya domina Git
+    target_xp: 30 # REAL publicado con Z1–Z9 completas (2026-11-05): 30
   - code: debugging_rca
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
-    target_xp: 260 # REAL publicado: Z4 + Z7 + Z1 = 257
+    target_xp: 270 # REAL publicado con Z1–Z9 completas (2026-11-05): 267
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
-    target_xp: 490 # REAL publicado Z6 + Z7 = 466 + capstone milestone 8 (×.5) 25
+    target_xp: 510 # REAL publicado con Z1–Z9 completas (2026-11-05): 513
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance
     core: false
-    target_xp: 440 # REAL publicado Z1 + Z7 = 413 + capstone milestone 8 (×.5) 25
+    target_xp: 450 # REAL publicado con Z1–Z9 completas (2026-11-05): 448
   - code: english
     name: Inglés técnico
     description: Comunicación y entrevistas en inglés
@@ -95,4 +95,4 @@ skills:
     name: Sistemas distribuidos
     description: Teoría de sistemas distribuidos (base para todo lo anterior)
     core: false
-    target_xp: 1040 # XP real publicado al completar la Zona 8 (1042)
+    target_xp: 1100 # REAL publicado con Z1–Z9 completas (2026-11-05): 1100

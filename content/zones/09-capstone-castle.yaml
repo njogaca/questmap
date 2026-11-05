@@ -2,97 +2,1069 @@ slug: capstone-castle
 title: Capstone Castle
 order: 9
 emoji: "🏯"
-status: outline
 map: { x: 880, y: 400 }
 prerequisites:
   - { zone: java-forest, level: 4 }
   - { zone: event-harbor, level: 3 }
   - { zone: cassandra-caverns, level: 3 }
   - { zone: observability-observatory, level: 3 }
-skills: [ java, eda, cassandra, bigquery_sql, observability, microservices_gcp, cicd, security, testing, english ]
+skills: [ java, eda, cassandra, bigquery_sql, observability, microservices_gcp, cicd, security, testing, english, distributed_systems, debugging_rca, git ]
 story: >
   Sector 09. El castillo final. Construyes un sistema de órdenes completo, pieza por pieza, y al final lo defiendes en una entrevista. Puedes usar Claude Code, pero debes poder explicar cada parte.
 levels:
   - slug: capstone-1
     number: 1
-    title: "Milestones 1–2 — API de órdenes en Spring Boot que publica a Pub/Sub"
+    title: Milestones 1–2 — API de órdenes y eventos con transactional outbox
+    story: "Pones la primera piedra del castillo: una puerta por donde entran las órdenes y una torre que avisa al reino de cada una, sin perder ni un mensaje aunque la torre se caiga."
     quests:
+      - slug: capstone-1-learn-plan
+        type: learn
+        title: "El plano del castillo: arquitectura y reglas del proyecto"
+        required: true
+        estimated_min: 30
+        skills:
+          java: 0.4
+          eda: 0.3
+          english: 0.3
+        resources:
+          - ref: res-pattern-outbox
+          - ref: res-pattern-saga
+            required: false
+        payload:
+          note_prompt: "Antes de escribir código: dibuja (en papel o Mermaid) el camino de una orden desde el POST hasta la fila en Cassandra y la tabla en BigQuery. ¿En qué puntos se puede perder o duplicar?"
+          summary_md: |
+            Vas a construir **order-platform**, un proyecto de portafolio que junta todo lo que aprendiste. Es lo que vas a mostrar y defender en tus entrevistas.
+
+            ```text
+            cliente ──POST /v1/orders──▶ orders (Spring Boot + PostgreSQL)
+                                            │  misma transacción: orders + outbox
+                                            ▼
+                                     OutboxPublisher ──▶ Pub/Sub topic "orders"
+                                                              │
+                                           subscription "fulfillment-sub" (DLQ: orders-dlq)
+                                                              ▼
+                                         fulfillment (consumidor idempotente) ──▶ Cassandra (3 nodos)
+                                                              │
+                                                  export diario NDJSON ──▶ BigQuery (sandbox)
+
+            Prometheus + Grafana miden todo · Keycloak protege la API · GitHub Actions construye y despliega
+            ```
+
+            **Estructura del repo** (un monorepo en `$HOME\questmap-labs\order-platform`):
+            - `orders/` — API de órdenes (Spring Boot).
+            - `fulfillment/` — consumidor de eventos (Spring Boot).
+            - `infra/` — `docker-compose.yml` con PostgreSQL, el emulador de Pub/Sub, Cassandra, Prometheus, Grafana y Keycloak.
+            - `load/` — scripts de k6.
+            - `docs/` — diagramas y decisiones técnicas (ADR).
+
+            **Reglas del castillo:**
+            1. **Puedes usar Claude Code** (u otra IA) para escribir código. Pero cada milestone tiene la casilla "puedo explicar cada archivo que cambié": si no puedes, no la marques. La defensa final (milestone 10) lo comprueba.
+            2. **Cada milestone termina con un commit** (y, desde el 7, con un pipeline en verde). La evidencia es el hash del commit o la URL.
+            3. **Seguridad local:** todos los puertos en `127.0.0.1`, ningún secreto en git (`.env` en `.gitignore`).
+            4. **Commits pequeños** con mensajes en inglés, como en un equipo real.
+
+            Reutiliza lo que ya tienes: el servicio `orders` de Java Forest (con el repositorio JDBC de la Fortaleza), el emulador de Event Harbor, el cluster de Cassandra Caverns y el observatorio de Prometheus/Grafana.
       - slug: capstone-1-milestone-1
         type: lab
-        title: "Milestone 1: Servicio Spring Boot: API de órdenes"
+        title: "Milestone 1: API de órdenes lista para producción"
         required: true
+        estimated_min: 240
         skills:
-          java: 1
+          java: 0.7
+          testing: 0.2
+          git: 0.1
+        payload:
+          goal: "Crear el monorepo y dejar `orders` como una API REST seria: creación idempotente, validación, errores con Problem Details, persistencia en PostgreSQL y pruebas."
+          steps:
+            - title: Crea el monorepo
+              commands:
+                - New-Item -ItemType Directory -Force $HOME\questmap-labs\order-platform\infra, $HOME\questmap-labs\order-platform\docs, $HOME\questmap-labs\order-platform\load | Out-Null
+                - Set-Location $HOME\questmap-labs\order-platform; git init -b main
+                - "Copy-Item -Recurse $HOME\\questmap-labs\\orders .\\orders   # tu servicio de las zonas anteriores; quita su carpeta .git si la tiene"
+                - Remove-Item -Recurse -Force .\orders\.git -ErrorAction SilentlyContinue
+              body: Si prefieres empezar limpio, genera `orders` en start.spring.io (Java 21, dependencias `web,validation,jdbc,postgresql,actuator`) con `groupId=com.questmap` y `packageName=com.questmap.orders`.
+            - title: Infraestructura base
+              body: |
+                `infra/docker-compose.yml` (lo irás ampliando en cada milestone):
+
+                ```yaml
+                name: order-platform
+                services:
+                  postgres:
+                    image: postgres:16
+                    environment:
+                      POSTGRES_DB: orders
+                      POSTGRES_USER: orders
+                      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orders-local}
+                    ports: ["127.0.0.1:5450:5432"]
+                    volumes: ["pgdata:/var/lib/postgresql/data"]
+                    healthcheck:
+                      test: ["CMD-SHELL", "pg_isready -U orders"]
+                      interval: 5s
+                      retries: 20
+                volumes:
+                  pgdata:
+                ```
+
+                Y en `orders/src/main/resources/application.properties`:
+
+                ```properties
+                spring.datasource.url=jdbc:postgresql://localhost:5450/orders
+                spring.datasource.username=orders
+                spring.datasource.password=${POSTGRES_PASSWORD:orders-local}
+                spring.sql.init.mode=always
+                ```
+              commands:
+                - docker compose -f infra/docker-compose.yml up -d postgres
+            - title: El contrato de la API
+              body: |
+                Implementa (o adapta lo que ya tienes):
+
+                - `POST /v1/orders` → `201` con header `Location` y la orden. Requiere el header `Idempotency-Key`.
+                - `GET /v1/orders/{id}` → `200` o `404`.
+                - `GET /v1/orders?customer=ana&limit=20` → lista paginada, `limit` máximo 100.
+
+                Reglas:
+                - `customer` obligatorio, `total` > 0, `items` con al menos 1 elemento (`sku`, `quantity` > 0, `unitPrice` > 0). Valida con `@Valid` y Bean Validation.
+                - Errores en formato **Problem Details** (`ProblemDetail`, `application/problem+json`) con un `@RestControllerAdvice`: 400 para validación, 404 para no encontrada, 409 para conflictos de idempotencia.
+                - Nunca expongas la entidad: usa DTOs (`CreateOrderRequest`, `OrderResponse`).
+            - title: Idempotencia de verdad
+              body: |
+                `schema.sql`:
+
+                ```sql
+                CREATE TABLE IF NOT EXISTS orders (
+                  id          VARCHAR(64) PRIMARY KEY,
+                  customer    VARCHAR(200) NOT NULL,
+                  total       NUMERIC(12,2) NOT NULL CHECK (total > 0),
+                  status      VARCHAR(32) NOT NULL,
+                  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+                );
+                CREATE TABLE IF NOT EXISTS idempotency_keys (
+                  key           VARCHAR(100) PRIMARY KEY,
+                  request_hash  VARCHAR(64) NOT NULL,
+                  order_id      VARCHAR(64) NOT NULL REFERENCES orders(id),
+                  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+                );
+                ```
+
+                En `OrderService.create(...)`, dentro de una sola `@Transactional`:
+                1. Busca la clave. Si existe y el hash del cuerpo coincide → devuelve la orden existente (mismo 201 y mismo body). Si el hash es distinto → 409.
+                2. Si no existe → inserta la orden y la clave.
+                3. Si dos peticiones con la misma clave llegan a la vez, la PRIMARY KEY hace fallar a una: atrapa `DuplicateKeyException` y vuelve a leer.
+
+                (Por simplicidad, guarda los `items` como JSON en una columna `items JSONB` o en una tabla `order_items`; tú decides y lo justificas en el README.)
+            - title: Pruebas
+              body: |
+                Mínimo:
+                - Unitarias de `OrderService` (validaciones, idempotencia con un mock o fake del repositorio).
+                - `@WebMvcTest` del controller: 201 con `Location`, 400 con Problem Details, 404, 409.
+                - Una prueba que llame dos veces con la misma `Idempotency-Key` y verifique que hay UNA sola orden.
+              commands:
+                - Set-Location $HOME\questmap-labs\order-platform\orders; .\mvnw.cmd test
+            - title: Prueba manual
+              commands:
+                - .\mvnw.cmd spring-boot:run
+                - $key = [guid]::NewGuid().ToString(); $body = @{ customer = 'ana'; total = 59.98; items = @(@{ sku = 'drill-20v'; quantity = 2; unitPrice = 29.99 }) } | ConvertTo-Json -Depth 4
+                - Invoke-RestMethod -Method Post http://localhost:8080/v1/orders -ContentType 'application/json' -Headers @{ 'Idempotency-Key' = $key } -Body $body
+                - "Invoke-RestMethod -Method Post http://localhost:8080/v1/orders -ContentType 'application/json' -Headers @{ 'Idempotency-Key' = $key } -Body $body   # mismo id"
+            - title: Commit
+              commands:
+                - 'Set-Location $HOME\questmap-labs\order-platform; git add .; git commit -m "orders: idempotent order API with problem details and tests"'
+          expected: "Las dos llamadas con la misma clave devuelven la MISMA orden y en la tabla `orders` hay una sola fila. Un POST con `total: 0` devuelve 400 con `application/problem+json`. `mvnw test` en verde."
+          checklist:
+            - POST, GET por id y listado paginado funcionan
+            - "Idempotency-Key: misma clave y mismo cuerpo → misma orden; cuerpo distinto → 409"
+            - Errores con Problem Details
+            - Pruebas unitarias y de controller en verde
+            - Ningún puerto publicado fuera de 127.0.0.1 y ningún secreto en git
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - Spring Boot 4 usa Jackson 3 (paquete `tools.jackson`). Si copias código viejo con `com.fasterxml.jackson.databind.ObjectMapper`, cámbialo por el `JsonMapper` que Spring te inyecta.
+            - 'Para el hash del cuerpo: serializa el request a JSON y aplica SHA-256 (`MessageDigest.getInstance("SHA-256")`).'
+            - '`ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "order not found")` y devuélvelo desde un `@ExceptionHandler`.'
+          evidence_hint: Pega el hash del commit y la salida de las dos llamadas con la misma Idempotency-Key.
       - slug: capstone-1-milestone-2
         type: lab
-        title: "Milestone 2: Publicar eventos a Pub/Sub (emulador)"
+        title: "Milestone 2: publicar OrderPlaced con transactional outbox"
         required: true
+        estimated_min: 240
         skills:
-          eda: 1
+          eda: 0.8
+          java: 0.2
+        resources:
+          - ref: res-pattern-outbox
+          - ref: res-pubsub-emulator
+        payload:
+          goal: "Cada orden creada genera un evento `OrderPlaced` en Pub/Sub sin 'dual write': el evento se guarda en una tabla outbox en la MISMA transacción que la orden y un publicador lo envía después."
+          steps:
+            - title: Emulador de Pub/Sub en el compose
+              body: |
+                Agrega a `infra/docker-compose.yml`:
+
+                ```yaml
+                  pubsub:
+                    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+                    command: gcloud beta emulators pubsub start --project=order-platform --host-port=0.0.0.0:8085
+                    ports: ["127.0.0.1:8085:8085"]
+                ```
+              commands:
+                - docker compose -f infra/docker-compose.yml up -d pubsub
+            - title: Script de bootstrap de topics
+              body: |
+                `infra/pubsub-bootstrap.ps1` (el emulador no guarda nada al reiniciarse, así que lo correrás cada vez):
+
+                ```powershell
+                $base = 'http://localhost:8085/v1/projects/order-platform'
+                Invoke-RestMethod -Method Put -Uri "$base/topics/orders" | Out-Null
+                Invoke-RestMethod -Method Put -Uri "$base/topics/orders-dlq" | Out-Null
+                Invoke-RestMethod -Method Put -Uri "$base/subscriptions/orders-dlq-sub" -ContentType 'application/json' `
+                  -Body (@{ topic = 'projects/order-platform/topics/orders-dlq' } | ConvertTo-Json) | Out-Null
+                Invoke-RestMethod -Method Put -Uri "$base/subscriptions/fulfillment-sub" -ContentType 'application/json' `
+                  -Body (@{ topic = 'projects/order-platform/topics/orders'; ackDeadlineSeconds = 20;
+                            deadLetterPolicy = @{ deadLetterTopic = 'projects/order-platform/topics/orders-dlq'; maxDeliveryAttempts = 5 } } | ConvertTo-Json -Depth 4) | Out-Null
+                Invoke-RestMethod -Method Put -Uri "$base/subscriptions/debug-sub" -ContentType 'application/json' `
+                  -Body (@{ topic = 'projects/order-platform/topics/orders' } | ConvertTo-Json) | Out-Null
+                'topics y subscriptions listos'
+                ```
+
+                `debug-sub` te sirve para mirar los eventos sin afectar al consumidor real.
+              commands:
+                - Set-Location $HOME\questmap-labs\order-platform; .\infra\pubsub-bootstrap.ps1
+            - title: La tabla outbox
+              body: |
+                ```sql
+                CREATE TABLE IF NOT EXISTS outbox (
+                  event_id      VARCHAR(64) PRIMARY KEY,
+                  aggregate_id  VARCHAR(64) NOT NULL,
+                  event_type    VARCHAR(64) NOT NULL,
+                  payload       JSONB NOT NULL,
+                  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+                  published_at  TIMESTAMPTZ
+                );
+                CREATE INDEX IF NOT EXISTS outbox_pending ON outbox (created_at) WHERE published_at IS NULL;
+                ```
+
+                En la misma `@Transactional` de `create(...)`, inserta la fila del outbox. Si la transacción falla, no queda ni la orden ni el evento; si se confirma, quedan los dos.
+            - title: El evento (contrato versionado)
+              body: |
+                ```json
+                {
+                  "eventId": "5b0d…",
+                  "eventType": "OrderPlaced",
+                  "version": 1,
+                  "occurredAt": "2026-11-05T18:30:00Z",
+                  "orderId": "…",
+                  "customer": "ana",
+                  "total": 59.98,
+                  "items": [{ "sku": "drill-20v", "quantity": 2, "unitPrice": 29.99 }]
+                }
+                ```
+
+                Atributos del mensaje: `eventType=OrderPlaced`, `version=1`. Usa `customer` como **ordering key** si quieres orden por cliente (y explica el costo en el README). Guarda el contrato en `docs/events/order-placed.v1.json`.
+            - title: OutboxPublisher
+              body: |
+                Agrega `com.google.cloud:google-cloud-pubsub` (con el BOM `libraries-bom`, como en Event Harbor). Un `@Scheduled(fixedDelay = 1000)` (con `@EnableScheduling`):
+
+                1. Lee hasta 100 filas con `published_at IS NULL` ordenadas por `created_at` (`FOR UPDATE SKIP LOCKED` si algún día corres varias instancias).
+                2. Publica cada una y espera el `ApiFuture` (con timeout).
+                3. Marca `published_at = now()` SOLO si la publicación se confirmó.
+
+                Así la entrega es **al-menos-una-vez**: si el proceso cae entre publicar y marcar, el evento se vuelve a publicar. Por eso el consumidor del milestone 3 debe ser idempotente (por `eventId`).
+
+                Con el emulador, crea el `Publisher` con el canal sin credenciales que usaste en Event Harbor, pero solo cuando exista `PUBSUB_EMULATOR_HOST`; sin esa variable, usa las credenciales por defecto (lo necesitarás en Cloud Run).
+            - title: Pruébalo
+              commands:
+                - $env:PUBSUB_EMULATOR_HOST = 'localhost:8085'; Set-Location orders; .\mvnw.cmd spring-boot:run
+                - "# en otra ventana: crea 3 órdenes con Invoke-RestMethod (como en el milestone 1) y luego:"
+                - $r = Invoke-RestMethod -TimeoutSec 15 -Method Post -Uri 'http://localhost:8085/v1/projects/order-platform/subscriptions/debug-sub:pull' -ContentType 'application/json' -Body '{"maxMessages":10}'
+                - $r.receivedMessages | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_.message.data)) }
+            - title: Prueba la resiliencia
+              body: Detén el emulador (`docker compose -f infra/docker-compose.yml stop pubsub`), crea 2 órdenes (la API debe seguir respondiendo 201), revisa que las filas del outbox quedan pendientes, vuelve a levantar el emulador, corre el bootstrap y comprueba que el publicador las envía solo.
+              commands:
+                - docker exec -it order-platform-postgres-1 psql -U orders -c "SELECT event_id, published_at FROM outbox ORDER BY created_at DESC LIMIT 5;"
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "orders: publish OrderPlaced events via transactional outbox"'
+          expected: Cada orden produce un evento en `debug-sub` con su `eventId`. Con el emulador detenido, la API sigue respondiendo 201 y las filas del outbox quedan con `published_at` vacío; al volver el emulador se publican solas, sin perder ninguna.
+          checklist:
+            - Orden y fila del outbox se guardan en la misma transacción
+            - El publicador marca como publicado solo después de la confirmación
+            - Con Pub/Sub caído, la API sigue aceptando órdenes y nada se pierde
+            - El contrato del evento está versionado en docs/events
+            - Puedo explicar por qué esto es al-menos-una-vez y no exactamente-una-vez
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - "Si el pull se queda esperando, es normal cuando no hay mensajes: el emulador hace long polling. Por eso el `-TimeoutSec 15`."
+            - "El emulador olvida topics y subscriptions al reiniciarse: vuelve a correr `infra\\pubsub-bootstrap.ps1`."
+            - "Para la prueba de integración del outbox, Testcontainers con Postgres (milestone 8) es ideal: verifica que tras `create` hay exactamente una fila en `orders` y una en `outbox`."
+          evidence_hint: Pega el hash del commit, un evento leído de debug-sub y la consulta del outbox antes y después de levantar el emulador.
   - slug: capstone-2
     number: 2
-    title: "Milestones 3–4 — Consumidor idempotente con DLQ y Cassandra"
+    title: Milestones 3–4 — Consumidor idempotente con DLQ y Cassandra
+    story: "Al otro lado del foso, los almacenes del castillo reciben cada aviso. Algunos llegan dos veces, otros vienen rotos: el almacén no debe contar doble ni detenerse por un mensaje envenenado."
     quests:
       - slug: capstone-2-milestone-3
         type: lab
-        title: "Milestone 3: Consumidor idempotente con DLQ"
+        title: "Milestone 3: consumidor idempotente con dead-letter topic"
         required: true
+        estimated_min: 240
         skills:
-          eda: 1
+          eda: 0.7
+          distributed_systems: 0.2
+          java: 0.1
+        resources:
+          - ref: res-pubsub-dead-letter
+          - ref: res-pubsub-flow-control
+        payload:
+          goal: Crear el servicio `fulfillment`, que consume `OrderPlaced` de `fulfillment-sub`, procesa cada evento UNA sola vez aunque llegue duplicado y deja los mensajes envenenados en `orders-dlq` sin bloquear al resto.
+          steps:
+            - title: Genera el servicio
+              commands:
+                - Set-Location $HOME\questmap-labs\order-platform
+                - Invoke-WebRequest "https://start.spring.io/starter.zip?type=maven-project&language=java&javaVersion=21&groupId=com.questmap&artifactId=fulfillment&name=fulfillment&packageName=com.questmap.fulfillment&dependencies=web,actuator" -OutFile fulfillment.zip; Expand-Archive fulfillment.zip -DestinationPath fulfillment; Remove-Item fulfillment.zip
+              body: Usa el puerto 8082 (`server.port=8082`) para no chocar con `orders` (8080). Agrega `google-cloud-pubsub` con el BOM, como en `orders`.
+            - title: Diseño del consumidor
+              body: |
+                Separa responsabilidades para poder probar sin Pub/Sub:
+
+                - `OrderPlacedHandler.handle(OrderPlacedEvent e)`: la lógica de negocio (en este milestone, registrar la orden; en el 4, escribir en Cassandra).
+                - `ProcessedEvents` (interfaz): `boolean markIfNew(String eventId)` → `true` si es la primera vez. Implementación en memoria ahora; en Cassandra en el milestone 4.
+                - `PubSubListener`: crea el `Subscriber` en un `SmartLifecycle` (arranca y se detiene con Spring), con **flow control** (`setMaxOutstandingElementCount(50L)`), y en el `MessageReceiver`:
+
+                ```java
+                try {
+                    OrderPlacedEvent e = parse(message);          // JSON inválido → PoisonMessageException
+                    if (processed.markIfNew(e.eventId())) {
+                        handler.handle(e);
+                    } else {
+                        log.info("duplicate event {} skipped", e.eventId());
+                    }
+                    consumer.ack();
+                } catch (PoisonMessageException ex) {
+                    log.warn("poison message {}: {}", message.getMessageId(), ex.getMessage());
+                    consumer.nack();   // tras 5 entregas, Pub/Sub lo manda a orders-dlq
+                } catch (Exception ex) {
+                    log.error("transient failure, will retry", ex);
+                    consumer.nack();
+                }
+                ```
+
+                Ojo con el orden: si marcas el evento como procesado y luego `handle` falla, perderías el evento. Piensa (y documenta) cuál es el orden correcto para tu caso; la versión robusta del milestone 4 hace las dos cosas en una sola escritura condicional.
+            - title: Pruebas sin infraestructura
+              body: |
+                Pruebas unitarias de la lógica del receiver (puedes extraerla a un método que reciba `PubsubMessage` y devuelva `ACK`/`NACK`):
+                - Evento nuevo → `handle` se llama una vez y ACK.
+                - Mismo `eventId` dos veces → `handle` se llama UNA vez, ambos ACK.
+                - JSON roto → NACK y `handle` nunca se llama.
+            - title: Pruébalo de punta a punta
+              commands:
+                - .\infra\pubsub-bootstrap.ps1
+                - $env:PUBSUB_EMULATOR_HOST = 'localhost:8085'; Set-Location fulfillment; .\mvnw.cmd spring-boot:run
+                - "# crea órdenes desde orders y mira los logs de fulfillment"
+            - title: Provoca un duplicado
+              body: Publica a mano el MISMO evento dos veces (copia el JSON de un evento real de `debug-sub`). En los logs debe aparecer una vez el procesamiento y una vez `duplicate event … skipped`.
+              commands:
+                - $data = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($eventoJson))
+                - 1..2 | ForEach-Object { Invoke-RestMethod -Method Post -Uri 'http://localhost:8085/v1/projects/order-platform/topics/orders:publish' -ContentType 'application/json' -Body (@{ messages = @(@{ data = $data; attributes = @{ eventType = 'OrderPlaced'; version = '1' } }) } | ConvertTo-Json -Depth 5) }
+            - title: Provoca un mensaje envenenado
+              commands:
+                - "$bad = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('{\"eventId\": 42, \"broken\": '))"
+                - Invoke-RestMethod -Method Post -Uri 'http://localhost:8085/v1/projects/order-platform/topics/orders:publish' -ContentType 'application/json' -Body (@{ messages = @(@{ data = $bad }) } | ConvertTo-Json -Depth 5)
+                - "# espera ~1 minuto (5 entregas con nack) y revisa la DLQ:"
+                - $d = Invoke-RestMethod -TimeoutSec 15 -Method Post -Uri 'http://localhost:8085/v1/projects/order-platform/subscriptions/orders-dlq-sub:pull' -ContentType 'application/json' -Body '{"maxMessages":10}'
+                - $d.receivedMessages.message.attributes
+            - title: Script para revisar la DLQ
+              body: Crea `infra/dlq-peek.ps1` que haga pull de `orders-dlq-sub`, muestre el contenido decodificado y los atributos, y NO haga ack (para inspeccionar sin borrar). Documenta en el README qué haría un operador con esos mensajes (corregir y republicar, o descartar).
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "fulfillment: idempotent Pub/Sub consumer with dead-letter handling"'
+          expected: "Cada orden nueva aparece una vez en los logs de fulfillment. El evento duplicado se salta con `duplicate event … skipped`. El mensaje roto llega a `orders-dlq-sub` con atributos como `CloudPubSubDeadLetterSourceDeliveryCount: 5` y `CloudPubSubDeadLetterSourceSubscription: fulfillment-sub`, y los demás mensajes siguen procesándose."
+          checklist:
+            - fulfillment consume con flow control y se apaga limpio con Spring
+            - Los duplicados se detectan por eventId (no por messageId)
+            - El mensaje envenenado termina en la DLQ tras 5 entregas
+            - Pruebas unitarias de ACK/NACK en verde
+            - Puedo explicar qué pasa si el proceso cae entre handle y ack
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - El `messageId` cambia si el outbox REPUBLICA el mismo evento; el `eventId` no. Por eso la idempotencia va por `eventId`.
+            - Un `nack()` hace que Pub/Sub reentregue enseguida. Si quieres espaciar los reintentos, configura `retryPolicy` (minimumBackoff/maximumBackoff) en la subscription.
+            - El emulador sí soporta dead-letter topics (y agrega los atributos CloudPubSubDeadLetter*).
+          evidence_hint: Pega el hash del commit, las líneas de log del duplicado y los atributos del mensaje en la DLQ.
       - slug: capstone-2-milestone-4
         type: lab
-        title: "Milestone 4: Persistencia en Cassandra (3 nodos)"
+        title: "Milestone 4: modelo de lectura en Cassandra (3 nodos)"
         required: true
+        estimated_min: 240
         skills:
-          cassandra: 1
+          cassandra: 0.8
+          distributed_systems: 0.2
+        resources:
+          - ref: res-cassandra-data-modeling
+        payload:
+          goal: Guardar las órdenes procesadas en un cluster de Cassandra de 3 nodos con tablas diseñadas por consulta, hacer la idempotencia con una escritura condicional y demostrar que el servicio sigue funcionando con un nodo caído.
+          steps:
+            - title: Cluster en el compose
+              body: |
+                Agrega a `infra/docker-compose.yml` los 3 nodos que armaste en Cassandra Caverns (`cassandra:5.0`, `CASSANDRA_DC: dc1`, `GossipingPropertyFileSnitch`, `MAX_HEAP_SIZE: 512M`), arrancando en cadena con healthchecks. Publica solo `cass1` en `127.0.0.1:9042`.
+
+                Necesitas unos 3 GB libres de RAM para Docker. Si tu PC sufre, usa `MAX_HEAP_SIZE: 384M` / `HEAP_NEWSIZE: 96M`.
+              commands:
+                - docker compose -f infra/docker-compose.yml up -d cass1 cass2 cass3
+                - "docker exec order-platform-cass1-1 nodetool status   # espera 3 nodos UN (3–5 min)"
+            - title: Modelo de datos por consulta
+              body: |
+                `infra/cassandra/schema.cql`:
+
+                ```sql
+                CREATE KEYSPACE IF NOT EXISTS fulfillment
+                  WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3};
+
+                -- Consulta: "las últimas órdenes de un cliente"
+                CREATE TABLE IF NOT EXISTS fulfillment.orders_by_customer (
+                  customer   text,
+                  created_at timestamp,
+                  order_id   text,
+                  total      decimal,
+                  items      text,
+                  status     text,
+                  PRIMARY KEY ((customer), created_at, order_id)
+                ) WITH CLUSTERING ORDER BY (created_at DESC, order_id ASC);
+
+                -- Consulta: "detalle de una orden por id"
+                CREATE TABLE IF NOT EXISTS fulfillment.orders_by_id (
+                  order_id   text PRIMARY KEY,
+                  customer   text,
+                  created_at timestamp,
+                  total      decimal,
+                  items      text,
+                  status     text
+                );
+
+                -- Idempotencia: eventos ya procesados (se olvidan a los 7 días)
+                CREATE TABLE IF NOT EXISTS fulfillment.processed_events (
+                  event_id     text PRIMARY KEY,
+                  processed_at timestamp
+                ) WITH default_time_to_live = 604800;
+                ```
+              commands:
+                - Get-Content infra\cassandra\schema.cql | docker exec -i order-platform-cass1-1 cqlsh
+            - title: Conecta fulfillment
+              body: |
+                Agrega `spring-boot-starter-data-cassandra` y en `application.properties`:
+
+                ```properties
+                spring.cassandra.contact-points=localhost:9042
+                spring.cassandra.local-datacenter=dc1
+                spring.cassandra.keyspace-name=fulfillment
+                spring.cassandra.request.consistency=local_quorum
+                ```
+
+                Implementa `CassandraProcessedEvents.markIfNew(eventId)` con una **lightweight transaction**:
+
+                ```sql
+                INSERT INTO processed_events (event_id, processed_at) VALUES (?, toTimestamp(now())) IF NOT EXISTS;
+                ```
+
+                `wasApplied()` en el resultado te dice si era nuevo. Las LWT usan Paxos (consenso, como viste en la Ciudadela): son más lentas, por eso solo las usas para esta tabla.
+
+                El handler escribe la orden en las DOS tablas con un `BATCH` lógico (`BatchType.LOGGED`), porque son la misma orden en dos vistas.
+            - title: Endpoints de lectura
+              body: "`GET /v1/customers/{customer}/orders?limit=20` (lee `orders_by_customer`, un solo partition) y `GET /v1/fulfillment/orders/{id}` (lee `orders_by_id`). Nunca uses `ALLOW FILTERING`."
+            - title: Pruébalo con un nodo caído
+              commands:
+                - docker stop order-platform-cass3-1
+                - "# crea 3 órdenes desde orders y consulta en fulfillment:"
+                - Invoke-RestMethod http://localhost:8082/v1/customers/ana/orders
+                - docker start order-platform-cass3-1
+              body: Con LOCAL_QUORUM (2 de 3 réplicas) todo debe seguir funcionando. Después cambia temporalmente la consistencia a `all`, repite y observa el error. Vuelve a `local_quorum`.
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "fulfillment: Cassandra read model with LWT-based idempotency"'
+          expected: nodetool status muestra 3 nodos UN. Las órdenes aparecen en `GET /v1/customers/ana/orders` de la más nueva a la más vieja. Con cass3 detenido, LOCAL_QUORUM sigue funcionando; con ALL, las escrituras fallan con un error de consistencia. Un evento duplicado no crea filas extra porque la LWT devuelve `[applied] = False`.
+          checklist:
+            - Keyspace con RF=3 y tablas diseñadas por consulta
+            - Idempotencia con INSERT … IF NOT EXISTS
+            - Endpoints de lectura sin ALLOW FILTERING
+            - Probé con un nodo caído con LOCAL_QUORUM y con ALL
+            - Puedo explicar por qué hay dos tablas para la misma orden
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - Si el driver dice 'No node was available', revisa `local-datacenter=dc1` (debe coincidir con `CASSANDRA_DC`).
+            - Si las LWT fallan con timeout al arrancar, espera a que los 3 nodos estén UN.
+            - La partición `customer` puede crecer sin límite para un cliente enorme; menciónalo como trade-off (bucketing por mes) en el README.
+          evidence_hint: Pega el hash del commit, la salida de nodetool status y la respuesta del endpoint con cass3 detenido.
   - slug: capstone-3
     number: 3
-    title: "Milestones 5–6 — Exportación a BigQuery, Prometheus y Grafana"
+    title: Milestones 5–6 — Exportación a BigQuery, Prometheus y Grafana
+    story: Los escribas del castillo llevan las cuentas del reino a la gran biblioteca, y en la torre de vigía se encienden los faroles que avisan cuando algo arde.
     quests:
       - slug: capstone-3-milestone-5
         type: lab
-        title: "Milestone 5: Exportación a BigQuery"
+        title: "Milestone 5: exportación diaria a BigQuery y análisis"
         required: true
+        estimated_min: 180
         skills:
-          bigquery_sql: 1
+          bigquery_sql: 0.8
+          java: 0.2
+        resources:
+          - ref: res-bq-sandbox
+          - ref: res-bq-partitioned
+        payload:
+          goal: Exportar las órdenes de fulfillment a un archivo NDJSON, cargarlo en una tabla particionada de BigQuery (sandbox, sin tarjeta) y responder tres preguntas de negocio con SQL, cuidando los bytes procesados.
+          steps:
+            - title: Genera datos suficientes
+              body: Con 5 órdenes no se analiza nada. Escribe `load/seed-orders.ps1` que cree ~300 órdenes vía la API de `orders` (10 clientes, 15 SKUs, cantidades y precios al azar). Úsalo también para las pruebas de carga después.
+            - title: El exportador
+              body: |
+                En `fulfillment`, un `ExportJob` que se activa con el perfil `export` (un `CommandLineRunner` con `@Profile("export")`) y escribe `exports/orders-YYYY-MM-DD.ndjson`, una orden por línea:
+
+                ```json
+                {"order_id":"…","customer":"ana","order_date":"2026-11-05","created_at":"2026-11-05T18:30:00Z","total":59.98,"items":[{"sku":"drill-20v","quantity":2,"unit_price":29.99}]}
+                ```
+
+                - `order_date` como fecha (será la columna de partición).
+                - `items` como arreglo (en BigQuery será `ARRAY<STRUCT<…>>`).
+                - Lee de `orders_by_id` paginando (no cargues todo en memoria). Agrega `exports/` al `.gitignore`.
+
+                Como el sandbox borra particiones de más de 60 días, usa fechas recientes (las órdenes se crean hoy, así que está bien).
+              commands:
+                - Set-Location $HOME\questmap-labs\order-platform\fulfillment; .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=export"
+                - Get-Content exports\orders-*.ndjson -TotalCount 3
+            - title: Crea la tabla y carga el archivo (consola)
+              body: |
+                En https://console.cloud.google.com/bigquery, en tu proyecto del sandbox:
+                1. Crea el dataset `capstone` (ubicación US).
+                2. Create table → Source: **Upload** → tu `.ndjson` → File format: **JSONL (Newline delimited JSON)**.
+                3. Tabla `orders`. Schema: **Edit as text** y pega:
+
+                ```json
+                [
+                  {"name":"order_id","type":"STRING","mode":"REQUIRED"},
+                  {"name":"customer","type":"STRING","mode":"REQUIRED"},
+                  {"name":"order_date","type":"DATE","mode":"REQUIRED"},
+                  {"name":"created_at","type":"TIMESTAMP","mode":"REQUIRED"},
+                  {"name":"total","type":"NUMERIC","mode":"REQUIRED"},
+                  {"name":"items","type":"RECORD","mode":"REPEATED","fields":[
+                    {"name":"sku","type":"STRING"},
+                    {"name":"quantity","type":"INT64"},
+                    {"name":"unit_price","type":"NUMERIC"}
+                  ]}
+                ]
+                ```
+
+                4. Partitioning: by field `order_date`. Clustering: `customer`.
+            - title: Tres preguntas de negocio
+              body: |
+                Guarda cada consulta en `docs/analytics/*.sql` con el resultado y los bytes procesados (el validador lo muestra antes de correr):
+
+                1. **Ingreso y ticket promedio por día** de los últimos 7 días (filtra por `order_date` para podar particiones).
+                2. **Top 5 SKUs por unidades vendidas** (necesitas `UNNEST(items)`).
+                3. **Ranking de clientes por gasto** con su porcentaje del total y el puesto (`RANK() OVER`, `SUM() OVER ()`).
+
+                Luego compara los bytes de la consulta 1 con y sin el filtro de `order_date`.
+            - title: Reconciliación
+              body: "Comprueba que el número de filas y la suma de `total` en BigQuery coinciden con PostgreSQL (`SELECT count(*), sum(total) FROM orders;` en orders). Si no coinciden, investiga antes de seguir: es exactamente lo que harías en un pipeline real."
+            - title: Commit
+              commands:
+                - 'Set-Location $HOME\questmap-labs\order-platform; git add .; git commit -m "fulfillment: daily NDJSON export and BigQuery analytics"'
+          expected: "La tabla `capstone.orders` está particionada por `order_date` y agrupada por `customer`. Las tres consultas devuelven resultados coherentes, y la consulta con filtro de fecha procesa menos bytes (o igual, si todo cae en una sola partición: explica por qué). Los conteos y sumas coinciden con PostgreSQL."
+          checklist:
+            - El exportador escribe NDJSON paginando, con items como arreglo
+            - Tabla particionada por order_date y agrupada por customer
+            - Tres consultas guardadas en docs/analytics con bytes procesados
+            - La reconciliación con PostgreSQL cuadra
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - Si la carga falla con 'JSON parsing error', revisa que cada línea sea un objeto completo y que no haya una coma al final.
+            - NUMERIC acepta 59.98 sin problemas de redondeo; FLOAT64 no es buena idea para dinero.
+            - Para automatizarlo de verdad usarías un load job con la librería `google-cloud-bigquery` o una BigQuery subscription de Pub/Sub; menciónalo como 'siguiente paso' en el README.
+          evidence_hint: Pega el hash del commit, la consulta 3 con su resultado y los bytes procesados con y sin filtro de fecha.
       - slug: capstone-3-milestone-6
         type: lab
-        title: "Milestone 6: Métricas Prometheus, dashboard Grafana y 2 alertas"
+        title: "Milestone 6: métricas, dashboard y 2 alertas"
         required: true
+        estimated_min: 240
         skills:
-          observability: 1
+          observability: 0.8
+          debugging_rca: 0.2
+        resources:
+          - ref: res-micrometer-concepts
+          - ref: res-prometheus-alerting-rules
+          - ref: res-grafana-provisioning
+        payload:
+          goal: Instrumentar los dos servicios con métricas de negocio y de salud, verlos en un dashboard de Grafana versionado en git y tener dos alertas útiles que puedas disparar a propósito.
+          steps:
+            - title: Métricas en los servicios
+              body: |
+                Agrega `micrometer-registry-prometheus` y expón `/actuator/prometheus` en ambos (`management.endpoints.web.exposure.include=health,info,prometheus`). Además de las métricas HTTP automáticas, crea:
+
+                En Micrometer los nombres van con puntos; Prometheus los convierte (agrega `_total` a los counters y `_seconds` a los timers):
+
+                **orders**
+                - `orders.created` (counter) → `orders_created_total`
+                - `outbox.pending` (gauge: filas con `published_at IS NULL`) → `outbox_pending`
+                - `outbox.publish` (timer con histograma) → `outbox_publish_seconds_*`
+
+                **fulfillment**
+                - `events.processed` con tag `result=ok|duplicate|poison|error` (counter) → `events_processed_total`
+                - `event.processing` (timer con histograma) → `event_processing_seconds_*`
+                - `event.lag` (timer: `now - occurredAt` del evento) → `event_lag_seconds_*`
+
+                Mantén la cardinalidad baja: nada de `orderId` ni `customer` como label.
+            - title: Prometheus y Grafana en el compose
+              body: |
+                `infra/prometheus/prometheus.yml`:
+
+                ```yaml
+                global:
+                  scrape_interval: 5s
+                rule_files: ["/etc/prometheus/alerts.yml"]
+                scrape_configs:
+                  - job_name: orders
+                    metrics_path: /actuator/prometheus
+                    static_configs: [{ targets: ["host.docker.internal:8080"] }]
+                  - job_name: fulfillment
+                    metrics_path: /actuator/prometheus
+                    static_configs: [{ targets: ["host.docker.internal:8082"] }]
+                ```
+
+                Agrega `prometheus` (127.0.0.1:9090, con `extra_hosts: ["host.docker.internal:host-gateway"]`) y `grafana` (127.0.0.1:3001, con el datasource provisionado), igual que en el Observatory, montando también `alerts.yml`.
+            - title: Dos alertas
+              body: |
+                `infra/prometheus/alerts.yml`:
+
+                ```yaml
+                groups:
+                  - name: order-platform
+                    rules:
+                      - alert: OrdersHighErrorRate
+                        expr: |
+                          sum(rate(http_server_requests_seconds_count{job="orders", status=~"5.."}[5m]))
+                            / sum(rate(http_server_requests_seconds_count{job="orders"}[5m])) > 0.05
+                        for: 2m
+                        labels: { severity: page }
+                        annotations:
+                          summary: "orders: more than 5% of requests are failing"
+                          runbook: "docs/runbooks/orders-errors.md"
+                      - alert: OutboxBacklogGrowing
+                        expr: max(outbox_pending) > 50
+                        for: 2m
+                        labels: { severity: ticket }
+                        annotations:
+                          summary: "Events are not reaching Pub/Sub (outbox backlog > 50)"
+                          runbook: "docs/runbooks/outbox-backlog.md"
+                ```
+
+                Escribe los dos runbooks en `docs/runbooks/`: qué significa, cómo confirmarlo, qué hacer y cómo escalar.
+            - title: Dashboard versionado
+              body: |
+                Arma en Grafana un dashboard "Order Platform" con, al menos:
+                - Órdenes por minuto (`rate(orders_created_total[1m])`)
+                - p95 de latencia de `POST /v1/orders` (`histogram_quantile`)
+                - % de errores 5xx
+                - `outbox_pending`
+                - Eventos procesados por resultado (apilado)
+                - p95 del lag de eventos
+
+                Exporta el JSON (Share → Export → Save to file) a `infra/grafana/dashboards/order-platform.json` y provisiónalo con un provider de dashboards, para que aparezca solo al levantar el compose.
+            - title: Dispara las alertas a propósito
+              body: "1) Detén el emulador de Pub/Sub y genera 60+ órdenes con `load\\seed-orders.ps1`: `OutboxBacklogGrowing` debe pasar a Pending y luego a Firing (http://localhost:9090/alerts). 2) Detén PostgreSQL y genera tráfico: `OrdersHighErrorRate`. Vuelve a levantar todo y verifica que se resuelven."
+              commands:
+                - docker compose -f infra/docker-compose.yml stop pubsub
+                - .\load\seed-orders.ps1
+                - Start-Process http://localhost:9090/alerts
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "observability: custom metrics, provisioned Grafana dashboard and alerts"'
+          expected: Los dos targets aparecen UP en Prometheus. El dashboard aparece solo al levantar Grafana. Con Pub/Sub detenido, `outbox_pending` sube y la alerta pasa de Pending a Firing tras 2 minutos; al levantarlo, el backlog baja a 0 y la alerta se resuelve.
+          checklist:
+            - Métricas de negocio y técnicas en los dos servicios, sin labels de alta cardinalidad
+            - Dashboard exportado a JSON y provisionado desde git
+            - Dos alertas con runbook, y vi ambas en Firing
+            - Puedo explicar por qué uso rate() sobre counters y histogram_quantile para el p95
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - Si un target aparece DOWN, prueba la URL desde el navegador (http://localhost:8082/actuator/prometheus) y revisa `extra_hosts`.
+            - 'Para el histograma de un Timer: `Timer.builder("event.processing").publishPercentileHistogram().register(registry)`.'
+            - Si quieres notificaciones, agrega Alertmanager como en el Observatory; no es obligatorio para este milestone.
+          evidence_hint: Pega el hash del commit, una captura o descripción del dashboard y el estado Firing de las dos alertas.
   - slug: capstone-4
     number: 4
-    title: "Milestones 7–8 — GitHub Actions a Cloud Run, JWT, Testcontainers y k6"
+    title: Milestones 7–8 — GitHub Actions a Cloud Run, JWT, Testcontainers y k6
+    story: Las murallas se levantan solas cada vez que el maestro de obras entrega un plano nuevo, y solo quien muestra el sello correcto puede dar órdenes al castillo.
     quests:
       - slug: capstone-4-milestone-7
         type: lab
-        title: "Milestone 7: GitHub Actions: build, test y deploy a Cloud Run"
+        title: "Milestone 7: pipeline de GitHub Actions — build, test y deploy a Cloud Run"
         required: true
+        estimated_min: 240
         skills:
           cicd: 0.5
           microservices_gcp: 0.5
+        resources:
+          - ref: res-gh-actions-intro
+          - ref: res-gh-auth-action
+          - ref: res-gcp-wif
+          - ref: res-artifact-registry
+        payload:
+          goal: Que cada push construya y pruebe los dos servicios en GitHub Actions, y que cada merge a main publique la imagen de `orders` en Artifact Registry y la despliegue en Cloud Run sin llaves JSON (Workload Identity Federation).
+          steps:
+            - title: Repositorio en GitHub
+              body: Crea el repo `order-platform` en tu GitHub (público si quieres mostrarlo en entrevistas). Revisa antes que `.env`, `exports/` y `target/` estén en `.gitignore`.
+              commands:
+                - git remote add origin https://github.com/<tu-usuario>/order-platform.git
+                - git push -u origin main
+            - title: Dockerfile por servicio
+              body: |
+                `orders/Dockerfile` (y uno igual en `fulfillment/`), multi-stage como en GCP Peaks:
+
+                ```dockerfile
+                FROM eclipse-temurin:21-jdk AS build
+                WORKDIR /src
+                COPY . .
+                RUN ./mvnw -B -q package -DskipTests
+
+                FROM eclipse-temurin:21-jre
+                WORKDIR /app
+                COPY --from=build /src/target/*.jar app.jar
+                USER 1000
+                ENV PORT=8080
+                CMD ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]
+                ```
+
+                Si el build falla por permisos del `mvnw`, agrega `RUN chmod +x mvnw` antes del package (Windows no guarda el bit de ejecución).
+            - title: Perfil `demo` para Cloud Run
+              body: |
+                Cloud SQL y Cassandra administrado cuestan dinero, así que en Cloud Run vas a correr `orders` con un perfil `demo`: repositorio en memoria (el de Java Forest, `@Profile("!jdbc")`) y publicador del outbox apagado. El perfil local pasa a llamarse `jdbc`.
+
+                Esto es una decisión de costo, no un atajo escondido: escríbela en el README ("In production this would use Cloud SQL and Pub/Sub; the demo deployment keeps the free tier").
+            - title: "CI: build y test en cada push"
+              body: |
+                `.github/workflows/ci.yml`:
+
+                ```yaml
+                name: ci
+                on:
+                  push:
+                  pull_request:
+                jobs:
+                  test:
+                    runs-on: ubuntu-latest
+                    strategy:
+                      matrix:
+                        service: [orders, fulfillment]
+                    defaults:
+                      run:
+                        working-directory: ${{ matrix.service }}
+                    steps:
+                      - uses: actions/checkout@v7
+                      - uses: actions/setup-java@v6
+                        with:
+                          distribution: temurin
+                          java-version: "21"
+                          cache: maven
+                      - run: chmod +x mvnw && ./mvnw -B verify
+                ```
+
+                Los runners `ubuntu-latest` traen Docker, así que las pruebas con Testcontainers del milestone 8 también corren aquí.
+            - title: Preparar GCP (una sola vez)
+              body: |
+                Necesitas un proyecto con facturación activa (Cloud Run lo exige) y una **alerta de presupuesto** de 1 USD, como en GCP Peaks. Con `--max-instances 1` y escala a cero, el costo esperado es 0 dentro del free tier. En PowerShell (cambia los valores):
+
+                ```powershell
+                $PROJECT = 'tu-proyecto'; $REPO = 'tu-usuario/order-platform'; $OWNER = 'tu-usuario'
+                $NUMBER = gcloud projects describe $PROJECT --format 'value(projectNumber)'
+                gcloud services enable run.googleapis.com artifactregistry.googleapis.com iamcredentials.googleapis.com --project $PROJECT
+                gcloud artifacts repositories create order-platform --repository-format docker --location us-central1 --project $PROJECT
+                gcloud iam service-accounts create gh-deployer --project $PROJECT
+                $SA = "gh-deployer@$PROJECT.iam.gserviceaccount.com"
+                gcloud projects add-iam-policy-binding $PROJECT --member "serviceAccount:$SA" --role roles/run.developer
+                gcloud projects add-iam-policy-binding $PROJECT --member "serviceAccount:$SA" --role roles/artifactregistry.writer
+                gcloud projects add-iam-policy-binding $PROJECT --member "serviceAccount:$SA" --role roles/iam.serviceAccountUser
+                gcloud iam workload-identity-pools create github --location global --project $PROJECT
+                gcloud iam workload-identity-pools providers create-oidc order-platform --location global --workload-identity-pool github --project $PROJECT `
+                  --issuer-uri "https://token.actions.githubusercontent.com" `
+                  --attribute-mapping "google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" `
+                  --attribute-condition "assertion.repository_owner == '$OWNER'"
+                gcloud iam service-accounts add-iam-policy-binding $SA --project $PROJECT --role roles/iam.workloadIdentityUser `
+                  --member "principalSet://iam.googleapis.com/projects/$NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/$REPO"
+                "WIF_PROVIDER = projects/$NUMBER/locations/global/workloadIdentityPools/github/providers/order-platform"
+                ```
+
+                En GitHub → Settings → Secrets and variables → Actions → **Variables** crea `GCP_PROJECT`, `WIF_PROVIDER` y `DEPLOY_SA` (no son secretos: no dan acceso por sí solos).
+
+                Los permisos pueden tardar hasta 5 minutos en propagarse.
+            - title: "CD: imagen y deploy en cada push a main"
+              body: |
+                Agrega a `ci.yml`:
+
+                ```yaml
+                  deploy:
+                    needs: test
+                    if: github.ref == 'refs/heads/main' && vars.GCP_PROJECT != ''
+                    runs-on: ubuntu-latest
+                    permissions:
+                      contents: read
+                      id-token: write
+                    env:
+                      IMAGE: us-central1-docker.pkg.dev/${{ vars.GCP_PROJECT }}/order-platform/orders:${{ github.sha }}
+                    steps:
+                      - uses: actions/checkout@v7
+                      - uses: google-github-actions/auth@v3
+                        with:
+                          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+                          service_account: ${{ vars.DEPLOY_SA }}
+                      - uses: google-github-actions/setup-gcloud@v3
+                      - run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+                      - run: docker build -t "$IMAGE" orders && docker push "$IMAGE"
+                      - run: >
+                          gcloud run deploy orders --image "$IMAGE" --region us-central1
+                          --no-allow-unauthenticated --max-instances 1
+                          --set-env-vars SPRING_PROFILES_ACTIVE=demo
+                ```
+
+                Si no tienes facturación, el job `deploy` se salta solo (`vars.GCP_PROJECT` vacío) y el pipeline sigue verde: anótalo en el README.
+            - title: Verifica el servicio desplegado
+              commands:
+                - $url = gcloud run services describe orders --region us-central1 --format 'value(status.url)'
+                - Invoke-RestMethod "$url/actuator/health" -Headers @{ Authorization = "Bearer $(gcloud auth print-identity-token)" }
+            - title: Badge y commit
+              body: "Agrega al README el badge del workflow: `![ci](https://github.com/<tu-usuario>/order-platform/actions/workflows/ci.yml/badge.svg)`."
+              commands:
+                - 'git add .; git commit -m "ci: build, test and deploy orders to Cloud Run via WIF"; git push'
+          expected: En la pestaña Actions, el job `test` corre para orders y fulfillment en paralelo y queda verde. En main, el job `deploy` se autentica sin llaves, sube la imagen etiquetada con el SHA y despliega una revisión nueva; `/actuator/health` responde `UP` con el identity token (y 403 sin él).
+          checklist:
+            - CI con matriz para los dos servicios, en verde
+            - Imagen multi-stage que corre como usuario no root
+            - Deploy con Workload Identity Federation, sin llaves JSON en ningún lado
+            - Servicio en Cloud Run privado (--no-allow-unauthenticated) y con max-instances 1
+            - La decisión del perfil demo está documentada
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - "Error 'Permission iam.serviceAccounts.getAccessToken denied': falta el binding `roles/iam.workloadIdentityUser` o el nombre del repo en el principalSet no coincide exactamente (mayúsculas incluidas)."
+            - "Error 'denied: Permission artifactregistry.repositories.uploadArtifacts': falta `roles/artifactregistry.writer` o el `configure-docker` usa otra región."
+            - "Si en algún momento no quieres gastar nada, borra el servicio: `gcloud run services delete orders --region us-central1`."
+          evidence_hint: Pega la URL de una ejecución verde del workflow (con el job deploy, si tienes facturación) y la respuesta de /actuator/health.
       - slug: capstone-4-milestone-8
         type: lab
-        title: "Milestone 8: JWT, pruebas con Testcontainers y k6"
+        title: "Milestone 8: JWT con Keycloak, pruebas con Testcontainers y k6"
         required: true
+        estimated_min: 300
         skills:
           security: 0.5
           testing: 0.5
+        resources:
+          - ref: res-spring-resource-server-jwt
+          - ref: res-testcontainers
+          - ref: res-k6-thresholds
+        payload:
+          goal: Proteger la API con JWT de Keycloak (scopes), cubrir los puntos críticos con pruebas de integración contra PostgreSQL y Cassandra reales, y medir la API con k6 con thresholds.
+          steps:
+            - title: Keycloak en el compose
+              body: |
+                Agrega el Keycloak de la Fortaleza:
+
+                ```yaml
+                  keycloak:
+                    image: quay.io/keycloak/keycloak:26.8.2
+                    command: start-dev
+                    environment:
+                      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+                      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+                    ports: ["127.0.0.1:8180:8080"]
+                ```
+
+                Crea el realm `order-platform`, el client scope `orders.write` y dos clients con client credentials: `checkout` (con `orders.write`) y `reporting` (sin él). Luego exporta el realm a `infra/keycloak/realm-order-platform.json` (Realm settings → Action → Partial export) para que cualquiera pueda reproducirlo.
+            - title: orders como resource server
+              body: |
+                `spring-boot-starter-oauth2-resource-server` y:
+
+                ```properties
+                spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/order-platform
+                ```
+
+                Reglas: `POST /v1/orders` exige `SCOPE_orders.write`; los `GET` exigen un token válido; `/actuator/health` y `/actuator/prometheus` quedan abiertos (solo escuchan en tu máquina). En el perfil `demo` de Cloud Run desactiva la validación JWT (ahí ya protege la IAM de Cloud Run) y documéntalo.
+
+                Pruebas con `MockMvc` y `jwt()`: sin token → 401; token sin scope → 403; con scope → 201.
+            - title: Pruebas de integración con Testcontainers
+              body: |
+                **orders** (`testcontainers-postgresql`): una prueba que llame a `OrderService.create` y verifique que hay exactamente una fila en `orders` y una en `outbox`; otra que simule un fallo después de insertar la orden (por ejemplo, un `total` que la base rechaza) y verifique que NO quedó fila en `outbox`.
+
+                **fulfillment** (`testcontainers-cassandra`): levanta un `CassandraContainer`, aplica una copia del esquema para pruebas (`src/test/resources/schema-test.cql` con `SimpleStrategy` y `replication_factor: 1`, porque el contenedor es un solo nodo y su datacenter se llama `datacenter1`, no `dc1`; usa también `local_one` en el perfil de test) y verifica que procesar el mismo evento dos veces deja una sola fila en `orders_by_customer`.
+
+                ```java
+                @Container
+                @ServiceConnection
+                static CassandraContainer cassandra = new CassandraContainer("cassandra:5.0");
+                ```
+              commands:
+                - Set-Location $HOME\questmap-labs\order-platform\orders; .\mvnw.cmd verify
+                - Set-Location ..\fulfillment; .\mvnw.cmd verify
+            - title: Prueba de carga con k6
+              body: |
+                `load/create-orders.js`:
+
+                ```javascript
+                import http from 'k6/http';
+                import { check } from 'k6';
+
+                export const options = {
+                  scenarios: {
+                    steady: { executor: 'constant-arrival-rate', rate: 20, timeUnit: '1s', duration: '1m', preAllocatedVUs: 20 },
+                  },
+                  thresholds: {
+                    http_req_failed: ['rate<0.01'],
+                    'http_req_duration{expected_response:true}': ['p(95)<300'],
+                  },
+                };
+
+                export default function () {
+                  const body = JSON.stringify({ customer: `c-${__VU % 10}`, total: 29.99, items: [{ sku: 'drill-20v', quantity: 1, unitPrice: 29.99 }] });
+                  const res = http.post('http://host.docker.internal:8080/v1/orders', body, {
+                    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': `${__VU}-${__ITER}-${Date.now()}`, Authorization: `Bearer ${__ENV.TOKEN}` },
+                  });
+                  check(res, { 'is 201': (r) => r.status === 201 });
+                }
+                ```
+              commands:
+                - $token = (Invoke-RestMethod -Method Post http://localhost:8180/realms/order-platform/protocol/openid-connect/token -Body @{ grant_type = 'client_credentials'; client_id = 'checkout'; client_secret = (Read-Host 'checkout secret' -MaskInput); scope = 'orders.write' }).access_token
+                - Get-Content load\create-orders.js | docker run --rm -i -e TOKEN=$token grafana/k6 run -
+            - title: Interpreta los resultados
+              body: "Mientras corre, mira el dashboard del milestone 6: órdenes por minuto, p95, outbox_pending y lag de fulfillment. Escribe en `docs/performance.md` el resultado (p95, tasa de errores, throughput), dónde estuvo el cuello de botella y qué probarías después (más instancias, pool de conexiones, batch en el outbox)."
+            - title: Commit
+              commands:
+                - 'Set-Location $HOME\questmap-labs\order-platform; git add .; git commit -m "security and tests: JWT scopes, Testcontainers ITs and k6 load test"; git push'
+          expected: "Sin token: 401; con `reporting`: 403; con `checkout`: 201. Las pruebas de integración pasan local y en GitHub Actions. k6 termina con los thresholds en verde (✓) a 20 órdenes por segundo; si alguno falla, `docs/performance.md` explica por qué y qué cambiarías."
+          checklist:
+            - "Scopes aplicados: 401, 403 y 201 probados con MockMvc y a mano"
+            - Realm de Keycloak exportado al repo (sin secretos de producción)
+            - Prueba de integración del outbox contra Postgres real
+            - Prueba de idempotencia contra Cassandra real
+            - k6 con thresholds y conclusiones escritas en docs/performance.md
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - "Si `CassandraContainer` no se encuentra, revisa el import según tu versión de Testcontainers: en la 2.x está en el módulo `testcontainers-cassandra` (paquete `org.testcontainers.cassandra`)."
+            - "Si el token tiene `iss` con `host.docker.internal` y tu app espera `localhost`, la validación falla: pide el token siempre a `localhost:8180` desde PowerShell."
+            - Para que k6 no cree órdenes eternamente en tu base de pruebas, usa un cliente `c-load-*` y bórralos después con un DELETE dirigido, o recrea el volumen solo del proyecto order-platform.
+          evidence_hint: Pega el hash del commit, el resumen final de k6 (thresholds) y el resultado de mvnw verify de los dos servicios.
   - slug: capstone-5
     number: 5
-    title: "Milestones 9–10 — README en inglés y defensa del proyecto"
+    title: Milestones 9–10 — README en inglés y defensa del proyecto
+    story: "El castillo está en pie. Ahora tienes que contarlo: primero en el gran libro de la entrada, y después frente al consejo que decidirá si eres digno de la corona."
     quests:
       - slug: capstone-5-milestone-9
         type: lab
         title: "Milestone 9: README en inglés con arquitectura y decisiones técnicas"
         required: true
+        estimated_min: 180
         skills:
-          english: 1
+          english: 0.7
+          distributed_systems: 0.3
+        payload:
+          goal: "Escribir, en inglés, la documentación que un entrevistador o un compañero nuevo lee en 5 minutos: qué es, cómo se corre, cómo está hecho y por qué se decidió así."
+          steps:
+            - title: Estructura del README
+              body: |
+                `README.md` en la raíz, con estas secciones:
+
+                1. **Order Platform** — una frase: qué problema resuelve.
+                2. **Architecture** — diagrama Mermaid (GitHub lo dibuja solo) y un párrafo con el camino de una orden.
+                3. **Tech stack** — Java 21, Spring Boot, PostgreSQL, Pub/Sub, Cassandra, BigQuery, Prometheus/Grafana, Keycloak, GitHub Actions, Cloud Run.
+                4. **Running locally** — los comandos exactos, en orden (compose, bootstrap de Pub/Sub, esquema de Cassandra, los dos servicios, un primer POST).
+                5. **Key design decisions** — enlaces a los ADR.
+                6. **Reliability** — idempotencia, outbox, DLQ, consistencia de Cassandra, qué pasa si cae cada pieza.
+                7. **Observability** — métricas, dashboard, alertas, enlaces a los runbooks.
+                8. **Testing** — pirámide: unitarias, integración con Testcontainers, k6 (con los números de `docs/performance.md`).
+                9. **Trade-offs and next steps** — lo que sacrificaste a propósito y lo que harías con más tiempo.
+            - title: Diagrama de arquitectura
+              body: |
+                Punto de partida (ajústalo a lo que construiste). En el README va dentro de un bloque de código con el lenguaje `mermaid`, tal cual se ve aquí:
+
+                ```mermaid
+                flowchart LR
+                  C[Client] -->|POST /v1/orders + JWT| O[orders service]
+                  O -->|tx: orders + outbox| PG[(PostgreSQL)]
+                  O -->|OutboxPublisher| T{{Pub/Sub topic: orders}}
+                  T --> S[fulfillment-sub]
+                  S -->|max 5 attempts| DLQ{{orders-dlq}}
+                  S --> F[fulfillment service]
+                  F -->|LWT idempotency, LOCAL_QUORUM| CS[(Cassandra x3)]
+                  F -->|daily NDJSON export| BQ[(BigQuery)]
+                  K[Keycloak] -.->|JWKS| O
+                  P[Prometheus] -.->|scrape| O & F
+                  G[Grafana] -.-> P
+                ```
+            - title: Decisiones técnicas (ADR)
+              body: |
+                En `docs/adr/`, al menos 4 archivos cortos (`0001-transactional-outbox.md`, …) con el formato:
+
+                ```markdown
+                # 0001 — Use a transactional outbox to publish events
+                ## Context
+                ## Decision
+                ## Consequences (good and bad)
+                ## Alternatives considered
+                ```
+
+                Temas sugeridos: outbox vs publicar directo; idempotencia por `eventId` con LWT; Cassandra como modelo de lectura (y por qué PostgreSQL es la fuente de verdad); LOCAL_QUORUM; el perfil `demo` en Cloud Run por costo.
+            - title: Revisión de inglés
+              body: 'Lee el README en voz alta (o con el lector de Windows). Marca las frases que no dirías en una entrevista y simplifícalas: frases cortas, voz activa ("The service publishes…"), y sin traducir palabra por palabra del español. Si quieres, pásalo por la evaluación de respuesta abierta de QuestMap.'
+            - title: Prueba de 'compañero nuevo'
+              body: "Clona tu repo en otra carpeta (`git clone … $HOME\\tmp\\op-check`) y sigue SOLO el README desde cero. Cada paso que falle o que tengas que adivinar es un bug del README: corrígelo."
+            - title: Commit
+              commands:
+                - 'git add .; git commit -m "docs: README with architecture, ADRs and runbooks"; git push'
+          expected: En GitHub, el README muestra el diagrama dibujado, el badge del pipeline en verde y enlaces que funcionan. Un clon limpio se levanta siguiendo solo el README.
+          checklist:
+            - README completo con las 9 secciones
+            - Diagrama Mermaid que coincide con lo que construí
+            - Al menos 4 ADR con alternativas y consecuencias
+            - Probé el README desde un clon limpio
+            - Lo leí en voz alta y simplifiqué las frases difíciles
+            - Puedo explicar cada archivo que cambié sin mirar el código
+          hints:
+            - "Las frases 'trade-off', 'at-least-once', 'source of truth' y 'read model' son tus aliadas: úsalas igual en el README y en la entrevista."
+            - Si GitHub no dibuja el diagrama, revisa que el bloque empiece exactamente con tres comillas invertidas y `mermaid`.
+          evidence_hint: Pega la URL del README en GitHub y el hash del commit.
       - slug: capstone-5-boss-defense
         type: boss
         title: "Milestone 10 — Final del castillo: defiende tu proyecto"
         required: true
+        estimated_min: 90
         skills:
-          english: 0.5
-          java: 0.5
+          english: 0.4
+          java: 0.15
+          eda: 0.15
+          distributed_systems: 0.15
+          security: 0.15
+        payload:
+          task: |
+            **Defend order-platform in an interview, in English.**
+
+            Prepárate así:
+            1. **Pitch de 2 minutos** (grábalo con Win + H y pega la transcripción): problema, arquitectura, lo más difícil que resolviste y un número (p95, throughput o tiempo de recuperación).
+            2. **Demo en vivo de 5 minutos**, con este guion: crear una orden con un token → ver el evento procesado en fulfillment → ver la orden en Cassandra → mostrar el dashboard → detener Pub/Sub, crear órdenes y mostrar que no se pierden.
+            3. **Preguntas difíciles que debes poder responder sin mirar el código:**
+               - Why an outbox instead of publishing directly after the commit?
+               - What happens if fulfillment crashes after writing to Cassandra but before acking?
+               - Why is PostgreSQL the source of truth and not Cassandra?
+               - How would you handle a customer with millions of orders in `orders_by_customer`?
+               - What would you change to run this at 100× the traffic?
+               - Which parts did you build with an AI assistant, and how did you verify them?
+
+            Pega aquí el pitch, tus respuestas cortas a esas preguntas y la URL del repo. Luego la mini-entrevista te hará preguntas de seguimiento sobre TU proyecto.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - architecture walkthrough of the candidate's own project
+            - outbox, idempotency and at-least-once delivery
+            - Cassandra data model and consistency levels
+            - observability, alerts and incident handling
+            - CI/CD, security and testing strategy
+            - trade-offs, scaling and what they would change
+            - responsible use of AI assistants and verifying generated code

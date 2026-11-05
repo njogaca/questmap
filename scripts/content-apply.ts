@@ -10,7 +10,7 @@
  * - Vuelve a validar TODO content/; si algo falla, deshace los cambios.
  * Después reconstruye (docker compose up -d --build) para que el seed lo cargue sin tocar tu progreso.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { isMap, isSeq, parse, parseDocument, YAMLMap } from "yaml";
 import { z } from "zod";
@@ -26,8 +26,22 @@ const draftSchema = z.object({
 
 const ROOT = "content";
 
+/** Contenido original de cada archivo que tocamos (null = no existía). Permite deshacer ante CUALQUIER error. */
+const originals = new Map<string, string | null>();
+
+function rollback() {
+  for (const [p, text] of originals) {
+    if (text === null) {
+      if (existsSync(p)) unlinkSync(p);
+    } else writeFileSync(p, text);
+  }
+  if (originals.size) console.error(`[content:apply] Se deshicieron los cambios en ${originals.size} archivo(s).`);
+  originals.clear();
+}
+
 function fail(msg: string): never {
   console.error(`[content:apply] ERROR ${msg}`);
+  rollback();
   process.exit(1);
 }
 
@@ -38,11 +52,12 @@ function main() {
   if (!existsSync(file)) fail(`No existe ${file}`);
 
   // Se valida con Zod, pero se ESCRIBE el YAML tal como vino (sin los valores por defecto que agrega Zod).
-  const raw = parse(readFileSync(file, "utf8")) as {
-    level: Record<string, unknown>;
-    glossary?: Record<string, unknown>[];
-    resources?: Record<string, unknown>[];
-  };
+  let raw: { level: Record<string, unknown>; glossary?: Record<string, unknown>[]; resources?: Record<string, unknown>[] };
+  try {
+    raw = parse(readFileSync(file, "utf8"));
+  } catch (e) {
+    fail(`El borrador no es YAML válido: ${e instanceof Error ? e.message.split("\n")[0] : e}\n  (Tip: si un texto contiene ": ", ponlo entre comillas.)`);
+  }
   const parsed = draftSchema.safeParse(raw);
   if (!parsed.success)
     fail(`El borrador no cumple el esquema:\n${parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n")}`);
@@ -67,7 +82,6 @@ function main() {
   if (!zoneFile) fail(`Ningún archivo de zona tiene el nivel "${draft.level.slug}". Usa el slug que generó content:new.`);
   const zoneSlug = String(parse(readFileSync(zoneFile, "utf8")).slug);
 
-  const originals = new Map<string, string | null>();
   const write = (p: string, text: string) => {
     if (!originals.has(p)) originals.set(p, existsSync(p) ? readFileSync(p, "utf8") : null);
     if (!dryRun) writeFileSync(p, text);
@@ -139,11 +153,7 @@ function main() {
   try {
     loadContent(path.resolve(ROOT));
   } catch (e) {
-    for (const [p, text] of originals) {
-      if (text === null) writeFileSync(p, "");
-      else writeFileSync(p, text);
-    }
-    fail(`La validación global falló y se deshicieron los cambios:\n${e instanceof Error ? e.message : e}`);
+    fail(`La validación global falló:\n${e instanceof Error ? e.message : e}`);
   }
   console.log(`[content:apply] OK: nivel ${draft.level.number} publicado en ${zoneFile}.`);
   console.log("Reconstruye para cargarlo:  docker compose up -d --build");

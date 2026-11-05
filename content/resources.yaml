@@ -430,3 +430,174 @@ resources:
     required: false
     why: Te prepara para el nivel 2 del Interview Arena.
     verified: false
+  - slug: res-prometheus-overview
+    title: Prometheus — Overview
+    type: docs
+    url: https://prometheus.io/docs/introduction/overview/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Qué es Prometheus, su modelo pull y cuándo usarlo (y cuándo no).
+    verified: true
+  - slug: res-prometheus-metric-types
+    title: Prometheus — Metric types
+    type: docs
+    url: https://prometheus.io/docs/concepts/metric_types/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Counter, gauge, histogram y summary explicados en una página.
+    verified: true
+  - slug: res-promql-basics
+    title: Prometheus — Querying basics (PromQL)
+    type: docs
+    url: https://prometheus.io/docs/prometheus/latest/querying/basics/
+    language: en
+    duration_min: 40
+    cost: free
+    required: true
+    why: Selectores, rangos y operadores de PromQL.
+    verified: true
+  - slug: res-prometheus-histograms
+    title: Prometheus — Histograms and summaries
+    type: docs
+    url: https://prometheus.io/docs/practices/histograms/
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Cómo calcular percentiles con histogram_quantile y por qué preferir histogramas.
+    verified: true
+  - slug: res-prometheus-alerting-rules
+    title: Prometheus — Alerting rules
+    type: docs
+    url: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Formato de las reglas de alerta (expr, for, labels, annotations).
+    verified: true
+  - slug: res-alertmanager
+    title: Prometheus — Alertmanager
+    type: docs
+    url: https://prometheus.io/docs/alerting/latest/alertmanager/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Agrupación, inhibición, silencios y rutas de notificación.
+    verified: true
+  - slug: res-prometheus-docker
+    title: Docker Hub — prom/prometheus
+    type: docs
+    url: https://hub.docker.com/r/prom/prometheus
+    language: en
+    duration_min: 5
+    cost: free
+    required: false
+    why: Imagen oficial de Prometheus para los labs.
+    verified: true
+  - slug: res-grafana-fundamentals
+    title: Grafana — Grafana fundamentals (tutorial)
+    type: lab
+    url: https://grafana.com/tutorials/grafana-fundamentals/
+    language: en
+    duration_min: 45
+    cost: free
+    required: true
+    why: "El tutorial oficial: paneles, consultas y dashboards."
+    verified: true
+  - slug: res-grafana-provisioning
+    title: Grafana — Provision Grafana
+    type: docs
+    url: https://grafana.com/docs/grafana/latest/administration/provisioning/
+    language: en
+    duration_min: 15
+    cost: free
+    required: false
+    why: Configurar datasources y dashboards con archivos (infraestructura como código).
+    verified: true
+  - slug: res-micrometer-concepts
+    title: Micrometer — Concepts
+    type: docs
+    url: https://docs.micrometer.io/micrometer/reference/concepts.html
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: "Meters, registry y nombres: la librería de métricas que usa Spring Boot."
+    verified: true
+  - slug: res-spring-actuator-metrics
+    title: Spring Boot — Metrics (Actuator)
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/actuator/metrics.html
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Cómo Spring Boot expone /actuator/prometheus y las métricas http.server.requests.
+    verified: true
+  - slug: res-otel-traces
+    title: OpenTelemetry — Traces
+    type: docs
+    url: https://opentelemetry.io/docs/concepts/signals/traces/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Qué son trazas y spans, con ejemplos.
+    verified: true
+  - slug: res-sre-monitoring
+    title: Google SRE Book — Monitoring Distributed Systems (cap. 6)
+    type: book
+    url: https://sre.google/sre-book/monitoring-distributed-systems/
+    language: en
+    duration_min: 40
+    cost: free
+    required: true
+    why: El origen de las 4 golden signals y de la idea de alertar por síntomas.
+    verified: true
+  - slug: res-sre-slo
+    title: Google SRE Book — Service Level Objectives (cap. 4)
+    type: book
+    url: https://sre.google/sre-book/service-level-objectives/
+    language: en
+    duration_min: 35
+    cost: free
+    required: true
+    why: Definiciones de SLI, SLO y SLA.
+    verified: true
+  - slug: res-sre-alerting-slos
+    title: Google SRE Workbook — Alerting on SLOs
+    type: book
+    url: https://sre.google/workbook/alerting-on-slos/
+    language: en
+    duration_min: 45
+    cost: free
+    required: true
+    why: Burn rate y alertas multi-ventana explicadas paso a paso.
+    verified: true
+  - slug: res-sre-postmortems
+    title: Google SRE Book — Postmortem Culture
+    type: book
+    url: https://sre.google/sre-book/postmortem-culture/
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Cómo escribir un postmortem sin culpables (base para el jefe de esta zona).
+    verified: true
+  - slug: res-yt-nana-prometheus
+    title: "Video: Prometheus explicado — TechWorld with Nana"
+    type: video
+    url: null
+    how_to_find: "Buscar en YouTube: 'TechWorld with Nana Prometheus' (canal TechWorld with Nana)."
+    language: en
+    duration_min: 25
+    cost: free
+    required: false
+    why: Explicación visual de la arquitectura de Prometheus.
+    verified: false

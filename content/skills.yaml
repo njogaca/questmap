@@ -50,7 +50,7 @@ skills:
     name: Observabilidad
     description: Prometheus + Grafana, métricas y alertas
     core: true
-    target_xp: 710 # 656 + capstone 50
+    target_xp: 580 # REAL Z4 publicada (2026-11-05): 528 + capstone milestone 6: 50
   - code: ai_tools
     name: Herramientas de IA
     description: Uso de herramientas de IA (Claude, asistentes LLM) en el desarrollo
@@ -75,7 +75,7 @@ skills:
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
-    target_xp: 390 # 875×.25 = 219 + 875×.20 = 175
+    target_xp: 360 # REAL Z4: 183 + Z1: 4 + Z7 estimado 875×.20 = 175
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios

@@ -2,7 +2,6 @@ slug: observability-observatory
 title: Observability Observatory
 order: 4
 emoji: "🔭"
-status: outline
 map: { x: 590, y: 320 }
 prerequisites: [ { zone: java-forest, level: 3 } ]
 skills: [ observability, debugging_rca ]
@@ -11,164 +10,1102 @@ story: >
 levels:
   - slug: obs-1-novice
     number: 1
-    title: "Novice — Métricas, logs, trazas y golden signals"
+    title: Novice — Métricas, logs, trazas y golden signals
+    story: "Subes al observatorio. Desde aquí se ve cada latido del reino: números que suben y bajan, diarios de eventos y rastros de cada viajero. Primero aprende a leer el cielo."
     quests:
-      - slug: obs-1-novice-learn-1
+      - slug: obs-1-learn-signals
         type: learn
-        title: "Conceptos: Métricas, logs, trazas y golden signals"
+        title: Métricas, logs y trazas — los tres pilares
         required: true
+        estimated_min: 40
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-1-novice-learn-2
+          observability: 0.8
+          debugging_rca: 0.2
+        resources:
+          - ref: res-prometheus-overview
+          - ref: res-otel-traces
+        payload:
+          note_prompt: Explica con tus palabras la diferencia entre una métrica, un log y una traza, con un ejemplo de cada uno para una API de órdenes. ¿Cuál usarías primero para saber SI algo anda mal y cuál para saber POR QUÉ?
+          summary_md: |
+            - Métrica: un número agregado en el tiempo (peticiones por segundo, latencia p99, memoria). Barata, ideal para alertas y tendencias.
+            - Log: un evento detallado con texto y contexto ("orden o-100 rechazada: total negativo"). Caro a gran escala, ideal para el detalle.
+            - Traza: el recorrido de UNA petición por varios servicios, dividida en spans con su duración. Ideal para saber dónde se fue el tiempo.
+            Regla práctica: las métricas te dicen QUE algo está mal; los logs y trazas te dicen POR QUÉ.
+      - slug: obs-1-learn-golden
         type: learn
-        title: "Lectura guiada: Métricas, logs, trazas y golden signals"
+        title: Golden signals, RED y USE
         required: true
+        estimated_min: 40
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-1-novice-glossary
+          observability: 0.8
+          debugging_rca: 0.2
+        resources:
+          - ref: res-sre-monitoring
+          - ref: res-yt-nana-prometheus
+            required: false
+        payload:
+          note_prompt: Lista las 4 golden signals y escribe, para tu API de órdenes, qué métrica concreta usarías para cada una.
+          summary_md: |
+            Las 4 golden signals (libro de SRE de Google): Latency, Traffic, Errors, Saturation.
+            - RED (para servicios): Rate, Errors, Duration.
+            - USE (para recursos como CPU, disco, pool de conexiones): Utilization, Saturation, Errors.
+            Alerta por SÍNTOMAS que sufre el usuario (latencia, errores), no por cada causa posible (CPU alta).
+      - slug: obs-1-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario del observatorio
         required: true
+        estimated_min: 15
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-1-novice-quiz
+          observability: 1
+        payload:
+          terms:
+            - obs-metric
+            - obs-log
+            - obs-trace
+            - obs-span
+            - obs-golden-signals
+            - obs-red
+            - obs-use
+            - obs-cardinality
+            - obs-percentile
+      - slug: obs-1-quiz
         type: quiz
-        title: Quiz — Métricas, logs, trazas y golden signals
+        title: Quiz — Fundamentos de observabilidad
         required: true
+        estimated_min: 15
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
+          observability: 0.8
+          debugging_rca: 0.2
+        questions:
+          - slug: o1-q1
+            type: mcq
+            prompt: ¿Cuál de estas NO es una de las 4 golden signals?
+            options:
+              - Latency
+              - Traffic
+              - Errors
+              - Uptime del servidor
+            answer: 3
+            explanation: Las golden signals son Latency, Traffic, Errors y Saturation. El uptime de una máquina no dice si los usuarios están sufriendo.
+            skill: observability
+            difficulty: 1
+          - slug: o1-q2
+            type: mcq
+            prompt: Quieres saber en qué servicio se fueron 2 segundos de UNA petición lenta que pasó por 4 microservicios. ¿Qué usas?
+            options:
+              - Una métrica de CPU
+              - Una traza distribuida
+              - Un dashboard de memoria
+              - El conteo de peticiones
+            answer: 1
+            explanation: La traza muestra cada span (paso) de la petición con su duración, así ves exactamente dónde se gastó el tiempo.
+            skill: observability
+            difficulty: 1
+          - slug: o1-q3
+            type: tf
+            prompt: El promedio de latencia es suficiente para saber si algunos usuarios están teniendo una mala experiencia.
+            answer: false
+            explanation: "El promedio esconde la cola: 99 peticiones de 50 ms y 1 de 5 s dan ~100 ms de promedio. Por eso se miran percentiles como p95 y p99."
+            skill: observability
+            difficulty: 1
+          - slug: o1-q4
+            type: mcq
+            prompt: ¿Qué significa la 'S' de USE?
+            options:
+              - Speed
+              - Saturation
+              - Success
+              - Scale
+            answer: 1
+            explanation: USE = Utilization, Saturation, Errors. Saturation es el trabajo que espera porque el recurso está lleno (ej. peticiones esperando una conexión del pool).
+            skill: observability
+            difficulty: 1
+          - slug: o1-q5
+            type: mcq
+            prompt: ¿Por qué es mala idea poner el `userId` como label de una métrica?
+            options:
+              - Porque es información privada solamente
+              - "Porque crea una serie de tiempo por usuario: millones de series (alta cardinalidad)"
+              - Porque Prometheus no acepta texto
+              - Porque los labels deben ser números
+            answer: 1
+            explanation: Cada combinación de labels es una serie nueva. Con millones de usuarios, Prometheus se queda sin memoria. Datos de alta cardinalidad van en logs o trazas.
+            skill: observability
+            difficulty: 2
+          - slug: o1-q6
+            type: fill
+            prompt: RED significa Rate, Errors y ______.
+            answer:
+              - Duration
+              - duration
+            explanation: "RED es la versión de las golden signals para servicios: cuántas peticiones, cuántas fallan y cuánto tardan."
+            skill: observability
+            difficulty: 1
+          - slug: o1-q7
+            type: mcq
+            prompt: ¿Cuál es una buena alerta según la filosofía de 'alertar por síntomas'?
+            options:
+              - CPU > 80 % por 1 minuto
+              - El 5 % de las peticiones a /orders falla durante 5 minutos
+              - La memoria JVM subió 10 %
+              - Hay 3 hilos más que ayer
+            answer: 1
+            explanation: "Un síntoma que sufre el usuario (errores) merece despertar a alguien. Una CPU alta puede ser normal y no afectar a nadie: va en un dashboard, no en un page."
+            skill: debugging_rca
+            difficulty: 2
+          - slug: o1-q8
+            type: order
+            prompt: "Ordena un flujo típico de investigación de un incidente:"
+            options:
+              - Una alerta por síntoma se dispara (ej. errores altos)
+              - Miras el dashboard para ubicar cuándo y dónde empezó
+              - Revisas trazas y logs de ese servicio y momento
+              - Encuentras la causa raíz y mitigas
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Métricas para detectar y acotar, trazas y logs para explicar. Así no lees millones de logs a ciegas.
+            skill: debugging_rca
+            difficulty: 1
+      - slug: obs-1-micro-flashcards
+        type: micro
+        title: Repaso rápido del observatorio
+        required: false
+        estimated_min: 10
+        skills:
+          observability: 1
+        payload:
+          kind: flashcards
+          terms:
+            - obs-metric
+            - obs-trace
+            - obs-golden-signals
+            - obs-cardinality
   - slug: obs-2-apprentice
     number: 2
-    title: "Apprentice — Prometheus, exporters y Micrometer"
+    title: Apprentice — Prometheus, exporters y Micrometer
+    story: Instalas tu primer telescopio. Tu servicio de órdenes empieza a emitir señales y Prometheus las recoge cada pocos segundos.
     quests:
-      - slug: obs-2-apprentice-learn
+      - slug: obs-2-learn-prometheus
         type: learn
-        title: Prometheus, exporters y Micrometer
+        title: Cómo funciona Prometheus (pull, scrape y tipos de métricas)
         required: true
+        estimated_min: 40
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-2-apprentice-glossary
+          observability: 1
+        resources:
+          - ref: res-prometheus-metric-types
+          - ref: res-prometheus-overview
+        payload:
+          note_prompt: ¿Qué diferencia hay entre un counter y un gauge? Da un ejemplo de cada uno en tu API de órdenes y explica por qué un counter nunca baja.
+      - slug: obs-2-learn-micrometer
+        type: learn
+        title: Micrometer y Spring Boot Actuator
+        required: true
+        estimated_min: 35
+        skills:
+          observability: 0.8
+          java: 0.2
+        resources:
+          - ref: res-micrometer-concepts
+          - ref: res-spring-actuator-metrics
+        payload:
+          note_prompt: Explica qué hace Micrometer y por qué tu código no debería depender directamente de Prometheus. ¿Qué es un MeterRegistry?
+      - slug: obs-2-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de Prometheus
         required: true
+        estimated_min: 10
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-2-apprentice-lab
+          observability: 1
+        payload:
+          terms:
+            - obs-counter
+            - obs-gauge
+            - obs-histogram
+            - obs-scrape
+            - obs-exporter
+            - obs-label
+            - obs-micrometer
+      - slug: obs-2-lab-prometheus
         type: lab
-        title: "Lab: Prometheus, exporters y Micrometer"
+        title: "Lab: tu API de órdenes vista por Prometheus"
         required: true
+        estimated_min: 90
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-2-apprentice-quiz
+          observability: 0.8
+          java: 0.2
+        payload:
+          goal: Exponer las métricas de tu servicio `orders` (Java Forest, niveles 3–4) con Actuator + Micrometer, recogerlas con Prometheus en Docker y crear tu primera métrica de negocio.
+          steps:
+            - title: Agrega Actuator y el registro de Prometheus
+              body: |
+                En el `pom.xml` de `orders` agrega (sin versión: Spring Boot la administra):
+
+                ```xml
+                <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-actuator</artifactId>
+                </dependency>
+                <dependency>
+                  <groupId>io.micrometer</groupId>
+                  <artifactId>micrometer-registry-prometheus</artifactId>
+                </dependency>
+                ```
+
+                Y en `src/main/resources/application.properties`:
+
+                ```properties
+                management.endpoints.web.exposure.include=health,info,prometheus
+                management.metrics.distribution.percentiles-histogram.http.server.requests=true
+                ```
+            - title: Comprueba el endpoint
+              commands:
+                - cd $HOME\questmap-labs\orders; .\mvnw.cmd spring-boot:run
+                - "# En otra ventana:"
+                - (Invoke-WebRequest http://localhost:8080/actuator/prometheus).Content -split "`n" | Select-String 'http_server_requests_seconds_count' | Select-Object -First 5
+            - title: Crea la carpeta del observatorio
+              body: |
+                Crea `$HOME\questmap-labs\observatory` con dos archivos.
+
+                `prometheus.yml`:
+
+                ```yaml
+                global:
+                  scrape_interval: 5s
+                scrape_configs:
+                  - job_name: orders
+                    metrics_path: /actuator/prometheus
+                    static_configs:
+                      - targets: ["host.docker.internal:8080"]
+                ```
+
+                `docker-compose.yml` (Grafana en el 3001 porque QuestMap usa el 3000):
+
+                ```yaml
+                services:
+                  prometheus:
+                    image: prom/prometheus:latest
+                    ports: ["127.0.0.1:9090:9090"]
+                    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+                    extra_hosts: ["host.docker.internal:host-gateway"]
+                  grafana:
+                    image: grafana/grafana:latest
+                    ports: ["127.0.0.1:3001:3000"]
+                    environment:
+                      GF_AUTH_ANONYMOUS_ENABLED: "true"
+                      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+                      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+                    volumes: ["./grafana/provisioning:/etc/grafana/provisioning:ro"]
+                ```
+
+                Y `grafana\provisioning\datasources\prometheus.yml`:
+
+                ```yaml
+                apiVersion: 1
+                datasources:
+                  - name: Prometheus
+                    type: prometheus
+                    url: http://prometheus:9090
+                    isDefault: true
+                ```
+
+                (Grafana sin login es solo para este lab local: el puerto está publicado únicamente en 127.0.0.1.)
+              commands:
+                - cd $HOME\questmap-labs\observatory; docker compose up -d
+            - title: Verifica que Prometheus ve tu servicio
+              body: "Abre http://localhost:9090/targets: el job `orders` debe estar en estado UP. Luego genera tráfico."
+              commands:
+                - 1..100 | ForEach-Object { Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body (@{ customer = "c$_"; total = (Get-Random -Minimum 5 -Maximum 500) } | ConvertTo-Json) } | Out-Null
+                - 1..20 | ForEach-Object { Invoke-RestMethod http://localhost:8080/orders/no-existe -SkipHttpErrorCheck } | Out-Null
+            - title: Tu primera consulta
+              body: En http://localhost:9090/query ejecuta `http_server_requests_seconds_count{job="orders"}`. Debes ver una serie por cada combinación de method, uri y status (por ejemplo POST /orders 201 y GET /orders/{id} 404).
+            - title: Una métrica de negocio
+              body: |
+                En `OrderService` inyecta `MeterRegistry` por constructor y cuenta las órdenes creadas:
+
+                ```java
+                private final Counter ordersCreated;
+
+                public OrderService(OrderRepository repo, MeterRegistry registry) {
+                    this.repo = repo;
+                    this.ordersCreated = Counter.builder("orders.created")
+                        .description("Órdenes creadas")
+                        .tag("channel", "web")
+                        .register(registry);
+                }
+                // en create(...), después de guardar:
+                ordersCreated.increment();
+                ```
+
+                Reinicia la app, crea algunas órdenes y busca `orders_created_total` en Prometheus. Fíjate cómo Micrometer convirtió los puntos en guiones bajos y agregó `_total`.
+            - title: Commit
+              commands:
+                - 'cd $HOME\questmap-labs\orders; git add .; git commit -m "orders: actuator + prometheus metrics"'
+          expected: El target `orders` aparece UP en /targets. La consulta muestra series con labels method, uri y status. `orders_created_total` sube cada vez que creas una orden.
+          checklist:
+            - /actuator/prometheus responde con métricas
+            - Prometheus muestra el target orders en estado UP
+            - Vi series distintas para 201 y 404 en http_server_requests_seconds_count
+            - Creé el counter orders.created y lo encontré como orders_created_total
+            - Grafana abre en http://localhost:3001 con el datasource Prometheus
+            - Hice commit
+          hints:
+            - Si el target sale DOWN con 'connection refused', revisa que la app esté corriendo y que el puerto sea 8080.
+            - "Si Grafana no muestra el datasource, revisa la ruta de la carpeta: grafana\\provisioning\\datasources\\prometheus.yml."
+            - "Los nombres en Prometheus: `orders.created` (Micrometer) → `orders_created_total` (Prometheus, por ser counter)."
+          evidence_hint: Pega el resultado de la consulta de orders_created_total en Prometheus y una línea del estado del target (UP).
+      - slug: obs-2-quiz
         type: quiz
-        title: Quiz — Prometheus, exporters y Micrometer
+        title: Quiz — Prometheus y Micrometer
         required: true
+        estimated_min: 15
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
+          observability: 1
+        questions:
+          - slug: o2-q1
+            type: mcq
+            prompt: ¿Cómo obtiene Prometheus las métricas de tu servicio normalmente?
+            options:
+              - El servicio las empuja (push) a Prometheus
+              - Prometheus las pide por HTTP cada cierto intervalo (pull/scrape)
+              - Las lee de los logs
+              - Las recibe por Pub/Sub
+            answer: 1
+            explanation: "Prometheus usa un modelo pull: visita el endpoint de métricas (scrape) cada scrape_interval. Para jobs batch de corta vida existe el Pushgateway."
+            skill: observability
+            difficulty: 1
+          - slug: o2-q2
+            type: mcq
+            prompt: ¿Qué tipo de métrica usarías para 'conexiones activas en el pool'?
+            options:
+              - Counter
+              - Gauge
+              - Histogram
+              - Ninguna
+            answer: 1
+            explanation: Un gauge sube y baja (valor actual). Un counter solo sube (total acumulado), como 'órdenes creadas'.
+            skill: observability
+            difficulty: 1
+          - slug: o2-q3
+            type: tf
+            prompt: Un counter de Prometheus puede volver a 0 cuando el proceso se reinicia, y las funciones como rate() lo manejan correctamente.
+            answer: true
+            explanation: Al reiniciar, el contador empieza de nuevo; rate() e increase() detectan el reinicio (counter reset) y lo compensan.
+            skill: observability
+            difficulty: 2
+          - slug: o2-q4
+            type: mcq
+            prompt: ¿Qué hace Micrometer en una aplicación Spring Boot?
+            options:
+              - Guarda las métricas por años
+              - Es una fachada para instrumentar el código; luego exporta a Prometheus u otros sistemas
+              - Dibuja dashboards
+              - Envía alertas por correo
+            answer: 1
+            explanation: "Micrometer es como SLF4J pero para métricas: tu código usa su API y un MeterRegistry concreto (Prometheus, Datadog…) se encarga del formato."
+            skill: observability
+            difficulty: 1
+          - slug: o2-q5
+            type: fill
+            prompt: El counter de Micrometer `orders.created` aparece en Prometheus como `orders_created______`.
+            answer:
+              - _total
+              - total
+            explanation: "La convención de Prometheus: los puntos pasan a guiones bajos y los counters llevan el sufijo `_total`."
+            skill: observability
+            difficulty: 2
+          - slug: o2-q6
+            type: mcq
+            prompt: ¿Para qué sirve un histogram en Prometheus?
+            options:
+              - Para contar errores
+              - Para medir distribuciones (ej. latencias) en buckets y luego calcular percentiles
+              - Para guardar logs
+              - Para medir memoria actual
+            answer: 1
+            explanation: El histogram cuenta observaciones por rangos (buckets `le`). Con histogram_quantile() calculas p95/p99 agregando entre instancias.
+            skill: observability
+            difficulty: 1
+          - slug: o2-q7
+            type: mcq
+            prompt: Tu target aparece DOWN en /targets. ¿Qué revisas primero?
+            options:
+              - La versión de Grafana
+              - Que la app esté corriendo y que Prometheus pueda llegar a host:puerto/ruta configurados
+              - Las alertas
+              - El tamaño del disco
+            answer: 1
+            explanation: "DOWN significa que el scrape falla: app caída, puerto o metrics_path incorrecto, o problema de red (host.docker.internal desde el contenedor)."
+            skill: debugging_rca
+            difficulty: 1
+          - slug: o2-q8
+            type: order
+            prompt: "Ordena el camino de una métrica desde tu código hasta el gráfico:"
+            options:
+              - El código incrementa un Counter de Micrometer
+              - Actuator expone el valor en /actuator/prometheus
+              - Prometheus hace scrape y guarda la serie de tiempo
+              - Grafana consulta a Prometheus con PromQL y dibuja el panel
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: "Grafana no guarda métricas: solo consulta a su datasource (Prometheus)."
+            skill: observability
+            difficulty: 1
   - slug: obs-3-journeyman
     number: 3
-    title: "Journeyman — PromQL y dashboards de Grafana"
+    title: Journeyman — PromQL y dashboards de Grafana
+    story: "Aprendes el idioma del observatorio. Con unas pocas palabras de PromQL conviertes millones de puntos en una respuesta: ¿está sano el servicio?"
     quests:
-      - slug: obs-3-journeyman-learn
+      - slug: obs-3-learn-promql
         type: learn
-        title: PromQL y dashboards de Grafana
+        title: PromQL — rate, sum by y histogram_quantile
         required: true
+        estimated_min: 50
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-3-journeyman-glossary
+          observability: 1
+        resources:
+          - ref: res-promql-basics
+          - ref: res-prometheus-histograms
+        payload:
+          note_prompt: Explica qué devuelve `sum(rate(http_server_requests_seconds_count[5m])) by (uri)` y por qué NO debes usar rate() sobre un gauge.
+          summary_md: |
+            Las 4 consultas que más vas a usar (servicio `orders`):
+            - Tráfico: `sum(rate(http_server_requests_seconds_count{job="orders"}[5m])) by (uri)`
+            - Errores (proporción): `sum(rate(http_server_requests_seconds_count{job="orders",status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count{job="orders"}[5m]))`
+            - Latencia p99: `histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job="orders"}[5m])) by (le))`
+            - Negocio: `increase(orders_created_total[1h])`
+            Regla: a los counters SIEMPRE aplícales rate() o increase() antes de sumarlos.
+      - slug: obs-3-learn-grafana
+        type: learn
+        title: Dashboards en Grafana
+        required: true
+        estimated_min: 45
+        skills:
+          observability: 1
+        resources:
+          - ref: res-grafana-fundamentals
+          - ref: res-grafana-provisioning
+            required: false
+        payload:
+          note_prompt: "Diseña en papel (o en texto) un dashboard para tu API de órdenes: qué 4–6 paneles pondrías arriba y por qué ese orden."
+      - slug: obs-3-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de consultas y dashboards
         required: true
+        estimated_min: 10
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-3-journeyman-lab
+          observability: 1
+        payload:
+          terms:
+            - obs-promql
+            - obs-rate
+            - obs-histogram-quantile
+            - obs-range-vector
+            - obs-dashboard
+            - obs-recording-rule
+      - slug: obs-3-lab-dashboard
         type: lab
-        title: "Lab: PromQL y dashboards de Grafana"
+        title: "Lab: dashboard RED de tu servicio"
         required: true
+        estimated_min: 90
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-3-journeyman-quiz
+          observability: 0.8
+          debugging_rca: 0.2
+        payload:
+          goal: Construir en Grafana un dashboard RED (rate, errors, duration) más una métrica de negocio para `orders`, y usarlo para detectar un endpoint lento.
+          steps:
+            - title: Agrega un endpoint lento para tener algo que encontrar
+              body: |
+                En tu `OrderController`:
+
+                ```java
+                @GetMapping("/slow")
+                public String slow() throws InterruptedException {
+                    long ms = ThreadLocalRandom.current().nextInt(100) < 90 ? 50 : 1500; // 10 % muy lentas
+                    Thread.sleep(ms);
+                    return "ok " + ms;
+                }
+                ```
+
+                Ojo con el orden de rutas: `/orders/slow` no debe chocar con `/orders/{id}` (Spring prioriza la ruta literal).
+            - title: Levanta el observatorio y genera tráfico mixto
+              commands:
+                - cd $HOME\questmap-labs\observatory; docker compose up -d
+                - 1..300 | ForEach-Object { Invoke-RestMethod http://localhost:8080/orders/slow -SkipHttpErrorCheck; if ($_ % 10 -eq 0) { Invoke-RestMethod http://localhost:8080/orders/no-existe -SkipHttpErrorCheck } } | Out-Null
+            - title: Prueba las consultas en Prometheus
+              body: En http://localhost:9090/query ejecuta las 4 consultas del resumen del nivel. Anota el p99 de `/orders/slow` usando `by (le, uri)`.
+            - title: Arma el dashboard en Grafana
+              body: |
+                En http://localhost:3001 crea un dashboard nuevo con estos paneles (visualización Time series, salvo el último):
+                1. **Tráfico por endpoint**: `sum(rate(http_server_requests_seconds_count{job="orders"}[1m])) by (uri)`
+                2. **Errores 5xx (%)**: la proporción de errores × 100 (unidad: percent).
+                3. **Latencia p99 por endpoint**: `histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job="orders"}[5m])) by (le, uri))` (unidad: seconds).
+                4. **Heap JVM**: `sum(jvm_memory_used_bytes{job="orders",area="heap"})` (unidad: bytes).
+                5. **Órdenes creadas en 1 h** (Stat): `increase(orders_created_total[1h])`.
+                Usa `$__rate_interval` en lugar de `[1m]` cuando Grafana lo sugiera.
+            - title: Guarda el dashboard como código
+              body: Dashboard → Share/Export → Export as JSON. Guárdalo en `observatory\dashboards\orders.json` y haz commit. Así lo puedes recrear en cualquier entorno.
+              commands:
+                - 'cd $HOME\questmap-labs\observatory; git init 2>$null; git add .; git commit -m "observatory: orders RED dashboard"'
+          expected: "El panel de p99 muestra /orders/slow muy por encima del resto (cerca de 1,5 s), aunque su promedio parezca razonable. El panel de errores 5xx queda en 0 (los 404 son 4xx: error del cliente)."
+          checklist:
+            - Las 4 consultas del resumen devuelven datos en Prometheus
+            - El dashboard tiene los 5 paneles con unidades correctas
+            - Identifiqué /orders/slow como el endpoint con peor p99 solo mirando el dashboard
+            - Puedo explicar por qué los 404 no aparecen en el panel de 5xx
+            - Exporté el dashboard a JSON y lo guardé en git
+          hints:
+            - Si histogram_quantile devuelve vacío, revisa que activaste `percentiles-histogram` en application.properties (nivel 2).
+            - Para ver el p99 de un solo endpoint agrega el filtro `uri="/orders/slow"` dentro de las llaves.
+          evidence_hint: Pega la consulta de p99 por uri con sus resultados y describe en 2 líneas qué te mostró el dashboard.
+      - slug: obs-3-quiz
         type: quiz
-        title: Quiz — PromQL y dashboards de Grafana
+        title: Quiz — PromQL y Grafana
         required: true
+        estimated_min: 15
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
+          observability: 1
+        questions:
+          - slug: o3-q1
+            type: mcq
+            prompt: ¿Qué calcula `rate(http_server_requests_seconds_count[5m])`?
+            options:
+              - El total de peticiones desde que arrancó la app
+              - Las peticiones por segundo, promediadas en los últimos 5 minutos
+              - La latencia promedio
+              - El número de errores
+            answer: 1
+            explanation: rate() toma un counter y devuelve el aumento por segundo promedio dentro de la ventana, manejando reinicios del contador.
+            skill: observability
+            difficulty: 1
+          - slug: o3-q2
+            type: mcq
+            prompt: ¿Cuál es el error en `rate(sum(http_server_requests_seconds_count)[5m])`?
+            options:
+              - Ninguno
+              - "Se suma antes de aplicar rate: hay que hacer rate primero y sum después"
+              - Falta el label le
+              - rate no acepta 5m
+            answer: 1
+            explanation: "Siempre rate-then-sum: `sum(rate(x[5m]))`. Sumar counters crudos de varias instancias rompe la detección de reinicios."
+            skill: observability
+            difficulty: 2
+            hint: "El orden importa: primero rate, luego sum."
+          - slug: o3-q3
+            type: fill
+            prompt: Para calcular el p99 desde un histograma usas `histogram_______(0.99, sum(rate(x_bucket[5m])) by (le))`.
+            answer:
+              - quantile
+            explanation: "`histogram_quantile` necesita el label `le` (los límites de los buckets) en la agregación."
+            skill: observability
+            difficulty: 1
+          - slug: o3-q4
+            type: tf
+            prompt: Grafana almacena las métricas de Prometheus en su propia base de datos para poder dibujarlas.
+            answer: false
+            explanation: Grafana consulta al datasource en cada refresco; las series viven en Prometheus (o en su almacenamiento de largo plazo).
+            skill: observability
+            difficulty: 1
+          - slug: o3-q5
+            type: mcq
+            prompt: ¿Qué selector filtra solo respuestas 5xx?
+            options:
+              - '{status="5xx"}'
+              - '{status=~"5.."}'
+              - "{status>500}"
+              - '{status!="200"}'
+            answer: 1
+            explanation: '`=~` es coincidencia por expresión regular: `5..` = un 5 seguido de dos caracteres cualesquiera. `!="200"` incluiría 404 y 201.'
+            skill: observability
+            difficulty: 2
+          - slug: o3-q6
+            type: mcq
+            prompt: ¿Qué es un range vector como `x[5m]`?
+            options:
+              - Un solo valor
+              - Todas las muestras de cada serie en los últimos 5 minutos
+              - El promedio de 5 minutos
+              - Una alerta
+            answer: 1
+            explanation: Las funciones como rate() e increase() necesitan un range vector para calcular cambios en el tiempo.
+            skill: observability
+            difficulty: 1
+          - slug: o3-q7
+            type: mcq
+            prompt: Una consulta pesada tarda 20 s en cada refresco del dashboard. ¿Qué haces?
+            options:
+              - Subir el refresco a cada 1 s
+              - Crear una recording rule que la precalcule
+              - Borrar Prometheus
+              - Usar logs en su lugar
+            answer: 1
+            explanation: Una recording rule calcula la expresión cada intervalo y guarda el resultado como una serie nueva, barata de consultar.
+            skill: observability
+            difficulty: 2
+          - slug: o3-q8
+            type: order
+            prompt: "Ordena los paneles de un buen dashboard de servicio, de arriba hacia abajo:"
+            options:
+              - Errores y latencia que ve el usuario (síntomas)
+              - Tráfico por endpoint
+              - Saturación de recursos (pool, CPU, memoria)
+              - Detalles internos para depurar (GC, hilos)
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Arriba lo que responde '¿está bien el servicio para los usuarios?'; abajo lo que ayuda a encontrar la causa.
+            skill: observability
+            difficulty: 2
   - slug: obs-4-expert
     number: 4
-    title: "Expert — Alertas, Alertmanager, SLO/SLI y burn rate"
+    title: Expert — Alertas, Alertmanager, SLO/SLI y burn rate
+    story: "El observatorio necesita centinelas: alarmas que despierten a alguien solo cuando los usuarios de verdad sufren, y que no griten por cualquier sombra."
     quests:
-      - slug: obs-4-expert-learn
+      - slug: obs-4-learn-alerting
         type: learn
-        title: Alertas, Alertmanager, SLO/SLI y burn rate
+        title: Reglas de alerta y Alertmanager
         required: true
+        estimated_min: 40
+        skills:
+          observability: 0.8
+          debugging_rca: 0.2
+        resources:
+          - ref: res-prometheus-alerting-rules
+          - ref: res-alertmanager
+        payload:
+          note_prompt: "Explica qué hace la cláusula `for: 5m` en una regla de alerta y qué gana Alertmanager al agrupar alertas. ¿Qué es una alerta 'ruidosa' y por qué es peligrosa?"
+      - slug: obs-4-learn-slo
+        type: learn
+        title: SLI, SLO, error budget y burn rate
+        required: true
+        estimated_min: 50
         skills:
           observability: 0.7
           debugging_rca: 0.3
-      - slug: obs-4-expert-glossary
+        resources:
+          - ref: res-sre-slo
+          - ref: res-sre-alerting-slos
+        payload:
+          note_prompt: Si tu SLO de disponibilidad es 99,5 % en 30 días, ¿cuántos minutos de 'falla' puedes gastar? ¿Qué significa un burn rate de 14,4?
+          summary_md: |
+            - SLI: lo que mides (ej. proporción de peticiones exitosas).
+            - SLO: la meta (ej. 99,5 % de éxito en 30 días).
+            - Error budget: lo que te permites fallar = 100 % − SLO. Con 99,5 % → 0,5 % de 30 días ≈ 216 minutos.
+            - Burn rate: qué tan rápido gastas el presupuesto. Burn rate 1 = lo gastas justo en 30 días. Burn rate 14,4 = gastas el 2 % del presupuesto mensual en 1 hora.
+            - Alerta multi-ventana: dispara si la tasa de errores supera 14,4 × 0,5 % = 7,2 % en la última hora Y en los últimos 5 minutos (para que se apague rápido al recuperarse).
+      - slug: obs-4-glossary
         type: glossary
-        title: Vocabulario del nivel
+        title: Vocabulario de alertas y confiabilidad
         required: true
+        estimated_min: 10
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-4-expert-lab
+          observability: 1
+        payload:
+          terms:
+            - obs-alert-rule
+            - obs-alertmanager
+            - obs-sli
+            - obs-slo
+            - obs-error-budget
+            - obs-burn-rate
+            - obs-runbook
+      - slug: obs-4-lab-alerts
         type: lab
-        title: "Lab: Alertas, Alertmanager, SLO/SLI y burn rate"
+        title: "Lab: alertas que despiertan solo cuando importa"
         required: true
+        estimated_min: 120
         skills:
           observability: 0.7
           debugging_rca: 0.3
-      - slug: obs-4-expert-quiz
+        payload:
+          goal: Agregar Alertmanager al observatorio, escribir una alerta de servicio caído y una de burn rate sobre un SLO de 99,5 %, y provocarlas a propósito.
+          steps:
+            - title: Un endpoint que falla a demanda
+              body: |
+                En `OrderController` agrega un endpoint para simular errores (solo para el lab):
+
+                ```java
+                @GetMapping("/flaky")
+                public String flaky(@RequestParam(defaultValue = "0") int failPercent) {
+                    if (ThreadLocalRandom.current().nextInt(100) < failPercent)
+                        throw new IllegalStateException("fallo simulado");
+                    return "ok";
+                }
+                ```
+
+                Una IllegalStateException sin manejar devuelve 500.
+            - title: Reglas de alerta
+              body: |
+                Crea `observatory\alerts.yml`. Las ventanas están acortadas para el lab (en producción serían 1h/5m y 6h/30m):
+
+                ```yaml
+                groups:
+                  - name: orders-slo
+                    rules:
+                      - record: orders:error_ratio:rate1m
+                        expr: |
+                          sum(rate(http_server_requests_seconds_count{job="orders",status=~"5.."}[1m]))
+                          / sum(rate(http_server_requests_seconds_count{job="orders"}[1m]))
+                      - alert: OrdersDown
+                        expr: up{job="orders"} == 0
+                        for: 30s
+                        labels: { severity: page }
+                        annotations:
+                          summary: "El servicio orders no responde al scrape"
+                          runbook: "Revisar si el proceso está vivo y los logs del último deploy"
+                      - alert: OrdersErrorBudgetFastBurn
+                        # SLO 99,5 % → presupuesto 0,5 %. Burn rate 14,4 → umbral 7,2 %.
+                        expr: orders:error_ratio:rate1m > (14.4 * 0.005)
+                        for: 1m
+                        labels: { severity: page }
+                        annotations:
+                          summary: "orders está quemando el presupuesto de errores 14x más rápido de lo permitido"
+                ```
+            - title: Conecta Prometheus con Alertmanager
+              body: |
+                Agrega al final de `prometheus.yml`:
+
+                ```yaml
+                rule_files:
+                  - /etc/prometheus/alerts.yml
+                alerting:
+                  alertmanagers:
+                    - static_configs:
+                        - targets: ["alertmanager:9093"]
+                ```
+
+                Crea `observatory\alertmanager.yml`:
+
+                ```yaml
+                route:
+                  receiver: default
+                  group_by: [alertname]
+                  group_wait: 10s
+                  repeat_interval: 1h
+                receivers:
+                  - name: default
+                ```
+
+                Y en `docker-compose.yml`: monta `./alerts.yml:/etc/prometheus/alerts.yml:ro` en el servicio prometheus y agrega:
+
+                ```yaml
+                  alertmanager:
+                    image: prom/alertmanager:latest
+                    ports: ["127.0.0.1:9093:9093"]
+                    volumes: ["./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro"]
+                ```
+              commands:
+                - cd $HOME\questmap-labs\observatory; docker compose up -d
+            - title: Provoca la alerta de burn rate
+              body: "Genera tráfico con 20 % de errores durante unos 3 minutos y mira http://localhost:9090/alerts: la alerta pasa de inactive → pending → firing. Luego aparece en Alertmanager (http://localhost:9093)."
+              commands:
+                - $end = (Get-Date).AddMinutes(3); while ((Get-Date) -lt $end) { Invoke-RestMethod 'http://localhost:8080/orders/flaky?failPercent=20' -SkipHttpErrorCheck | Out-Null; Start-Sleep -Milliseconds 100 }
+            - title: Provoca la alerta de servicio caído
+              body: Detén la app (Ctrl+C en la ventana de spring-boot:run). En 30–60 s `OrdersDown` debe dispararse. Vuelve a arrancarla y observa cómo se resuelve.
+            - title: Silencia y commit
+              body: En Alertmanager crea un silence de 15 minutos para OrdersDown (como si fuera una ventana de mantenimiento). Luego haz commit de la configuración.
+              commands:
+                - 'cd $HOME\questmap-labs\observatory; git add .; git commit -m "observatory: alert rules + alertmanager"'
+          expected: Con 20 % de errores, orders:error_ratio:rate1m ronda 0,2 (> 0,072) y OrdersErrorBudgetFastBurn pasa a firing tras 1 minuto en pending. Al detener la app, OrdersDown dispara. Ambas alertas aparecen agrupadas en Alertmanager y se resuelven al recuperar.
+          checklist:
+            - La recording rule orders:error_ratio:rate1m devuelve datos
+            - Vi una alerta pasar por pending antes de firing (efecto del `for`)
+            - OrdersErrorBudgetFastBurn y OrdersDown llegaron a Alertmanager
+            - Creé un silence y entiendo cuándo usarlo
+            - Puedo explicar por qué el umbral es 14,4 × 0,5 % y qué cambiaría con un SLO de 99,9 %
+          hints:
+            - "Si /alerts no muestra tus reglas, revisa el montaje del archivo y los logs: `docker compose logs prometheus`."
+            - Con SLO 99,9 % el presupuesto es 0,1 %, así que el umbral de fast burn sería 14,4 × 0,001 = 1,44 %.
+          evidence_hint: Pega el estado de las alertas (firing) desde Prometheus o Alertmanager y tu cálculo del umbral.
+      - slug: obs-4-quiz
         type: quiz
-        title: Quiz — Alertas, Alertmanager, SLO/SLI y burn rate
+        title: Quiz — Alertas y SLOs
         required: true
+        estimated_min: 15
         skills:
           observability: 0.7
           debugging_rca: 0.3
+        questions:
+          - slug: o4-q1
+            type: mcq
+            prompt: "¿Qué hace `for: 5m` en una regla de alerta?"
+            options:
+              - Revisa la regla cada 5 minutos
+              - La condición debe cumplirse sin interrupción durante 5 minutos antes de disparar
+              - La alerta dura 5 minutos
+              - Silencia la alerta 5 minutos
+            answer: 1
+            explanation: Mientras tanto la alerta está en 'pending'. Evita disparar por picos de segundos (alertas ruidosas).
+            skill: observability
+            difficulty: 1
+          - slug: o4-q2
+            type: mcq
+            prompt: ¿Quién decide a quién notificar y agrupa alertas repetidas?
+            options:
+              - Prometheus
+              - Alertmanager
+              - Grafana
+              - Micrometer
+            answer: 1
+            explanation: Prometheus evalúa las reglas y envía alertas; Alertmanager agrupa, deduplica, aplica silencios e inhibiciones y enruta a correo, Slack, PagerDuty…
+            skill: observability
+            difficulty: 1
+          - slug: o4-q3
+            type: mcq
+            prompt: Tu SLO es 99,9 % de disponibilidad en 30 días. ¿Cuánto error budget tienes aproximadamente?
+            options:
+              - 4,3 minutos
+              - 43 minutos
+              - 7,2 horas
+              - 3 días
+            answer: 1
+            explanation: 0,1 % de 30 días = 0,001 × 43.200 min ≈ 43 minutos. Cada nueve extra divide el presupuesto por 10.
+            skill: observability
+            difficulty: 2
+            hint: 30 días tienen 43.200 minutos.
+          - slug: o4-q4
+            type: tf
+            prompt: Un burn rate de 1 significa que, si sigue así, gastarás exactamente todo el error budget al final de la ventana del SLO.
+            answer: true
+            explanation: Burn rate = tasa de errores observada ÷ tasa permitida. Con 1 llegas justo al límite; con 14,4 lo agotarías en unos 2 días.
+            skill: observability
+            difficulty: 2
+          - slug: o4-q5
+            type: mcq
+            prompt: ¿Por qué las alertas de burn rate usan dos ventanas (ej. 1 h y 5 min)?
+            options:
+              - Para gastar más recursos
+              - La ventana larga da confianza de que es serio; la corta hace que la alerta se apague rápido al recuperarse
+              - Porque Prometheus lo exige
+              - Para alertar dos veces
+            answer: 1
+            explanation: "Es la recomendación del SRE Workbook: precisión (ventana larga) y tiempo de reinicio corto (ventana corta)."
+            skill: observability
+            difficulty: 3
+          - slug: o4-q6
+            type: fill
+            prompt: La métrica que mides (ej. % de peticiones exitosas) se llama SL______; la meta que fijas sobre ella se llama SLO.
+            answer:
+              - I
+            explanation: SLI = indicator, SLO = objective, SLA = agreement (contrato con consecuencias).
+            skill: observability
+            difficulty: 1
+          - slug: o4-q7
+            type: mcq
+            prompt: Durante un mantenimiento planeado de 30 minutos no quieres páginas. ¿Qué usas en Alertmanager?
+            options:
+              - Borrar las reglas
+              - Un silence con tiempo de expiración
+              - Apagar Prometheus
+              - Cambiar el SLO
+            answer: 1
+            explanation: Un silence suprime notificaciones que coinciden con ciertos labels durante un tiempo, sin tocar las reglas.
+            skill: observability
+            difficulty: 1
+          - slug: o4-q8
+            type: mcq
+            prompt: ¿Qué debe tener toda alerta que despierta a una persona?
+            options:
+              - Un color llamativo
+              - Un enlace o texto de runbook con qué revisar y cómo mitigar
+              - Un umbral de CPU
+              - Al menos 3 destinatarios
+            answer: 1
+            explanation: Si la alerta no dice qué hacer, la persona de guardia pierde minutos valiosos. Toda alerta accionable lleva su runbook.
+            skill: debugging_rca
+            difficulty: 1
   - slug: obs-5-boss
     number: 5
-    title: "Boss — Diagnosticar un incidente (RCA)"
+    title: Boss — Diagnosticar un incidente (RCA)
+    story: "Suena la alarma a las 2:47 a. m. El guardián del observatorio te entrega los dashboards de esa noche y una pregunta: ¿qué pasó, por qué, y cómo evitas que vuelva a pasar?"
     quests:
-      - slug: obs-5-boss-learn-review
+      - slug: obs-5-learn-rca
         type: learn
-        title: Repaso para el jefe
+        title: Root cause analysis y postmortems sin culpables
         required: true
+        estimated_min: 40
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-5-boss-quiz-final
+          debugging_rca: 0.7
+          observability: 0.3
+        resources:
+          - ref: res-sre-postmortems
+          - ref: res-sre-monitoring
+            required: false
+        payload:
+          note_prompt: Escribe el esqueleto de un postmortem (las secciones) y explica por qué 'el desarrollador se equivocó' nunca es una causa raíz aceptable.
+          summary_md: |
+            Estructura de un postmortem:
+            1. Resumen (2–3 líneas) e impacto (usuarios afectados, duración, error budget gastado).
+            2. Línea de tiempo (detección, escalamiento, mitigación, resolución).
+            3. Causa raíz y factores que contribuyeron (pregunta "¿por qué?" varias veces).
+            4. Qué salió bien y qué salió mal en la respuesta.
+            5. Acciones con dueño y fecha (prevenir, detectar antes, mitigar más rápido).
+            Sin culpables: se buscan fallas del sistema y del proceso, no de personas.
+      - slug: obs-5-glossary
+        type: glossary
+        title: Vocabulario de incidentes
+        required: true
+        estimated_min: 10
+        skills:
+          debugging_rca: 1
+        payload:
+          terms:
+            - obs-rca
+            - obs-mttr
+            - obs-postmortem
+            - obs-five-whys
+            - obs-saturation
+      - slug: obs-5-quiz-final
         type: quiz
-        title: Examen final de la zona
+        title: Examen final — Observability Observatory
         required: true
+        estimated_min: 20
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-5-boss-boss-fight
+          observability: 0.6
+          debugging_rca: 0.4
+        questions:
+          - slug: o5-q1
+            type: mcq
+            prompt: A las 2:10 hubo un deploy. Desde las 2:12 el p99 de POST /orders sube de 180 ms a 2,4 s, el CPU está normal y `hikaricp_connections_pending` crece sin parar. ¿Hipótesis más probable?
+            options:
+              - Falta CPU
+              - "El pool de conexiones a la BD está saturado: algo nuevo retiene conexiones más tiempo (consulta lenta o conexión que no se libera)"
+              - Problema de DNS
+              - Grafana está lento
+            answer: 1
+            explanation: Conexiones pendientes que crecen = saturación del pool (USE). Coincide con el deploy, así que lo primero es revisar qué cambió en el acceso a datos.
+            skill: debugging_rca
+            difficulty: 2
+          - slug: o5-q2
+            type: mcq
+            prompt: En ese mismo incidente, ¿cuál es la mejor mitigación inmediata?
+            options:
+              - Escribir el postmortem
+              - Hacer rollback del deploy de las 2:10
+              - Agregar índices en producción a ciegas
+              - Reiniciar Prometheus
+            answer: 1
+            explanation: Primero se detiene el daño (mitigar) con la acción más segura y reversible; la causa exacta se investiga después con calma.
+            skill: debugging_rca
+            difficulty: 1
+          - slug: o5-q3
+            type: mcq
+            prompt: ¿Qué mide MTTR?
+            options:
+              - Tiempo medio entre deploys
+              - Tiempo medio para recuperar el servicio tras un incidente
+              - Tiempo de respuesta de la API
+              - Tiempo hasta escribir el postmortem
+            answer: 1
+            explanation: Mean Time To Recovery/Restore. Buenas alertas y runbooks reducen el tiempo de detección; los rollbacks rápidos, el de recuperación.
+            skill: debugging_rca
+            difficulty: 1
+          - slug: o5-q4
+            type: tf
+            prompt: Si el p99 sube pero el promedio de latencia no cambia, no hay nada de qué preocuparse.
+            answer: false
+            explanation: El p99 refleja a tus usuarios más afectados (a menudo los de pedidos grandes o clientes importantes). El promedio esconde la cola.
+            skill: observability
+            difficulty: 1
+          - slug: o5-q5
+            type: mcq
+            prompt: La tasa de errores de /orders es 0 %, pero los usuarios reportan que 'no pasa nada al pagar'. El backlog de `payments-sub` crece desde hace 1 h. ¿Qué te falta monitorear?
+            options:
+              - El CPU de Grafana
+              - "Los consumidores asíncronos: backlog y antigüedad del mensaje más viejo sin ack"
+              - La memoria del navegador
+              - Nada, la API está bien
+            answer: 1
+            explanation: En sistemas event-driven la API puede responder 201 mientras el trabajo real se queda en una cola. Hay que alertar también sobre la edad del mensaje más viejo.
+            skill: observability
+            difficulty: 2
+          - slug: o5-q6
+            type: fill
+            prompt: La técnica de preguntar '¿por qué?' varias veces seguidas hasta llegar a la causa de fondo se llama los cinco ______ (en español).
+            answer:
+              - porqués
+              - porques
+              - por qués
+            explanation: "5 Whys: cada respuesta abre la siguiente pregunta, hasta llegar a una causa del sistema o del proceso que puedas corregir."
+            skill: debugging_rca
+            difficulty: 1
+          - slug: o5-q7
+            type: mcq
+            prompt: ¿Cuál es una buena acción preventiva después del incidente del pool de conexiones?
+            options:
+              - Despedir a quien hizo el deploy
+              - Alerta sobre saturación del pool + prueba de carga en CI + revisión de consultas nuevas
+              - Desactivar las alertas
+              - Duplicar el tamaño del pool sin entender la causa
+            answer: 1
+            explanation: Las acciones buenas atacan detección, prevención y mitigación, tienen dueño y fecha, y no culpan a personas.
+            skill: debugging_rca
+            difficulty: 1
+          - slug: o5-q8
+            type: order
+            prompt: "Ordena la respuesta a un incidente:"
+            options:
+              - Detectar (alerta por síntoma)
+              - Evaluar el impacto y avisar a los interesados
+              - Mitigar (rollback, escalar, desviar tráfico)
+              - Encontrar la causa raíz
+              - Postmortem con acciones preventivas
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Mitigar va ANTES de entender del todo la causa: primero se detiene el daño a los usuarios."
+            skill: debugging_rca
+            difficulty: 2
+      - slug: obs-5-boss-fight
         type: boss
-        title: "Jefe: Diagnosticar un incidente (RCA)"
+        title: "Jefe: el incidente de las 2:47 a. m."
         required: true
+        estimated_min: 90
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
-      - slug: obs-5-boss-interview
+          debugging_rca: 0.5
+          observability: 0.3
+          english: 0.2
+        payload:
+          task: |
+            Datos del incidente (servicio `orders`, viernes):
+            - 02:10 deploy v2.3 de orders: "nuevo reporte de órdenes por cliente en el endpoint POST /orders (validación de límite de crédito)".
+            - 02:12 p99 de POST /orders: 180 ms → 2,4 s. Tráfico estable (~300 req/s).
+            - 02:15 `hikaricp_connections_active` = 20 (el máximo). `hikaricp_connections_pending` sube de 0 a 140.
+            - 02:18 errores 5xx: 0,2 % → 9 % (timeouts al obtener conexión). CPU de la app 35 %, CPU de la BD 92 %.
+            - 02:20 el backlog de `payments-sub` empieza a crecer: los pagos llegan, pero no se pueden guardar.
+            - 02:47 se dispara la alerta de burn rate (error budget, SLO 99,5 %). Nadie había sido notificado antes.
+            - 03:05 rollback a v2.2. A las 03:09 todo vuelve a la normalidad.
+
+            Entrega (en español o inglés, texto con secciones): resumen e impacto (incluye cuánto error budget se gastó aproximadamente), línea de tiempo, causa raíz probable con la evidencia (qué métricas y consultas PromQL la sostienen), por qué se detectó tarde, mitigación, y al menos 4 acciones preventivas (alertas nuevas con su PromQL, pruebas, cambios de código o de proceso). Luego defiende tu análisis en una mini-entrevista en inglés.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - root cause reasoning and evidence
+            - why detection took 37 minutes
+            - saturation metrics and alert design
+            - blameless action items
+      - slug: obs-5-interview
         type: interview
-        title: Mini-entrevista de la zona
+        title: "Mini-entrevista: observability screen"
         required: false
+        estimated_min: 30
         skills:
-          observability: 0.7
-          debugging_rca: 0.3
+          observability: 0.6
+          english: 0.4
         payload:
           mode: technical_screen
           zone: observability-observatory

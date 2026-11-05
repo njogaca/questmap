@@ -1,0 +1,96 @@
+# Zona de PRUEBA (Fase 1). El contenido completo de la Zona 1 llega en la Fase 4.
+slug: java-forest
+title: Java Forest
+order: 1
+emoji: "🌲"
+unlocked_from_start: true
+prerequisites: []
+skills: [java, git, testing]
+story: >
+  Sector 01. Un bosque de datos donde cada árbol es una clase y cada hoja un objeto.
+  Para infiltrarte en el reino necesitas hablar su lenguaje: Java.
+levels:
+  - slug: java-1-novice
+    number: 1
+    title: Novice — Java y OOP
+    story: "Entras al bosque. Los árboles son clases y los frutos, objetos. Primero aprende sus nombres."
+    quests:
+      - slug: java-1-learn-oop
+        type: learn
+        title: Conceptos de OOP en Java
+        required: true
+        estimated_min: 45
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-java-mooc-part1 }
+          - { ref: res-devjava-learn, required: false }
+        payload:
+          note_prompt: "Explica con tus palabras (2–3 líneas) qué es una clase y qué es un objeto."
+
+      - slug: java-1-glossary
+        type: glossary
+        title: Vocabulario básico de Java
+        required: true
+        estimated_min: 10
+        skills: { java: 1.0 }
+        payload:
+          glossary_file: java
+          terms: [java-class, java-object, java-interface]
+
+      - slug: java-1-quiz
+        type: quiz
+        title: Quiz — OOP básico
+        required: true
+        estimated_min: 15
+        skills: { java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué es un objeto en Java?"
+            options:
+              - "Una instancia concreta de una clase"
+              - "Un archivo .java"
+              - "Un tipo primitivo como int"
+              - "Un paquete de clases"
+            answer: 0
+            explanation: "La clase es el molde; el objeto es una instancia creada con `new` a partir de ese molde."
+            skill: java
+            difficulty: 1
+            hint: "Piensa en molde vs. pieza."
+          - type: tf
+            prompt: "En Java una clase puede implementar varias interfaces."
+            answer: true
+            explanation: "Java no permite herencia múltiple de clases, pero sí implementar varias interfaces."
+            skill: java
+            difficulty: 1
+            hint: "La restricción es con `extends`, no con `implements`."
+
+      - slug: java-1-micro-flashcards
+        type: micro
+        title: Repaso rápido de flashcards
+        required: false
+        estimated_min: 10
+        skills: { java: 1.0 }
+
+  - slug: java-2-apprentice
+    number: 2
+    title: Apprentice — Colecciones, streams y Java moderno
+    status: outline
+    quests: []
+
+  - slug: java-3-journeyman
+    number: 3
+    title: Journeyman — Excepciones, concurrencia y pruebas
+    status: outline
+    quests: []
+
+  - slug: java-4-expert
+    number: 4
+    title: Expert — Spring Boot REST
+    status: outline
+    quests: []
+
+  - slug: java-5-boss
+    number: 5
+    title: Boss — Servicio REST con pruebas
+    status: outline
+    quests: []

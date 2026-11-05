@@ -1,0 +1,41 @@
+name: questmap
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-questmap}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-questmap}
+      POSTGRES_DB: ${POSTGRES_DB:-questmap}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - questmap_pgdata:/var/lib/postgresql/data
+    ports:
+      # Solo localhost. Nunca 0.0.0.0.
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-questmap}:${POSTGRES_PASSWORD:-questmap}@db:5432/${POSTGRES_DB:-questmap}
+      TZ: ${TZ:-UTC}
+    ports:
+      # Solo localhost. Para el celular usa `tailscale serve --bg 3000` (ver README).
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  questmap_pgdata:
+    name: questmap_pgdata

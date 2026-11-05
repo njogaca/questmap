@@ -1,0 +1,48 @@
+# Catálogo de recursos. Las quests los referencian con {ref: <slug>}.
+# Regla: verified: true SOLO si la URL se abrió y se confirmó. Si no, url: null + how_to_find.
+
+resources:
+  - slug: res-java-mooc
+    title: Java Programming MOOC — University of Helsinki
+    type: course
+    url: https://java-programming.mooc.fi/
+    language: en
+    duration_min: 6000
+    cost: free
+    required: true
+    why: Curso gratis y completo de Java con ejercicios autocalificados.
+    verified: true
+
+  - slug: res-java-mooc-part1
+    title: Java Programming MOOC — Part 1
+    type: course
+    url: https://java-programming.mooc.fi/part-1
+    language: en
+    duration_min: 600
+    cost: free
+    required: true
+    why: Sintaxis, variables, condicionales y bucles desde cero.
+    verified: true
+
+  - slug: res-devjava-learn
+    title: Dev.java — Learn (tutoriales oficiales de Java, Oracle)
+    type: docs
+    url: https://dev.java/learn/
+    language: en
+    duration_min: 120
+    cost: free
+    required: false
+    why: Tutoriales oficiales; la sección Object-Oriented Programming refuerza clases e interfaces.
+    verified: true
+
+  - slug: res-effective-java
+    title: Effective Java (3rd ed.) — Joshua Bloch
+    type: book
+    url: null
+    how_to_find: "Buscar el libro 'Effective Java, Third Edition' de Joshua Bloch (Addison-Wesley) en tu librería o biblioteca preferida."
+    language: en
+    duration_min: 900
+    cost: paid
+    required: false
+    why: El libro clásico de buenas prácticas en Java; útil para entrevistas.
+    verified: false

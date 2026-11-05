@@ -1,0 +1,28 @@
+zone: java-forest
+terms:
+  - slug: java-class
+    term: class
+    category: oop
+    definition_es: "El molde o plano que describe qué datos (campos) y qué comportamiento (métodos) tendrán los objetos."
+    definition_en: "A blueprint that defines the fields and methods of its objects."
+    example_en: "The Order class has an id and a total."
+    analogy_mq: "Como la definición de un message model en IIB: describe la forma, no es el mensaje en sí."
+    see_also: [java-object]
+
+  - slug: java-object
+    term: object
+    category: oop
+    definition_es: "Una instancia concreta de una clase, creada con `new`. Tiene sus propios valores."
+    definition_en: "A concrete instance of a class, created with new."
+    example_en: "We create a new Order object for each purchase."
+    analogy_mq: "Como un mensaje concreto en la cola: sigue el modelo, pero tiene sus propios datos."
+    see_also: [java-class]
+
+  - slug: java-interface
+    term: interface
+    category: oop
+    definition_es: "Un contrato: lista métodos que una clase promete implementar, sin decir cómo."
+    definition_en: "A contract of methods that a class promises to implement."
+    example_en: "PaymentService is an interface with two implementations."
+    analogy_mq: "Como un WSDL: define la operación; cada servicio la implementa a su manera."
+    see_also: [java-class]

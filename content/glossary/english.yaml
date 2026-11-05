@@ -1,0 +1,320 @@
+# Frases y vocabulario del English Track. Aquí "term" es la expresión en inglés.
+zone: english-track
+terms:
+  # ------------------------------------------------ Nivel 1: supervivencia
+  - slug: en-could-you-repeat
+    term: "Could you repeat that, please?"
+    category: survival
+    definition_es: "Pedir que repitan algo, de forma educada. Mejor que decir solo 'What?'."
+    definition_en: "A polite way to ask someone to say something again."
+    example_en: "Sorry, could you repeat that, please? The audio cut out."
+    see_also: [en-to-clarify]
+
+  - slug: en-let-me-think
+    term: "Let me think about that for a second."
+    category: survival
+    definition_es: "Gana unos segundos para pensar sin quedarte en silencio. En entrevistas es totalmente normal."
+    definition_en: "A natural way to buy time before answering."
+    example_en: "Good question. Let me think about that for a second."
+    analogy: "Como poner las intermitentes antes de girar: avisas que vas a responder."
+
+  - slug: en-to-clarify
+    term: "Just to clarify, do you mean…?"
+    category: survival
+    definition_es: "Confirma que entendiste la pregunta antes de responder; demuestra cuidado, no debilidad."
+    definition_en: "Used to check that you understood the question correctly."
+    example_en: "Just to clarify, do you mean the latency of the consumer or end to end?"
+    see_also: [en-could-you-repeat]
+
+  - slug: en-as-far-as-i-know
+    term: "As far as I know…"
+    category: survival
+    definition_es: "'Hasta donde sé…'. Sirve para dar una respuesta cuando no estás 100 % seguro."
+    definition_en: "Used to say something is true based on your current knowledge."
+    example_en: "As far as I know, Pub/Sub only guarantees ordering per ordering key."
+
+  - slug: en-im-not-sure-but
+    term: "I'm not 100% sure, but my understanding is…"
+    category: survival
+    definition_es: "Forma honesta de responder algo que no dominas, mostrando tu razonamiento. Mucho mejor que inventar."
+    definition_en: "An honest way to answer while showing your reasoning."
+    example_en: "I'm not 100% sure, but my understanding is that tombstones are removed during compaction."
+
+  - slug: en-throughput-numbers
+    term: "two million messages per day / five hundred per second"
+    category: numbers
+    definition_es: "Cómo decir volúmenes: 'per' para la tasa; 'million' y 'thousand' sin 's' cuando van con número (two million, no two millions)."
+    definition_en: "How to say volumes and rates out loud."
+    example_en: "We handle about two million messages per day."
+
+  - slug: en-latency-ms
+    term: "milliseconds (ms) / under 200 milliseconds"
+    category: numbers
+    definition_es: "Se dice 'milliseconds' (mi-li-SE-conds). 'Under' = por debajo de; 'around' = aproximadamente."
+    definition_en: "How to talk about latency values."
+    example_en: "The p99 latency is under two hundred milliseconds."
+
+  - slug: en-percent-p99
+    term: "p99 / the ninety-ninth percentile"
+    category: numbers
+    definition_es: "'p99' se lee 'P ninety-nine': el 99 % de las peticiones tarda eso o menos."
+    definition_en: "The value below which 99% of measurements fall."
+    example_en: "Our p99 went from 300 to 120 milliseconds after the fix."
+
+  - slug: en-orders-of-magnitude
+    term: "an order of magnitude"
+    category: numbers
+    definition_es: "'Un orden de magnitud' = unas 10 veces. Muy usado en diseño de sistemas."
+    definition_en: "About ten times bigger or smaller."
+    example_en: "Batching reduced the number of calls by an order of magnitude."
+
+  # ------------------------------------------------ Nivel 2: explicar
+  - slug: en-in-other-words
+    term: "In other words…"
+    category: explaining
+    definition_es: "'En otras palabras…': reformula una idea de forma más simple."
+    definition_en: "Used to explain the same idea more simply."
+    example_en: "In other words, each subscription gets its own copy."
+
+  - slug: en-for-example
+    term: "For example, … / For instance, …"
+    category: explaining
+    definition_es: "Introduce un ejemplo concreto. Un buen ejemplo vale más que una definición larga."
+    definition_en: "Introduces a concrete example."
+    example_en: "For instance, an Order class could have an id and a total."
+
+  - slug: en-the-main-difference
+    term: "The main difference is that…"
+    category: explaining
+    definition_es: "Estructura perfecta para preguntas de 'X vs Y'."
+    definition_en: "A clear way to start a comparison."
+    example_en: "The main difference is that a set doesn't allow duplicates."
+
+  - slug: en-under-the-hood
+    term: "under the hood"
+    category: explaining
+    definition_es: "'Por dentro / internamente': cómo funciona algo que normalmente no ves."
+    definition_en: "How something works internally."
+    example_en: "Under the hood, Cassandra hashes the partition key into a token."
+    analogy: "Literalmente 'bajo el capó' del carro."
+
+  - slug: en-it-depends-on
+    term: "It depends on…"
+    category: explaining
+    definition_es: "Respuesta válida en diseño, pero SIEMPRE di de qué depende y cómo decidirías."
+    definition_en: "Used when the answer changes with the context; always explain the factors."
+    example_en: "It depends on whether we need strict ordering or high throughput."
+
+  - slug: en-trade-off
+    term: "trade-off"
+    category: tradeoffs
+    definition_es: "Compromiso: ganas algo a cambio de perder otra cosa. Palabra clave en entrevistas de diseño."
+    definition_en: "A balance between two desirable but competing things."
+    example_en: "The trade-off is lower latency in exchange for weaker consistency."
+
+  - slug: en-on-the-other-hand
+    term: "On the other hand…"
+    category: tradeoffs
+    definition_es: "'Por otro lado…': presenta el punto opuesto."
+    definition_en: "Introduces a contrasting point."
+    example_en: "Push is simpler to deploy. On the other hand, pull gives us flow control."
+
+  - slug: en-the-downside-is
+    term: "The downside is…"
+    category: tradeoffs
+    definition_es: "'La desventaja es…'. Mencionar desventajas muestra madurez técnica."
+    definition_en: "Used to state the disadvantage of an option."
+    example_en: "The downside is that we have to maintain two tables."
+
+  - slug: en-it-comes-at-the-cost-of
+    term: "It comes at the cost of…"
+    category: tradeoffs
+    definition_es: "'Tiene el costo de…': otra forma elegante de hablar de trade-offs."
+    definition_en: "Says what you lose when choosing an option."
+    example_en: "Ordering keys guarantee order, but it comes at the cost of throughput."
+
+  - slug: en-good-enough
+    term: "good enough for now"
+    category: tradeoffs
+    definition_es: "'Suficiente por ahora': justificar una solución simple, sin sobre-ingeniería, sabiendo cuándo cambiarla."
+    definition_en: "Acceptable for the current needs."
+    example_en: "An in-memory cache is good enough for now; we'll revisit it at 10x traffic."
+
+  # ------------------------------------------------ Nivel 3: mensajería y datos
+  - slug: en-to-publish
+    term: "to publish (an event)"
+    category: messaging
+    definition_es: "Publicar/enviar un evento a un topic. Pasado: published."
+    definition_en: "To send a message to a topic."
+    example_en: "The order service publishes an OrderPlaced event."
+
+  - slug: en-to-acknowledge
+    term: "to acknowledge (to ack)"
+    category: messaging
+    definition_es: "Confirmar que un mensaje se procesó. Se pronuncia 'ak-NOL-ij'; abreviado 'ack'."
+    definition_en: "To confirm a message was processed."
+    example_en: "We only acknowledge the message after the database commit."
+
+  - slug: en-to-retry
+    term: "to retry"
+    category: messaging
+    definition_es: "Reintentar. 'Retries' = los reintentos. 'With exponential backoff' = con espera creciente."
+    definition_en: "To try an operation again after a failure."
+    example_en: "The client retries with exponential backoff."
+
+  - slug: en-to-fan-out
+    term: "to fan out"
+    category: messaging
+    definition_es: "Repartir un mensaje a muchos consumidores."
+    definition_en: "To deliver one message to many consumers."
+    example_en: "The event fans out to three subscriptions."
+
+  - slug: en-to-redeliver
+    term: "to redeliver"
+    category: messaging
+    definition_es: "Volver a entregar un mensaje (ej. porque no hubo ack a tiempo)."
+    definition_en: "To deliver a message again."
+    example_en: "If the ack deadline expires, Pub/Sub redelivers the message."
+
+  - slug: en-to-scale-out
+    term: "to scale out / to scale up"
+    category: data
+    definition_es: "Scale out = agregar más máquinas (horizontal). Scale up = una máquina más grande (vertical)."
+    definition_en: "Scale out: add more machines. Scale up: use a bigger machine."
+    example_en: "Cassandra lets us scale out by adding nodes."
+
+  - slug: en-bottleneck
+    term: "bottleneck"
+    category: data
+    definition_es: "Cuello de botella: la parte más lenta que limita todo el sistema."
+    definition_en: "The slowest part that limits the whole system."
+    example_en: "The database was the bottleneck, not the consumers."
+    analogy: "El cuello de una botella: no importa qué tan grande sea la botella, el agua sale al ritmo del cuello."
+
+  - slug: en-to-partition
+    term: "to partition (data)"
+    category: data
+    definition_es: "Dividir datos en partes que se guardan en distintos lugares para repartir la carga."
+    definition_en: "To split data into parts stored in different places."
+    example_en: "We partition the events by store and day."
+
+  - slug: en-to-query
+    term: "to query"
+    category: data
+    definition_es: "Consultar datos. 'A query' = una consulta. Se pronuncia 'KWI-ri'."
+    definition_en: "To ask a database for data."
+    example_en: "We query the table by customer id."
+
+  - slug: en-under-load
+    term: "under load / under heavy load"
+    category: data
+    definition_es: "'Bajo carga': cómo se comporta un sistema cuando recibe mucho tráfico."
+    definition_en: "When a system receives a lot of traffic."
+    example_en: "Under heavy load, the latency doubled."
+
+  # ------------------------------------------------ Nivel 4: experiencia
+  - slug: en-i-led
+    term: "I led…"
+    category: experience
+    definition_es: "'Lideré…'. Pasado de 'lead' es 'led' (se pronuncia 'led', no 'lid')."
+    definition_en: "Past tense of lead."
+    example_en: "I led the migration of twenty integrations to the new platform."
+
+  - slug: en-i-designed
+    term: "I designed…"
+    category: experience
+    definition_es: "'Diseñé…'. Usa 'I' (yo) para tus aportes; 'we' para el equipo. Los entrevistadores quieren saber qué hiciste TÚ."
+    definition_en: "Describes something you designed."
+    example_en: "I designed the retry and dead-letter strategy."
+
+  - slug: en-i-reduced
+    term: "I reduced… by X percent"
+    category: experience
+    definition_es: "'Reduje… en X %'. Siempre que puedas, termina tus historias con un número."
+    definition_en: "Describes a measurable improvement."
+    example_en: "I reduced the processing time by forty percent."
+
+  - slug: en-i-migrated
+    term: "I migrated… from X to Y"
+    category: experience
+    definition_es: "'Migré… de X a Y'. Muy útil para contar tu paso de middleware tradicional a tecnologías nuevas."
+    definition_en: "Describes moving a system from one technology to another."
+    example_en: "I migrated the batch jobs from scripts to containers on OpenShift."
+
+  - slug: en-i-was-responsible-for
+    term: "I was responsible for…"
+    category: experience
+    definition_es: "'Era responsable de…'. Útil para describir tu alcance."
+    definition_en: "Describes your area of ownership."
+    example_en: "I was responsible for the payment integrations."
+
+  - slug: en-stakeholder
+    term: "stakeholder"
+    category: teamwork
+    definition_es: "Persona o equipo interesado o afectado por un proyecto (negocio, otros equipos, clientes)."
+    definition_en: "A person or team affected by a project."
+    example_en: "I aligned the stakeholders before changing the message format."
+
+  - slug: en-ownership
+    term: "ownership"
+    category: teamwork
+    definition_es: "Hacerte responsable de algo de principio a fin, incluso de lo que sale mal."
+    definition_en: "Taking full responsibility for something."
+    example_en: "I took ownership of the incident until it was resolved."
+
+  - slug: en-on-call
+    term: "on-call"
+    category: teamwork
+    definition_es: "Guardia: estar disponible para atender incidentes fuera del horario."
+    definition_en: "Being available to respond to incidents outside working hours."
+    example_en: "Our team has a one-week on-call rotation."
+
+  - slug: en-to-roll-back
+    term: "to roll back"
+    category: teamwork
+    definition_es: "Revertir un despliegue a la versión anterior."
+    definition_en: "To return to a previous version after a bad deployment."
+    example_en: "We rolled back the release within ten minutes."
+
+  - slug: en-post-mortem
+    term: "post-mortem / blameless post-mortem"
+    category: teamwork
+    definition_es: "Análisis después de un incidente para entender causas y evitar que se repita, sin buscar culpables."
+    definition_en: "A review after an incident, focused on learning, not blame."
+    example_en: "In the post-mortem we found two root causes."
+
+  # ------------------------------------------------ Nivel 5: pronunciación
+  - slug: en-pron-cache
+    term: "cache"
+    category: pronunciation
+    definition_es: "Se pronuncia igual que 'cash' (/kæʃ/). NO 'ca-ché' ni 'catch'."
+    definition_en: "Pronounced like 'cash'."
+    example_en: "We cache the results for five minutes."
+
+  - slug: en-pron-queue
+    term: "queue"
+    category: pronunciation
+    definition_es: "Se pronuncia como la letra Q: 'kiú' (/kjuː/). Las letras 'ueue' no suenan."
+    definition_en: "Pronounced like the letter Q."
+    example_en: "The queue depth increased during the outage."
+
+  - slug: en-pron-schema
+    term: "schema"
+    category: pronunciation
+    definition_es: "Se pronuncia 'SKI-ma' (/ˈskiːmə/). La 'ch' suena como K."
+    definition_en: "Pronounced 'SKEE-muh'."
+    example_en: "We added an optional field to the schema."
+
+  - slug: en-pron-throughput
+    term: "throughput"
+    category: pronunciation
+    definition_es: "'ZRU-put' (/ˈθruːpʊt/): la 'th' es como la 'z' española de España (lengua entre los dientes). Significa volumen procesado por unidad de tiempo."
+    definition_en: "Pronounced 'THROO-put'; the amount processed per unit of time."
+    example_en: "Batching increased the throughput."
+
+  - slug: en-pron-data
+    term: "data"
+    category: pronunciation
+    definition_es: "En EE. UU. se dice 'DEI-ta' o 'DA-ta' (con 'd' suave, casi 'r'). Las dos se entienden; elige una y sé consistente."
+    definition_en: "Pronounced 'DAY-tuh' or 'DA-tuh' in American English."
+    example_en: "We store the event data in BigQuery."

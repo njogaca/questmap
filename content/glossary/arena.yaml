@@ -1,0 +1,69 @@
+zone: interview-arena
+terms:
+  - slug: arena-tmay
+    term: "Tell me about yourself"
+    category: interview
+    definition_es: "La pregunta con la que abren casi todas las entrevistas. No piden tu biografía: piden un resumen profesional de 60–90 s que explique por qué encajas."
+    definition_en: "The classic opening question; a short professional summary."
+    example_en: "Tell me about yourself and what brought you to this role."
+    analogy: "El tráiler de una película: suficiente para que quieran ver el resto."
+    see_also: [arena-bridge-story]
+
+  - slug: arena-bridge-story
+    term: bridge story
+    category: interview
+    definition_es: "La parte de tu historia que conecta tu experiencia actual con el puesto nuevo y explica por qué el cambio tiene sentido."
+    definition_en: "The part of your story that connects past experience to the new role."
+    example_en: "My bridge story connects IBM MQ with event-driven systems on GCP."
+    analogy: "Un puente entre dos orillas: no niegas de dónde vienes, muestras cómo cruzas."
+    see_also: [arena-tmay]
+
+  - slug: arena-behavioral
+    term: behavioral interview
+    category: interview
+    definition_es: "Entrevista sobre cómo actuaste en situaciones reales (conflictos, errores, liderazgo). Parte de la idea de que tu conducta pasada predice la futura."
+    definition_en: "An interview about how you handled real situations in the past."
+    example_en: "In the behavioral round they asked about a conflict with a teammate."
+    see_also: [arena-star]
+
+  - slug: arena-star
+    term: STAR method
+    category: interview
+    definition_es: "Estructura para responder preguntas conductuales: Situation (contexto), Task (tu responsabilidad), Action (lo que TÚ hiciste) y Result (resultado medible)."
+    definition_en: "Situation, Task, Action, Result: a structure for behavioral answers."
+    example_en: "Use the STAR method and finish with a measurable result."
+    analogy: "Una receta de cuento corto: inicio, conflicto, lo que hiciste y final."
+    see_also: [arena-behavioral]
+
+  - slug: arena-technical-screen
+    term: technical screen
+    category: interview
+    definition_es: "Primera entrevista técnica corta (30–60 min) para comprobar conocimientos base: preguntas conceptuales y a veces un poco de código."
+    definition_en: "A short first technical interview to check fundamentals."
+    example_en: "The technical screen covered Java, Pub/Sub and SQL basics."
+    see_also: [arena-system-design]
+
+  - slug: arena-system-design
+    term: system design interview
+    category: interview
+    definition_es: "Entrevista donde diseñas un sistema (por ejemplo, un pipeline de eventos de órdenes) en voz alta: requisitos, componentes, datos, escala y trade-offs."
+    definition_en: "An interview where you design a system out loud and discuss trade-offs."
+    example_en: "In the system design interview I designed an order events pipeline."
+    analogy: "Dibujar los planos de un edificio frente al cliente, explicando cada decisión."
+    see_also: [arena-technical-screen]
+
+  - slug: arena-take-home
+    term: take-home assignment
+    category: interview
+    definition_es: "Ejercicio de programación que resuelves en tu casa con un tiempo límite y luego defiendes en una entrevista."
+    definition_en: "A coding exercise you complete at home and later discuss."
+    example_en: "The take-home was a small REST service with tests."
+    see_also: [arena-technical-screen]
+
+  - slug: arena-hiring-manager
+    term: hiring manager
+    category: interview
+    definition_es: "La persona que será tu jefe directo y toma la decisión final de contratación."
+    definition_en: "The person who would be your manager and makes the hiring decision."
+    example_en: "My last round is with the hiring manager."
+    see_also: [arena-behavioral]

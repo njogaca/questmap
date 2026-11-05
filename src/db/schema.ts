@@ -160,6 +160,9 @@ export const glossaryTerms = pgTable("glossary_terms", {
   definitionEs: text("definition_es").notNull(),
   definitionEn: text("definition_en").notNull(),
   exampleEn: text("example_en"),
+  /** Analogía cotidiana (o de cualquier tipo) para entender el término. */
+  analogy: text("analogy"),
+  /** Opcional y poco frecuente: equivalente en IBM MQ/IIB/DataPower cuando realmente ayuda. */
   analogyMq: text("analogy_mq"),
   seeAlso: jsonb("see_also").$type<string[]>().notNull().default([]),
   status: contentStatus("status").notNull().default("published"),

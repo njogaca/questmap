@@ -1,12 +1,13 @@
 zone: java-forest
 terms:
+  # ---------------------------------------------------------------- Nivel 1
   - slug: java-class
     term: class
     category: oop
-    definition_es: "El molde o plano que describe qué datos (campos) y qué comportamiento (métodos) tendrán los objetos."
+    definition_es: "El molde que describe qué datos (campos) y qué comportamiento (métodos) tendrán los objetos."
     definition_en: "A blueprint that defines the fields and methods of its objects."
-    example_en: "The Order class has an id and a total."
-    analogy_mq: "Como la definición de un message model en IIB: describe la forma, no es el mensaje en sí."
+    example_en: "The Order class has an id, a customer and a total."
+    analogy: "El plano de una casa: dice cuántos cuartos tendrá, pero no es una casa donde puedas vivir."
     see_also: [java-object]
 
   - slug: java-object
@@ -15,14 +16,288 @@ terms:
     definition_es: "Una instancia concreta de una clase, creada con `new`. Tiene sus propios valores."
     definition_en: "A concrete instance of a class, created with new."
     example_en: "We create a new Order object for each purchase."
-    analogy_mq: "Como un mensaje concreto en la cola: sigue el modelo, pero tiene sus propios datos."
-    see_also: [java-class]
+    analogy: "Cada casa construida con el mismo plano: misma forma, pero cada una con su dueño y sus muebles."
+    see_also: [java-class, java-constructor]
+
+  - slug: java-constructor
+    term: constructor
+    category: oop
+    definition_es: "Método especial que se ejecuta al crear un objeto con `new`; deja el objeto en un estado válido."
+    definition_en: "A special method that runs when an object is created and sets its initial state."
+    example_en: "The constructor rejects a negative total."
+    analogy: "La inspección final antes de entregar la casa: no se entrega si falta algo esencial."
+    see_also: [java-object]
 
   - slug: java-interface
     term: interface
     category: oop
-    definition_es: "Un contrato: lista métodos que una clase promete implementar, sin decir cómo."
+    definition_es: "Un contrato: lista de métodos que una clase promete implementar, sin decir cómo."
     definition_en: "A contract of methods that a class promises to implement."
-    example_en: "PaymentService is an interface with two implementations."
-    analogy_mq: "Como un WSDL: define la operación; cada servicio la implementa a su manera."
+    example_en: "PaymentGateway is an interface with two implementations: Stripe and PayPal."
+    analogy: "Un enchufe estándar: cualquier aparato que respete la forma funciona, sin importar la marca."
+    analogy_mq: "Parecido a un WSDL: define la operación; cada servicio la implementa a su manera."
+    see_also: [java-polymorphism, java-inheritance]
+
+  - slug: java-inheritance
+    term: inheritance
+    category: oop
+    definition_es: "Mecanismo por el que una clase (hija) reutiliza y extiende los campos y métodos de otra (padre) con `extends`."
+    definition_en: "A mechanism where a subclass reuses and extends a parent class."
+    example_en: "ExpressOrder extends Order and adds a delivery deadline."
+    analogy: "Una receta base de pan y una variante 'pan con ajo' que agrega un paso sin reescribir todo."
+    see_also: [java-interface, java-polymorphism]
+
+  - slug: java-encapsulation
+    term: encapsulation
+    category: oop
+    definition_es: "Ocultar el estado interno de un objeto (campos `private`) y exponer solo operaciones seguras."
+    definition_en: "Hiding internal state and exposing only safe operations."
+    example_en: "You can't set the balance directly; you must call deposit()."
+    analogy: "Un cajero automático: no tocas el dinero adentro, solo usas los botones que el banco permite."
+    see_also: [java-access-modifier]
+
+  - slug: java-polymorphism
+    term: polymorphism
+    category: oop
+    definition_es: "Un mismo mensaje (método) produce comportamientos distintos según el tipo real del objeto."
+    definition_en: "The same method call behaves differently depending on the object's real type."
+    example_en: "Calling notify() sends an email or an SMS depending on the channel."
+    analogy: "Decir 'arranca' a un carro, a una moto y a una lancha: cada uno lo hace a su manera."
+    see_also: [java-interface, java-inheritance]
+
+  - slug: java-access-modifier
+    term: access modifier
+    category: oop
+    definition_es: "Palabra que controla quién puede ver un campo o método: `public`, `protected`, (paquete) o `private`."
+    definition_en: "A keyword that controls visibility: public, protected, package-private or private."
+    example_en: "Make fields private and expose only the methods other classes need."
+    analogy: "Las zonas de un edificio: lobby público, oficinas solo para empleados, caja fuerte solo para el gerente."
+    see_also: [java-encapsulation]
+
+  # ---------------------------------------------------------------- Nivel 2
+  - slug: java-generics
+    term: generics
+    category: modern-java
+    definition_es: "Parámetros de tipo (`List<Order>`) que permiten al compilador revisar tipos y evitar casts."
+    definition_en: "Type parameters that let the compiler check types, like List<Order>."
+    example_en: "Thanks to generics, the compiler rejects adding a String to a List<Order>."
+    analogy: "Una caja con etiqueta 'solo libros': no tienes que revisar qué hay adentro cada vez que la abres."
+    see_also: [java-list]
+
+  - slug: java-list
+    term: List
+    category: collections
+    definition_es: "Colección ordenada que admite duplicados y acceso por posición (índice)."
+    definition_en: "An ordered collection that allows duplicates and access by index."
+    example_en: "Keep the order lines in a List to preserve their order."
+    analogy: "Una fila en el banco: hay un orden y la misma persona podría formarse dos veces."
+    see_also: [java-set, java-map]
+
+  - slug: java-map
+    term: Map
+    category: collections
+    definition_es: "Colección de pares clave → valor; cada clave aparece una sola vez."
+    definition_en: "A collection of key-value pairs with unique keys."
+    example_en: "Store orders in a Map keyed by order id for fast lookups."
+    analogy: "Un diccionario: buscas la palabra (clave) y obtienes su significado (valor)."
+    see_also: [java-list, java-set]
+
+  - slug: java-set
+    term: Set
+    category: collections
+    definition_es: "Colección que no admite duplicados."
+    definition_en: "A collection with no duplicate elements."
+    example_en: "Use a Set to collect the unique customer emails."
+    analogy: "Una lista de invitados a una fiesta: aunque alguien confirme dos veces, aparece una sola vez."
+    see_also: [java-list, java-map]
+
+  - slug: java-lambda
+    term: lambda expression
+    category: modern-java
+    definition_es: "Función corta y anónima que se pasa como valor: `o -> o.total() > 100`."
+    definition_en: "A short anonymous function passed as a value."
+    example_en: "We pass a lambda to filter only the paid orders."
+    analogy: "Una notita con una instrucción ('separa los de más de 100') que le das a otra persona para que la aplique."
+    see_also: [java-stream]
+
+  - slug: java-stream
+    term: Stream API
+    category: modern-java
+    definition_es: "Forma declarativa de procesar colecciones encadenando operaciones (`filter`, `map`, `collect`). Es perezosa: no hace nada hasta la operación terminal."
+    definition_en: "A declarative way to process collections by chaining operations; it is lazy."
+    example_en: "The stream filters, maps and collects the results in one pipeline."
+    analogy: "Una línea de producción: cada estación hace una sola cosa y la máquina no arranca hasta que alguien pide el producto final."
+    see_also: [java-lambda, java-optional]
+
+  - slug: java-optional
+    term: Optional
+    category: modern-java
+    definition_es: "Contenedor que puede tener un valor o estar vacío; obliga a pensar en el caso 'no existe'. Ideal como tipo de retorno."
+    definition_en: "A container that may or may not hold a value; mostly used as a return type."
+    example_en: "findById returns an Optional because the order might not exist."
+    analogy: "Una caja de regalo que puede venir vacía: antes de usar lo de adentro, tienes que abrirla y revisar."
+    see_also: [java-stream]
+
+  - slug: java-record
+    term: record
+    category: modern-java
+    definition_es: "Clase inmutable y concisa para transportar datos; Java genera constructor, getters, `equals`, `hashCode` y `toString`."
+    definition_en: "A concise immutable data carrier class."
+    example_en: "CreateOrderRequest is a record with customer and total."
+    analogy: "Un formulario impreso ya lleno: sirve para pasar datos y nadie debería tacharlo después."
     see_also: [java-class]
+
+  # ---------------------------------------------------------------- Nivel 3
+  - slug: java-checked-exception
+    term: checked exception
+    category: errors
+    definition_es: "Excepción que el compilador te obliga a capturar o declarar con `throws` (ej. `IOException`). Las unchecked heredan de `RuntimeException`."
+    definition_en: "An exception the compiler forces you to catch or declare."
+    example_en: "Reading a file throws a checked IOException."
+    analogy: "Un aviso de 'piso mojado' que la ley obliga a poner: no puedes ignorarlo."
+    see_also: [java-try-with-resources]
+
+  - slug: java-try-with-resources
+    term: try-with-resources
+    category: errors
+    definition_es: "Bloque `try (...)` que cierra automáticamente los recursos (`AutoCloseable`) al salir, haya error o no."
+    definition_en: "A try block that closes resources automatically."
+    example_en: "Open the connection in a try-with-resources so it always gets closed."
+    analogy: "Una puerta con cierre automático: aunque salgas corriendo, se cierra sola."
+    see_also: [java-checked-exception]
+
+  - slug: java-thread
+    term: thread
+    category: concurrency
+    definition_es: "Un hilo de ejecución: una secuencia de instrucciones que puede correr en paralelo con otras dentro del mismo programa."
+    definition_en: "A single path of execution that can run concurrently with others."
+    example_en: "Each HTTP request is handled by a different thread."
+    analogy: "Cada cajero en un supermercado: atienden a la vez, pero comparten la misma bodega."
+    see_also: [java-executorservice, java-race-condition]
+
+  - slug: java-executorservice
+    term: ExecutorService
+    category: concurrency
+    definition_es: "Administrador de un grupo (pool) de hilos al que le envías tareas; reutiliza hilos en lugar de crear uno por tarea."
+    definition_en: "A managed pool of threads that runs submitted tasks."
+    example_en: "We submit the report tasks to a fixed thread pool of four."
+    analogy: "Una agencia de mensajeros con 4 motos: no compras una moto por cada paquete."
+    see_also: [java-thread, java-completablefuture]
+
+  - slug: java-completablefuture
+    term: CompletableFuture
+    category: concurrency
+    definition_es: "Representa un resultado que llegará en el futuro; permite encadenar (`thenApply`), combinar (`thenCombine`) y manejar errores (`exceptionally`) sin bloquear."
+    definition_en: "A future result you can chain, combine and recover from without blocking."
+    example_en: "We call the price and stock services in parallel and combine both results."
+    analogy: "El ticket de una pizzería: sigues haciendo otras cosas y, cuando está lista, reaccionas."
+    see_also: [java-executorservice]
+
+  - slug: java-race-condition
+    term: race condition
+    category: concurrency
+    definition_es: "Error que aparece cuando el resultado depende del orden en que se intercalan hilos que comparten datos."
+    definition_en: "A bug where the result depends on the timing of concurrent threads."
+    example_en: "Two threads updated the counter at the same time and one update was lost."
+    analogy: "Dos personas editando la misma hoja impresa a la vez: una borra lo que escribió la otra."
+    see_also: [java-thread]
+
+  - slug: java-unit-test
+    term: unit test
+    category: testing
+    definition_es: "Prueba automática de una pieza pequeña (un método o clase) aislada de sus dependencias externas."
+    definition_en: "An automated test of a small piece of code in isolation."
+    example_en: "The unit test checks that a zero total is rejected."
+    analogy: "Probar cada foco de una lámpara por separado antes de armarla completa."
+    see_also: [java-mock, java-assertion]
+
+  - slug: java-mock
+    term: mock
+    category: testing
+    definition_es: "Objeto falso que reemplaza una dependencia real en una prueba; tú decides qué responde y verificas cómo lo llamaron."
+    definition_en: "A fake object that replaces a real dependency in a test."
+    example_en: "We mock the repository so the test doesn't need a database."
+    analogy: "Un actor de doblaje en un ensayo: el protagonista ensaya sin esperar a la estrella real."
+    see_also: [java-unit-test]
+
+  - slug: java-assertion
+    term: assertion
+    category: testing
+    definition_es: "Comprobación dentro de una prueba (`assertEquals`, `assertThrows`); si no se cumple, la prueba falla."
+    definition_en: "A check in a test that fails the test when it is not true."
+    example_en: "The assertion expects the total to be 215.0."
+    analogy: "El 'debe decir' de una lista de control: si no coincide, se marca en rojo."
+    see_also: [java-unit-test]
+
+  # ---------------------------------------------------------------- Nivel 4
+  - slug: spring-dependency-injection
+    term: dependency injection
+    category: spring
+    definition_es: "Patrón donde un objeto recibe sus dependencias desde fuera (normalmente por el constructor) en lugar de crearlas él mismo. Spring las conecta por ti."
+    definition_en: "A pattern where an object receives its dependencies instead of creating them."
+    example_en: "OrderService gets the repository through its constructor."
+    analogy: "Un chef al que le entregan los ingredientes listos: no tiene que ir al mercado, y en una prueba le puedes dar ingredientes de utilería."
+    see_also: [spring-bean]
+
+  - slug: spring-bean
+    term: bean
+    category: spring
+    definition_es: "Objeto creado y administrado por Spring (`@Service`, `@Repository`, `@Component`…). Por defecto hay una sola instancia (singleton)."
+    definition_en: "An object created and managed by the Spring container."
+    example_en: "OrderService is a singleton bean shared by all requests."
+    analogy: "El equipo de una oficina que administra recepción: tú lo pides y te lo prestan, no lo fabricas."
+    see_also: [spring-dependency-injection]
+
+  - slug: spring-rest-controller
+    term: REST controller
+    category: spring
+    definition_es: "Clase anotada con `@RestController` cuyos métodos responden a rutas HTTP y devuelven JSON."
+    definition_en: "A class that maps HTTP routes to methods and returns JSON."
+    example_en: "The controller maps POST /orders to the create method."
+    analogy: "La ventanilla de atención: recibe la solicitud, la pasa al área correcta y entrega la respuesta."
+    see_also: [http-status-codes, spring-controller-advice]
+
+  - slug: spring-profile
+    term: profile
+    category: spring
+    definition_es: "Conjunto de configuración que se activa según el entorno (`dev`, `prod`) con `spring.profiles.active`."
+    definition_en: "A named set of configuration activated per environment."
+    example_en: "The dev profile enables debug logging."
+    analogy: "Los modos de un celular (avión, silencio, normal): el mismo aparato, distinta configuración."
+    see_also: [spring-bean]
+
+  - slug: spring-bean-validation
+    term: Bean Validation
+    category: spring
+    definition_es: "Validación declarativa con anotaciones (`@NotBlank`, `@Positive`) que Spring aplica con `@Valid` antes de llamar a tu método."
+    definition_en: "Declarative validation with annotations like @NotBlank, triggered by @Valid."
+    example_en: "Bean Validation returns 400 when the customer is blank."
+    analogy: "El guardia que revisa tu boleto antes de entrar al estadio: si falta algo, ni siquiera pasas."
+    see_also: [spring-controller-advice]
+
+  - slug: spring-controller-advice
+    term: "@RestControllerAdvice"
+    category: spring
+    definition_es: "Clase que centraliza el manejo de excepciones de todos los controllers y las traduce a respuestas HTTP."
+    definition_en: "A class that centralizes exception handling for all controllers."
+    example_en: "The advice maps OrderNotFoundException to a 404."
+    analogy: "Un solo departamento de quejas para toda la empresa, en lugar de que cada área invente su respuesta."
+    see_also: [http-status-codes]
+
+  - slug: spring-actuator
+    term: Actuator
+    category: spring
+    definition_es: "Módulo de Spring Boot que expone endpoints operativos: salud, info y métricas (`/actuator/health`)."
+    definition_en: "A Spring Boot module that exposes health, info and metrics endpoints."
+    example_en: "Kubernetes calls the actuator health endpoint as a readiness probe."
+    analogy: "El tablero de un carro: no maneja por ti, pero te dice si algo anda mal."
+    see_also: [spring-bean]
+
+  - slug: http-status-codes
+    term: HTTP status codes
+    category: http
+    definition_es: "Números que resumen el resultado de una petición: 2xx éxito (200, 201), 4xx error del cliente (400, 404, 409), 5xx error del servidor (500, 503)."
+    definition_en: "Numbers that summarize the result: 2xx success, 4xx client error, 5xx server error."
+    example_en: "Return 404 when the order does not exist, not 500."
+    analogy: "El semáforo de una respuesta: verde (2xx), 'te equivocaste tú' (4xx), 'nos equivocamos nosotros' (5xx)."
+    see_also: [spring-rest-controller]

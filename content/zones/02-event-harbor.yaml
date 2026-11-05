@@ -2,16 +2,705 @@ slug: event-harbor
 title: Event Harbor
 order: 2
 emoji: "⚓"
-status: outline
 map: { x: 390, y: 190 }
 prerequisites: [{ zone: java-forest, level: 2 }]
 skills: [eda, distributed_systems]
 story: >
   Sector 02. Un puerto donde los mensajes llegan y zarpan sin esperar a nadie.
-  Tú ya dominabas las colas de IBM MQ; aquí aprenderás el idioma de Pub/Sub.
+  Tú ya dominabas las colas de IBM MQ; aquí aprenderás el idioma de Google Cloud Pub/Sub
+  y por qué en un sistema distribuido "entregar exactamente una vez" es más difícil de lo que parece.
+
 levels:
-  - { slug: eda-1-novice, number: 1, title: "Novice — Mensajería asíncrona y el mapa MQ → Pub/Sub" }
-  - { slug: eda-2-apprentice, number: 2, title: "Apprentice — Cloud Pub/Sub con el emulador" }
-  - { slug: eda-3-journeyman, number: 3, title: "Journeyman — Reintentos, DLQ, idempotencia y ordering" }
-  - { slug: eda-4-expert, number: 4, title: "Expert — Esquemas, backpressure y consumidores en Spring" }
-  - { slug: eda-5-boss, number: 5, title: "Boss — Diseñar un flujo de eventos" }
+  # ================================================================ NIVEL 1
+  - slug: eda-1-novice
+    number: 1
+    title: "Novice — Mensajería asíncrona y el mapa MQ → Pub/Sub"
+    story: "Llegas al muelle. Ves barcos (mensajes), faros (topics) y capitanes que esperan carga (suscriptores). Mucho te resulta familiar."
+    quests:
+      - slug: eda-1-learn-async
+        type: learn
+        title: Pub/Sub vs colas y por qué asíncrono
+        required: true
+        estimated_min: 45
+        skills: { eda: 0.8, distributed_systems: 0.2 }
+        resources:
+          - { ref: res-pubsub-overview }
+          - { ref: res-ddia, required: false }
+        payload:
+          note_prompt: "Explica con tus palabras la diferencia entre una cola punto a punto y un topic con varias suscripciones. ¿Qué gana un sistema al comunicarse de forma asíncrona?"
+
+      - slug: eda-1-learn-mq-map
+        type: learn
+        title: "Tu mapa: de IBM MQ a Pub/Sub"
+        required: true
+        estimated_min: 30
+        skills: { eda: 1.0 }
+        resources:
+          - { ref: res-pubsub-subscriptions }
+        payload:
+          note_prompt: "Arma tu propio mapa: ¿a qué se parece en Pub/Sub un queue manager, una queue local, un channel y un backout queue? ¿Qué NO tiene equivalente directo?"
+          summary_md: |
+            Mapa aproximado (no es 1 a 1):
+            - Queue manager → el servicio Pub/Sub gestionado de Google (no administras servidores).
+            - Queue local (punto a punto) → un topic con UNA subscription consumida por varios workers.
+            - Publish/subscribe de MQ → un topic con VARIAS subscriptions (cada una recibe copia).
+            - Channel → no existe: la conexión es HTTPS/gRPC con autenticación IAM.
+            - Backout queue / BOTHRESH → dead-letter topic + max delivery attempts.
+            - MQGET con syncpoint + commit → pull + ack (o push a un endpoint HTTP).
+
+      - slug: eda-1-glossary
+        type: glossary
+        title: Vocabulario básico de mensajería
+        required: true
+        estimated_min: 15
+        skills: { eda: 1.0 }
+        payload:
+          terms: [eda-async-messaging, eda-topic, eda-subscription, eda-publisher, eda-subscriber, eda-point-to-point, eda-fan-out, eda-event-vs-command, eda-message-attributes]
+
+      - slug: eda-1-quiz
+        type: quiz
+        title: Quiz — Mensajería y Pub/Sub básico
+        required: true
+        estimated_min: 15
+        skills: { eda: 0.8, distributed_systems: 0.2 }
+        questions:
+          - slug: e1-q1
+            type: mcq
+            prompt: "Un topic de Pub/Sub tiene 3 subscriptions. Se publica 1 mensaje. ¿Cuántas copias se entregan?"
+            options: ["1, a la primera subscription que llegue", "3, una por subscription", "Depende del número de suscriptores conectados", "0 hasta que alguien haga ack"]
+            answer: 1
+            explanation: "Cada subscription recibe su propia copia (fan-out). Dentro de una subscription, si hay varios workers, cada mensaje va normalmente a uno solo de ellos."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q2
+            type: mcq
+            prompt: "Quieres que 5 workers se repartan el trabajo de un mismo flujo (como varias instancias leyendo una cola MQ). ¿Qué haces?"
+            options: ["Un topic con 5 subscriptions", "Un topic con 1 subscription y 5 workers conectados a ella", "5 topics", "Push a 5 URLs"]
+            answer: 1
+            explanation: "Los workers que comparten una subscription compiten por los mensajes (competing consumers). Cinco subscriptions harían que cada mensaje se procese cinco veces."
+            skill: eda
+            difficulty: 2
+            hint: "¿Repartir o copiar?"
+          - slug: e1-q3
+            type: tf
+            prompt: "En la comunicación asíncrona, quien publica no necesita que el consumidor esté disponible en ese momento."
+            answer: true
+            explanation: "El broker guarda el mensaje hasta que el consumidor lo procese: desacopla en el tiempo y absorbe picos de carga."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q4
+            type: mcq
+            prompt: "¿Cuál es un EVENTO (no un comando)?"
+            options: ["ChargeCreditCard", "SendWelcomeEmail", "OrderPlaced", "ReserveStock"]
+            answer: 2
+            explanation: "Un evento describe algo que YA ocurrió (pasado: OrderPlaced) y cualquiera puede reaccionar. Un comando pide a alguien específico que haga algo (imperativo)."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q5
+            type: mcq
+            prompt: "¿Cuál es el equivalente más cercano a una backout queue de MQ en Pub/Sub?"
+            options: ["Una subscription push", "Un dead-letter topic", "Un snapshot", "Un ordering key"]
+            answer: 1
+            explanation: "Tras N intentos fallidos (max delivery attempts) el mensaje se reenvía al dead-letter topic, igual que MQ lo mueve a la backout queue al superar BOTHRESH."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q6
+            type: fill
+            prompt: "La operación con la que el suscriptor confirma que procesó un mensaje y Pub/Sub puede dejar de reenviarlo se llama ______ (abreviatura en inglés)."
+            answer: ["ack", "acknowledge", "acknowledgement"]
+            explanation: "Sin ack, cuando vence el ack deadline, Pub/Sub vuelve a entregar el mensaje."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q7
+            type: mcq
+            prompt: "¿Para qué sirven los atributos (attributes) de un mensaje?"
+            options: ["Para cifrar el contenido", "Metadatos clave-valor (ej. tipo de evento, versión) sin abrir el cuerpo", "Para ordenar los mensajes", "Para elegir la región"]
+            answer: 1
+            explanation: "Como los headers/propiedades de un mensaje MQ: permiten filtrar o enrutar sin deserializar el payload."
+            skill: eda
+            difficulty: 1
+          - slug: e1-q8
+            type: tf
+            prompt: "En Pub/Sub tienes que crear y mantener canales (channels) entre aplicaciones, como en IBM MQ."
+            answer: false
+            explanation: "No hay canales que administrar: los clientes se conectan al servicio por HTTPS/gRPC y la seguridad la da IAM."
+            skill: eda
+            difficulty: 1
+
+      - slug: eda-1-micro-flashcards
+        type: micro
+        title: Repaso rápido de mensajería
+        required: false
+        estimated_min: 10
+        skills: { eda: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [eda-topic, eda-subscription, eda-fan-out, eda-event-vs-command]
+
+  # ================================================================ NIVEL 2
+  - slug: eda-2-apprentice
+    number: 2
+    title: "Apprentice — Cloud Pub/Sub con el emulador"
+    story: "Construyes tu propio puerto en miniatura: un emulador en Docker donde puedes publicar y recibir sin gastar un centavo."
+    quests:
+      - slug: eda-2-learn-subscriptions
+        type: learn
+        title: Pull, push y ack deadline
+        required: true
+        estimated_min: 40
+        skills: { eda: 1.0 }
+        resources:
+          - { ref: res-pubsub-subscriptions }
+          - { ref: res-pubsub-emulator }
+        payload:
+          note_prompt: "¿Cuándo elegirías una subscription push y cuándo pull? ¿Qué pasa si tu consumidor tarda más que el ack deadline?"
+
+      - slug: eda-2-glossary
+        type: glossary
+        title: Vocabulario de entrega
+        required: true
+        estimated_min: 10
+        skills: { eda: 1.0 }
+        payload:
+          terms: [eda-ack, eda-ack-deadline, eda-pull, eda-push, eda-emulator, eda-backlog]
+
+      - slug: eda-2-lab-emulator
+        type: lab
+        title: "Lab: tu primer topic en el emulador de Pub/Sub"
+        required: true
+        estimated_min: 60
+        skills: { eda: 0.9, distributed_systems: 0.1 }
+        payload:
+          goal: "Levantar el emulador de Pub/Sub en Docker y, usando solo su API REST con Invoke-RestMethod, crear un topic, dos subscriptions, publicar y recibir mensajes."
+          steps:
+            - title: Levanta el emulador
+              body: "Usamos la imagen oficial de Google Cloud CLI con los emuladores. La primera descarga pesa bastante. Deja esta ventana abierta. Si el tag `:emulators` no existiera, revisa la guía oficial del emulador (recurso del nivel)."
+              commands:
+                - "docker run --rm --name pubsub-emu -p 8085:8085 gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators gcloud beta emulators pubsub start --project=questmap-lab --host-port=0.0.0.0:8085"
+            - title: Variables en otra ventana de PowerShell
+              commands:
+                - "$base = 'http://localhost:8085/v1/projects/questmap-lab'"
+            - title: Crea el topic y dos subscriptions
+              body: "`billing-sub` y `shipping-sub` recibirán cada una su copia (fan-out)."
+              commands:
+                - "Invoke-RestMethod -Method Put -Uri \"$base/topics/orders\""
+                - "Invoke-RestMethod -Method Put -Uri \"$base/subscriptions/billing-sub\" -ContentType 'application/json' -Body (@{ topic = 'projects/questmap-lab/topics/orders'; ackDeadlineSeconds = 10 } | ConvertTo-Json)"
+                - "Invoke-RestMethod -Method Put -Uri \"$base/subscriptions/shipping-sub\" -ContentType 'application/json' -Body (@{ topic = 'projects/questmap-lab/topics/orders'; ackDeadlineSeconds = 10 } | ConvertTo-Json)"
+            - title: Publica un evento OrderPlaced
+              body: "El cuerpo del mensaje (`data`) va en Base64. Los atributos viajan aparte."
+              commands:
+                - "$json = '{\"orderId\":\"o-100\",\"customer\":\"ana\",\"total\":120}'"
+                - "$data = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($json))"
+                - "Invoke-RestMethod -Method Post -Uri \"$base/topics/orders:publish\" -ContentType 'application/json' -Body (@{ messages = @(@{ data = $data; attributes = @{ eventType = 'OrderPlaced'; version = '1' } }) } | ConvertTo-Json -Depth 5)"
+            - title: Recibe (pull) desde billing-sub y decodifica
+              commands:
+                - "$r = Invoke-RestMethod -Method Post -Uri \"$base/subscriptions/billing-sub:pull\" -ContentType 'application/json' -Body '{\"maxMessages\":10}'"
+                - "$r.receivedMessages | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_.message.data)); $_.message.attributes }"
+            - title: Haz ack
+              commands:
+                - "$ids = @($r.receivedMessages.ackId)"
+                - "Invoke-RestMethod -Method Post -Uri \"$base/subscriptions/billing-sub:acknowledge\" -ContentType 'application/json' -Body (@{ ackIds = $ids } | ConvertTo-Json)"
+            - title: Comprueba el fan-out
+              body: "Haz pull en `shipping-sub`: debe tener SU PROPIA copia del mismo mensaje, aunque billing ya hizo ack."
+              commands:
+                - "Invoke-RestMethod -Method Post -Uri \"$base/subscriptions/shipping-sub:pull\" -ContentType 'application/json' -Body '{\"maxMessages\":10}'"
+          expected: "El pull en billing-sub muestra el JSON de la orden y los atributos eventType=OrderPlaced, version=1. Después del ack, un nuevo pull en billing-sub viene vacío, pero shipping-sub todavía tiene su copia."
+          checklist:
+            - "El emulador corre en Docker en el puerto 8085"
+            - "Creé el topic `orders` y las dos subscriptions"
+            - "Publiqué un mensaje con atributos y lo leí decodificado desde billing-sub"
+            - "Después del ack, billing-sub queda vacía"
+            - "shipping-sub recibió su propia copia (fan-out)"
+          hints:
+            - "Si un PUT devuelve 409, el recurso ya existe: no pasa nada, sigue."
+            - "Si el pull viene vacío justo después de publicar, espera un segundo y repite."
+          evidence_hint: "Pega la salida del pull decodificado de billing-sub y la del pull de shipping-sub."
+
+      - slug: eda-2-quiz
+        type: quiz
+        title: Quiz — Subscriptions y entrega
+        required: true
+        estimated_min: 15
+        skills: { eda: 1.0 }
+        questions:
+          - slug: e2-q1
+            type: mcq
+            prompt: "Tu consumidor tarda 30 s en procesar y el ack deadline es 10 s (sin extensión). ¿Qué pasa?"
+            options: ["Pub/Sub espera indefinidamente", "El mensaje se vuelve a entregar y puede procesarse dos veces", "El mensaje se pierde", "Se va al dead-letter topic de inmediato"]
+            answer: 1
+            explanation: "Al vencer el plazo sin ack, Pub/Sub asume que falló y lo reenvía. Por eso las librerías cliente extienden el plazo automáticamente (lease management) y tu consumidor debe ser idempotente."
+            skill: eda
+            difficulty: 2
+          - slug: e2-q2
+            type: mcq
+            prompt: "¿Qué caracteriza a una subscription push?"
+            options: ["El consumidor pide mensajes cuando quiere", "Pub/Sub envía cada mensaje por HTTP POST a un endpoint", "Solo funciona con el emulador", "Garantiza orden siempre"]
+            answer: 1
+            explanation: "En push, Pub/Sub llama a tu endpoint (ej. Cloud Run); una respuesta 2xx cuenta como ack. En pull, tu proceso pide mensajes y controla el ritmo."
+            skill: eda
+            difficulty: 1
+          - slug: e2-q3
+            type: tf
+            prompt: "Para usar el emulador de Pub/Sub necesitas una cuenta de Google Cloud con facturación."
+            answer: false
+            explanation: "El emulador corre localmente y es gratis. Las librerías cliente lo detectan con la variable `PUBSUB_EMULATOR_HOST`."
+            skill: eda
+            difficulty: 1
+          - slug: e2-q4
+            type: fill
+            prompt: "Las librerías cliente usan la variable de entorno `PUBSUB_EMULATOR_______` para conectarse al emulador."
+            answer: ["HOST"]
+            explanation: "`PUBSUB_EMULATOR_HOST=localhost:8085` hace que el cliente hable con el emulador y no con Google Cloud."
+            skill: eda
+            difficulty: 1
+          - slug: e2-q5
+            type: mcq
+            prompt: "¿Qué es el backlog de una subscription?"
+            options: ["Los mensajes publicados pero aún sin ack en esa subscription", "Los logs del servicio", "Los mensajes del dead-letter topic", "El historial de deploys"]
+            answer: 0
+            explanation: "Es el trabajo pendiente. Un backlog que crece de forma sostenida indica que los consumidores no dan abasto: métrica clave para alertas y autoscaling."
+            skill: eda
+            difficulty: 1
+          - slug: e2-q6
+            type: mcq
+            prompt: "Pub/Sub por defecto ofrece entrega:"
+            options: ["At-most-once", "At-least-once", "Exactly-once siempre", "Best effort sin reintentos"]
+            answer: 1
+            explanation: "At-least-once: cada mensaje llega una o más veces. Los duplicados son normales y tu consumidor debe tolerarlos."
+            skill: eda
+            difficulty: 1
+          - slug: e2-q7
+            type: mcq
+            prompt: "Un push endpoint responde 500 a Pub/Sub. ¿Qué ocurre?"
+            options: ["El mensaje se descarta", "Se considera no confirmado y se reintenta más tarde", "Pub/Sub cambia a pull", "Se borra la subscription"]
+            answer: 1
+            explanation: "Cualquier respuesta que no sea éxito equivale a un 'nack': Pub/Sub reintenta con backoff y, si está configurado, al llegar al máximo de intentos lo manda al dead-letter topic."
+            skill: eda
+            difficulty: 2
+          - slug: e2-q8
+            type: order
+            prompt: "Ordena el ciclo de vida de un mensaje en una subscription pull:"
+            options: ["El publisher publica en el topic", "Pub/Sub guarda una copia por subscription", "El subscriber hace pull y recibe el mensaje con un ackId", "El subscriber procesa", "El subscriber envía ack y el mensaje sale del backlog"]
+            answer: [0, 1, 2, 3, 4]
+            explanation: "Si el paso de ack no llega antes del deadline, el ciclo vuelve al paso 3 (reentrega)."
+            skill: eda
+            difficulty: 1
+
+  # ================================================================ NIVEL 3
+  - slug: eda-3-journeyman
+    number: 3
+    title: "Journeyman — Reintentos, DLQ, idempotencia y ordering"
+    story: "Una tormenta golpea el puerto: mensajes duplicados, desordenados y algunos envenenados. Aprende a sobrevivir sin perder ni duplicar órdenes."
+    quests:
+      - slug: eda-3-learn-reliability
+        type: learn
+        title: Dead-letter, reintentos y semánticas de entrega
+        required: true
+        estimated_min: 45
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-pubsub-dead-letter }
+          - { ref: res-pubsub-exactly-once }
+        payload:
+          note_prompt: "¿Por qué 'exactly-once' de Pub/Sub no te libra de diseñar consumidores idempotentes? Menciona al menos un límite que leíste."
+
+      - slug: eda-3-learn-ordering
+        type: learn
+        title: Ordering keys e idempotencia
+        required: true
+        estimated_min: 30
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-pubsub-ordering }
+        payload:
+          note_prompt: "Si los eventos OrderCreated y OrderCancelled de la MISMA orden llegan al revés, ¿qué puede pasar? ¿Cómo lo evitarías con ordering keys y qué costo tiene?"
+
+      - slug: eda-3-glossary
+        type: glossary
+        title: Vocabulario de confiabilidad
+        required: true
+        estimated_min: 15
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        payload:
+          terms: [eda-at-least-once, eda-exactly-once, eda-idempotency, eda-idempotency-key, eda-dead-letter-topic, eda-poison-message, eda-retry-backoff, eda-ordering-key]
+
+      - slug: eda-3-lab-redelivery
+        type: lab
+        title: "Lab: provoca una reentrega y escribe un consumidor idempotente"
+        required: true
+        estimated_min: 75
+        skills: { eda: 0.7, distributed_systems: 0.2, java: 0.1 }
+        payload:
+          goal: "Ver con tus ojos que sin ack el mensaje vuelve, y escribir un consumidor que procese cada orden UNA sola vez aunque reciba duplicados."
+          steps:
+            - title: Prepara el emulador
+              body: "Levanta el emulador como en el nivel 2 y define `$base`. Crea el topic `payments` y la subscription `payments-sub` con `ackDeadlineSeconds = 10`."
+            - title: Publica y NO hagas ack
+              commands:
+                - "$data = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('{\"paymentId\":\"p-1\",\"orderId\":\"o-100\",\"amount\":120}'))"
+                - "Invoke-RestMethod -Method Post -Uri \"$base/topics/payments:publish\" -ContentType 'application/json' -Body (@{ messages = @(@{ data = $data }) } | ConvertTo-Json -Depth 5)"
+                - "$r1 = Invoke-RestMethod -Method Post -Uri \"$base/subscriptions/payments-sub:pull\" -ContentType 'application/json' -Body '{\"maxMessages\":10}'; $r1.receivedMessages.message.messageId"
+            - title: Espera a que venza el ack deadline y vuelve a hacer pull
+              commands:
+                - "Start-Sleep -Seconds 15"
+                - "$r2 = Invoke-RestMethod -Method Post -Uri \"$base/subscriptions/payments-sub:pull\" -ContentType 'application/json' -Body '{\"maxMessages\":10}'; $r2.receivedMessages | Select-Object deliveryAttempt, @{n='messageId';e={$_.message.messageId}}"
+            - title: Escribe IdempotentConsumer.java
+              body: "Simula lo que vas a hacer en producción. Crea `IdempotentConsumer.java` que:\n1. Recibe una lista de mensajes `record Msg(String messageId, String paymentId, double amount)` con duplicados (el mismo `paymentId` dos o tres veces).\n2. Antes de procesar, revisa si el `paymentId` (la idempotency key de negocio, NO el messageId) ya está en un `Set<String> processed`.\n3. Si ya está: imprime `SKIP duplicate p-1` y 'hace ack'. Si no: 'cobra', lo agrega al set e imprime `CHARGED p-1 120.0`.\n4. Un mensaje con amount negativo es un 'poison message': después de 3 intentos se mueve a una lista `deadLetters`.\n5. Al final imprime el total cobrado y el contenido de `deadLetters`."
+              commands:
+                - "java IdempotentConsumer.java"
+            - title: Commit
+              commands:
+                - "git add IdempotentConsumer.java; git commit -m \"event-harbor: idempotent consumer\""
+          expected: "El segundo pull devuelve el MISMO messageId (reentrega). Tu programa cobra cada paymentId una sola vez, imprime SKIP para los duplicados y deja el mensaje negativo en deadLetters tras 3 intentos."
+          checklist:
+            - "Vi el mismo messageId en dos pulls (reentrega por ack deadline)"
+            - "Mi consumidor usa una clave de negocio (paymentId) para deduplicar"
+            - "Los duplicados no cobran dos veces"
+            - "El poison message termina en deadLetters después de 3 intentos"
+            - "Puedo explicar por qué en producción el set `processed` debe vivir en una base de datos y no en memoria"
+          hints:
+            - "¿Por qué no deduplicar por messageId? Porque si el PUBLISHER reintenta, publica un mensaje nuevo con otro messageId pero el mismo pago."
+            - "Para los intentos: un `Map<String, Integer> attempts` por paymentId; si attempts ≥ 3, mueve a deadLetters."
+          evidence_hint: "Pega los dos messageId del paso 3 y la salida de `java IdempotentConsumer.java`."
+
+      - slug: eda-3-quiz
+        type: quiz
+        title: Quiz — Confiabilidad
+        required: true
+        estimated_min: 15
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        questions:
+          - slug: e3-q1
+            type: mcq
+            prompt: "¿Qué hace idempotente a un consumidor de pagos?"
+            options: ["Hacer ack antes de procesar", "Procesar cada pago una sola vez aunque el mensaje llegue varias veces", "Usar push en lugar de pull", "Activar ordering keys"]
+            answer: 1
+            explanation: "Idempotente = procesar el mismo mensaje N veces deja el mismo resultado que procesarlo una. Se logra con una clave de deduplicación persistida (paymentId) o con operaciones naturalmente idempotentes (upsert)."
+            skill: eda
+            difficulty: 1
+          - slug: e3-q2
+            type: tf
+            prompt: "Si activas exactly-once delivery en Pub/Sub, ya no necesitas idempotencia en ningún caso."
+            answer: false
+            explanation: "La garantía tiene límites (solo pull, misma región, y el publisher puede duplicar al reintentar). Además, tu procesamiento puede fallar después de escribir en la BD y antes del ack."
+            skill: eda
+            difficulty: 2
+          - slug: e3-q3
+            type: mcq
+            prompt: "Un mensaje con JSON corrupto falla siempre. Sin dead-letter topic, ¿qué pasa?"
+            options: ["Se descarta solo", "Se reintenta indefinidamente y consume recursos (poison message)", "Pub/Sub lo corrige", "Se pausa el topic"]
+            answer: 1
+            explanation: "Un poison message nunca se va a procesar bien. El dead-letter topic con max delivery attempts lo aparta para revisarlo sin bloquear al resto."
+            skill: eda
+            difficulty: 1
+          - slug: e3-q4
+            type: mcq
+            prompt: "¿Qué garantiza un ordering key?"
+            options: ["Orden global de todo el topic", "Orden entre los mensajes con la misma clave, en la misma región", "Que no haya duplicados", "Que los mensajes lleguen más rápido"]
+            answer: 1
+            explanation: "El orden es por clave (ej. orderId), no global. Las demás claves se procesan en paralelo. Costo: menos throughput por clave y, si un mensaje falla, los siguientes de esa clave esperan."
+            skill: eda
+            difficulty: 2
+          - slug: e3-q5
+            type: mcq
+            prompt: "¿Por qué usar exponential backoff en los reintentos?"
+            options: ["Para reintentar más rápido", "Para no saturar un servicio que ya está fallando y darle tiempo a recuperarse", "Para ordenar los mensajes", "Porque Pub/Sub lo exige"]
+            answer: 1
+            explanation: "Reintentar inmediatamente y en masa (retry storm) puede tumbar al servicio de nuevo. Esperar 1 s, 2 s, 4 s… (con jitter) reparte la carga."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: e3-q6
+            type: mcq
+            prompt: "¿Cuál es la mejor clave de idempotencia para un evento PaymentRequested?"
+            options: ["El messageId de Pub/Sub", "La hora de recepción", "Un paymentId generado por el emisor en el origen del negocio", "Un número aleatorio generado por el consumidor"]
+            answer: 2
+            explanation: "El messageId cambia si el publisher reintenta (nuevo mensaje, mismo pago). Una clave de negocio estable identifica la intención, sin importar cuántas veces se envió."
+            skill: eda
+            difficulty: 2
+          - slug: e3-q7
+            type: fill
+            prompt: "La garantía por defecto de Pub/Sub se llama at-______-once."
+            answer: ["least"]
+            explanation: "At-least-once: puede haber duplicados, nunca pérdidas (mientras el mensaje esté retenido)."
+            skill: eda
+            difficulty: 1
+          - slug: e3-q8
+            type: order
+            prompt: "Ordena los pasos de un consumidor idempotente seguro:"
+            options: ["Recibir el mensaje", "Leer la clave de idempotencia", "Si ya fue procesada: ack y terminar", "Procesar y guardar la clave en la MISMA transacción que el efecto", "Hacer ack"]
+            answer: [0, 1, 2, 3, 4]
+            explanation: "Guardar la clave junto con el efecto (misma transacción) evita la ventana en la que procesas pero mueres antes de registrar que lo hiciste. El ack va al final."
+            skill: eda
+            difficulty: 3
+            hint: "El ack siempre va después de que el efecto quedó guardado."
+
+  # ================================================================ NIVEL 4
+  - slug: eda-4-expert
+    number: 4
+    title: "Expert — Esquemas, backpressure y consumidores en Java"
+    story: "El puerto crece: más barcos, formatos nuevos y picos de carga. Aprende a cambiar el contrato sin romper a nadie y a no ahogarte en mensajes."
+    quests:
+      - slug: eda-4-learn-schemas
+        type: learn
+        title: Evolución de esquemas y contratos de eventos
+        required: true
+        estimated_min: 40
+        skills: { eda: 0.8, distributed_systems: 0.2 }
+        resources:
+          - { ref: res-pubsub-schemas }
+          - { ref: res-ddia, required: false }
+        payload:
+          note_prompt: "Quieres agregar el campo `currency` a OrderPlaced. ¿Cómo lo haces sin romper a los consumidores que ya existen? ¿Y si quisieras renombrar `total` a `amount`?"
+
+      - slug: eda-4-learn-backpressure
+        type: learn
+        title: Backpressure y flow control
+        required: true
+        estimated_min: 30
+        skills: { eda: 0.6, distributed_systems: 0.4 }
+        resources:
+          - { ref: res-pubsub-flow-control }
+        payload:
+          note_prompt: "Explica qué es backpressure con un ejemplo de la vida real y cómo lo aplicarías a un suscriptor que escribe en una base de datos lenta."
+
+      - slug: eda-4-glossary
+        type: glossary
+        title: Vocabulario avanzado de eventos
+        required: true
+        estimated_min: 10
+        skills: { eda: 0.8, distributed_systems: 0.2 }
+        payload:
+          terms: [eda-schema-evolution, eda-backward-compatibility, eda-backpressure, eda-flow-control, eda-consumer-lag]
+
+      - slug: eda-4-lab-java-subscriber
+        type: lab
+        title: "Lab: suscriptor Java con flow control contra el emulador"
+        required: true
+        estimated_min: 120
+        skills: { eda: 0.6, java: 0.3, distributed_systems: 0.1 }
+        payload:
+          goal: "Escribir un publisher y un subscriber en Java con la librería oficial `google-cloud-pubsub`, conectados al emulador, y observar el efecto del flow control."
+          steps:
+            - title: Proyecto Maven
+              body: "Genera un proyecto sin dependencias web desde Spring Initializr (o reutiliza uno). En el `pom.xml` agrega en `<dependencyManagement>` el BOM `com.google.cloud:libraries-bom` (tipo `pom`, scope `import`) y en `<dependencies>` `com.google.cloud:google-cloud-pubsub` sin versión. Para la versión del BOM, busca la más reciente en central.sonatype.com (`libraries-bom`)."
+              commands:
+                - "cd $HOME\\questmap-labs; Invoke-WebRequest \"https://start.spring.io/starter.zip?type=maven-project&language=java&javaVersion=21&groupId=com.questmap&artifactId=harbor&name=harbor&packageName=com.questmap.harbor\" -OutFile harbor.zip; Expand-Archive harbor.zip -DestinationPath harbor; cd harbor"
+            - title: Conexión al emulador
+              body: |
+                Con el emulador no hay credenciales. Crea el canal así y úsalo en Publisher y Subscriber:
+
+                ```java
+                ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:8085").usePlaintext().build();
+                TransportChannelProvider channelProvider =
+                    FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
+                CredentialsProvider credentials = NoCredentialsProvider.create();
+
+                Publisher publisher = Publisher.newBuilder(TopicName.of("questmap-lab", "orders"))
+                    .setChannelProvider(channelProvider)
+                    .setCredentialsProvider(credentials)
+                    .build();
+                ```
+            - title: Publica 200 órdenes
+              body: "Un `CommandLineRunner` (o un `main`) publica 200 mensajes JSON con atributo `eventType=OrderPlaced`. Usa `publisher.publish(msg).get()` al final para esperar y luego `publisher.shutdown()`."
+            - title: Suscriptor lento con flow control
+              body: "El `MessageReceiver` duerme 200 ms (simula una BD lenta), imprime el orderId y hace `consumer.ack()`. Configura:\n\nFlowControlSettings.newBuilder().setMaxOutstandingElementCount(10L).build()\n\ny pásalo con `Subscriber.newBuilder(...).setFlowControlSettings(...)`. Imprime cada segundo cuántos mensajes llevas procesados."
+            - title: Experimenta
+              body: "Corre dos veces: con `setMaxOutstandingElementCount(10L)` y con `1000L`. Observa la memoria (Administrador de tareas) y cuántos mensajes tiene 'en vuelo' el proceso. Escribe tu conclusión en la evidencia."
+              commands:
+                - ".\\mvnw.cmd spring-boot:run"
+            - title: Tolerant reader
+              body: "Publica 5 mensajes nuevos con un campo extra `currency: \"USD\"`. Tu consumidor debe seguir funcionando: si usas Jackson, configura `FAIL_ON_UNKNOWN_PROPERTIES = false` o ignora campos desconocidos."
+            - title: Commit
+              commands:
+                - "git add .; git commit -m \"event-harbor: java subscriber with flow control\""
+          expected: "Con 10 elementos en vuelo, el proceso recibe de a pocos y la memoria se mantiene estable; con 1000 recibe una avalancha que espera en memoria. Los mensajes con `currency` se procesan sin errores."
+          checklist:
+            - "Publisher y subscriber Java funcionan contra el emulador"
+            - "Configuré FlowControlSettings y vi la diferencia entre 10 y 1000"
+            - "El consumidor tolera un campo nuevo (backward compatible)"
+            - "Hice commit"
+          hints:
+            - "Las clases están en `com.google.api.gax.*`, `io.grpc.*` y `com.google.cloud.pubsub.v1.*`; deja que tu IDE haga los imports."
+            - "Recuerda crear antes el topic y la subscription en el emulador (como en el nivel 2) o con `TopicAdminClient`/`SubscriptionAdminClient`."
+            - "Si el subscriber termina enseguida, bloquea el hilo principal con `subscriber.startAsync().awaitRunning(); subscriber.awaitTerminated(60, TimeUnit.SECONDS)` (captura el TimeoutException)."
+          evidence_hint: "Pega un extracto de la salida con ambos experimentos y tu conclusión en 2–3 líneas."
+
+      - slug: eda-4-quiz
+        type: quiz
+        title: Quiz — Esquemas y backpressure
+        required: true
+        estimated_min: 15
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        questions:
+          - slug: e4-q1
+            type: mcq
+            prompt: "¿Qué cambio en un evento es backward compatible (los consumidores viejos siguen funcionando)?"
+            options: ["Renombrar un campo", "Agregar un campo opcional", "Cambiar el tipo de `total` de número a texto", "Eliminar un campo obligatorio"]
+            answer: 1
+            explanation: "Agregar un campo opcional no rompe a quien lo ignora. Renombrar o eliminar sí: para eso se publica una versión nueva del evento y se migra de forma gradual."
+            skill: eda
+            difficulty: 1
+          - slug: e4-q2
+            type: mcq
+            prompt: "¿Qué es backpressure?"
+            options: ["Un error de red", "Que el consumidor señale o limite cuánto puede recibir para no saturarse", "Comprimir mensajes", "Reintentar más rápido"]
+            answer: 1
+            explanation: "Es un mecanismo para que el lado lento marque el ritmo. En Pub/Sub, el flow control del subscriber limita los mensajes 'en vuelo'."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: e4-q3
+            type: tf
+            prompt: "Si el consumer lag (backlog) crece de forma sostenida, una solución típica es agregar más instancias del consumidor a la misma subscription."
+            answer: true
+            explanation: "Escalar horizontalmente los competing consumers aumenta el throughput, siempre que la dependencia de abajo (la BD) lo aguante y no uses ordering keys muy concentradas."
+            skill: eda
+            difficulty: 2
+          - slug: e4-q4
+            type: mcq
+            prompt: "¿Qué es el patrón 'tolerant reader'?"
+            options: ["Un lector que ignora los campos que no conoce y usa defaults para los que faltan", "Un consumidor que nunca hace ack", "Un lector con reintentos infinitos", "Un consumidor que solo lee atributos"]
+            answer: 0
+            explanation: "Ser tolerante en lo que recibes permite que el productor evolucione el esquema sin coordinar un despliegue simultáneo con todos los consumidores."
+            skill: eda
+            difficulty: 2
+          - slug: e4-q5
+            type: mcq
+            prompt: "Pub/Sub schemas te permiten:"
+            options: ["Validar que los mensajes publicados cumplan un esquema Avro o Protocol Buffer", "Ordenar mensajes", "Cifrar mensajes", "Reemplazar IAM"]
+            answer: 0
+            explanation: "El topic rechaza mensajes que no cumplen el esquema, y puedes crear revisiones para evolucionarlo de forma controlada."
+            skill: eda
+            difficulty: 1
+          - slug: e4-q6
+            type: mcq
+            prompt: "Tu subscriber tiene flow control de 10 mensajes en vuelo y cada uno tarda 200 ms. ¿Throughput aproximado por instancia?"
+            options: ["5 msg/s", "50 msg/s", "500 msg/s", "Ilimitado"]
+            answer: 1
+            explanation: "10 en paralelo ÷ 0,2 s = 50 mensajes por segundo (si tienes hilos suficientes). Esta cuenta rápida es muy común en entrevistas de diseño."
+            skill: distributed_systems
+            difficulty: 3
+            hint: "Mensajes en paralelo dividido por el tiempo de cada uno."
+          - slug: e4-q7
+            type: fill
+            prompt: "En Jackson, para que tu consumidor no falle con campos desconocidos desactivas `DeserializationFeature.FAIL_ON_UNKNOWN_______`."
+            answer: ["PROPERTIES"]
+            explanation: "`FAIL_ON_UNKNOWN_PROPERTIES = false` (o `@JsonIgnoreProperties(ignoreUnknown = true)`) es la forma práctica de aplicar el tolerant reader en Java."
+            skill: eda
+            difficulty: 2
+          - slug: e4-q8
+            type: order
+            prompt: "Ordena un cambio incompatible de evento (renombrar `total` → `amount`) sin romper a nadie:"
+            options: ["Publicar OrderPlaced v2 con `amount` (y mantener v1 con `total`)", "Actualizar los consumidores para que entiendan v2", "Cuando todos leen v2, dejar de publicar v1", "Retirar el soporte de v1 en los consumidores"]
+            answer: [0, 1, 2, 3]
+            explanation: "Expandir y luego contraer (expand/contract): primero conviven ambas versiones, se migra a los consumidores y al final se elimina lo viejo."
+            skill: eda
+            difficulty: 3
+
+  # ================================================================ NIVEL 5
+  - slug: eda-5-boss
+    number: 5
+    title: "Boss — Diseñar un flujo de eventos"
+    story: "El capitán del puerto te pide diseñar el flujo de órdenes de toda la flota, y defenderlo frente a su consejo en inglés."
+    quests:
+      - slug: eda-5-learn-review
+        type: learn
+        title: Repaso — diseño de flujos de eventos
+        required: true
+        estimated_min: 30
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-ddia }
+          - { ref: res-kleppmann-lectures, required: false }
+        payload:
+          note_prompt: "Resume en 3 bullets cómo diseñarías un flujo OrderPlaced → Payment → Shipping: topics, subscriptions, qué pasa si Payment falla y cómo evitas cobrar dos veces."
+
+      - slug: eda-5-quiz-final
+        type: quiz
+        title: Examen final — Event Harbor
+        required: true
+        estimated_min: 20
+        skills: { eda: 0.7, distributed_systems: 0.3 }
+        questions:
+          - slug: e5-q1
+            type: mcq
+            prompt: "Tu servicio guarda una orden en la BD y luego publica OrderPlaced. A veces se cae entre los dos pasos y el evento nunca sale. ¿Qué patrón lo resuelve?"
+            options: ["Retry infinito", "Transactional outbox", "Ordering keys", "Push subscription"]
+            answer: 1
+            explanation: "Outbox: guardas la orden y el evento en la MISMA transacción (tabla outbox) y un proceso aparte publica lo pendiente. Evita el 'dual write'."
+            skill: distributed_systems
+            difficulty: 3
+          - slug: e5-q2
+            type: mcq
+            prompt: "¿Qué dato NO debería viajar en un evento OrderPlaced publicado a muchos equipos?"
+            options: ["orderId", "Número completo de tarjeta de crédito", "total y currency", "timestamp del evento"]
+            answer: 1
+            explanation: "Los eventos se replican y se guardan en muchos sistemas. Datos sensibles (PCI/PII) se evitan o se tokenizan."
+            skill: eda
+            difficulty: 1
+          - slug: e5-q3
+            type: tf
+            prompt: "En una coreografía de eventos no existe un orquestador central: cada servicio reacciona a eventos y publica los suyos."
+            answer: true
+            explanation: "Coreografía = desacoplada pero difícil de seguir de punta a punta. Orquestación (saga orchestrator) = un coordinador decide los pasos. Ambas son válidas; depende del caso."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: e5-q4
+            type: mcq
+            prompt: "Cada orden produce Created → Paid → Shipped y el consumidor necesita verlos en ese orden. ¿Qué ordering key usas?"
+            options: ["El tipo de evento", "El orderId", "Una constante 'orders'", "El customerId del mes"]
+            answer: 1
+            explanation: "La clave define el grupo que debe ir en orden. Por orderId mantienes el orden por orden y paralelismo entre órdenes distintas. Una constante convertiría todo en una sola fila lenta."
+            skill: eda
+            difficulty: 2
+          - slug: e5-q5
+            type: mcq
+            prompt: "El backlog de `payments-sub` crece y el dead-letter topic recibe miles de mensajes desde las 3:00 a. m. ¿Qué revisas primero?"
+            options: ["Subir el ack deadline a 10 minutos", "Los mensajes del DLT y los logs/deploys alrededor de las 3:00 para encontrar la causa común", "Borrar el dead-letter topic", "Agregar 50 consumidores"]
+            answer: 1
+            explanation: "Muchos dead-letters a la vez suelen tener una causa común (deploy, esquema nuevo, dependencia caída). Primero el diagnóstico (RCA); escalar sin entender solo genera más fallos."
+            skill: eda
+            difficulty: 2
+          - slug: e5-q6
+            type: mcq
+            prompt: "¿Qué ventaja tiene publicar eventos de dominio en lugar de que Shipping llame por HTTP a Orders?"
+            options: ["Menor latencia siempre", "Desacoplamiento: Orders no necesita saber quién consume ni estar disponible a la vez", "No hay que manejar errores", "Garantiza consistencia fuerte"]
+            answer: 1
+            explanation: "Ganas desacoplamiento y resiliencia a costa de consistencia eventual y más complejidad operativa (duplicados, orden, observabilidad)."
+            skill: eda
+            difficulty: 1
+          - slug: e5-q7
+            type: fill
+            prompt: "Cuando el sistema converge al estado correcto después de un tiempo (y no de inmediato), hablamos de consistencia ______ (en inglés, eventual)."
+            answer: ["eventual"]
+            explanation: "Eventual consistency: es el precio normal de la comunicación asíncrona. En entrevistas, explica cómo lo comunicas al usuario (ej. 'pago en proceso')."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: e5-q8
+            type: mcq
+            prompt: "¿Qué métrica de Pub/Sub usarías para alertar que los consumidores se están quedando atrás?"
+            options: ["Número de topics", "Antigüedad del mensaje más viejo sin ack (oldest unacked message age)", "Tamaño del código", "Cantidad de IAM roles"]
+            answer: 1
+            explanation: "La edad del mensaje más viejo sin ack refleja directamente el retraso. Lo verás de nuevo en el Observatory con alertas."
+            skill: eda
+            difficulty: 2
+
+      - slug: eda-5-boss-fight
+        type: boss
+        title: "Jefe: diseña el flujo de eventos de órdenes"
+        required: true
+        estimated_min: 90
+        skills: { eda: 0.6, distributed_systems: 0.2, english: 0.2 }
+        payload:
+          task: "Diseña el flujo de eventos de un e-commerce: OrderPlaced → PaymentProcessed → ShipmentCreated. Entrega en texto + diagrama Mermaid: topics, subscriptions, formato de cada evento, estrategia de idempotencia, ordering, dead-letter, cómo evitar el dual write y qué métricas alertas. Luego defiéndelo en una mini-entrevista en inglés."
+          rubric: [correctness, depth, clarity, tradeoffs]
+          interview_focus: ["at-least-once and idempotency", "ordering keys trade-offs", "dual write and outbox", "monitoring backlog and DLQ"]
+
+      - slug: eda-5-interview
+        type: interview
+        title: "Mini-entrevista: Pub/Sub screen"
+        required: false
+        estimated_min: 30
+        skills: { eda: 0.6, english: 0.4 }
+        payload:
+          mode: technical_screen
+          zone: event-harbor

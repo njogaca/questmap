@@ -2,16 +2,748 @@ slug: cassandra-caverns
 title: Cassandra Caverns
 order: 3
 emoji: "🕳️"
-status: outline
 map: { x: 390, y: 450 }
 prerequisites: [{ zone: java-forest, level: 2 }]
 skills: [cassandra, distributed_systems]
 story: >
   Sector 03. Cavernas donde los datos se reparten en un anillo de nodos.
-  Si cae uno, los demás siguen respondiendo. Aprende a modelar para las consultas.
+  Si cae uno, los demás siguen respondiendo. Aquí la regla es al revés de lo que conoces:
+  no diseñas las tablas y luego las consultas; diseñas las consultas y de ahí salen las tablas.
+
 levels:
-  - { slug: cassandra-1-novice, number: 1, title: "Novice — NoSQL, wide-column, anillo y replicación" }
-  - { slug: cassandra-2-apprentice, number: 2, title: "Apprentice — CQL y modelado orientado a consultas" }
-  - { slug: cassandra-3-journeyman, number: 3, title: "Journeyman — Consistencia, tombstones, TTL y cluster de 3 nodos" }
-  - { slug: cassandra-4-expert, number: 4, title: "Expert — Alto throughput, hot partitions y nodetool" }
-  - { slug: cassandra-5-boss, number: 5, title: "Boss — Modelar un caso real con escenario de fallo" }
+  # ================================================================ NIVEL 1
+  - slug: cassandra-1-novice
+    number: 1
+    title: "Novice — NoSQL, wide-column, anillo y replicación"
+    story: "Entras a la caverna y ves un anillo de cristales. Cada cristal guarda un pedazo del tesoro, y varios guardan copias."
+    quests:
+      - slug: cassandra-1-learn-nosql
+        type: learn
+        title: Qué es Cassandra y por qué existe
+        required: true
+        estimated_min: 45
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-cassandra-dynamo }
+          - { ref: res-cassandra-docs, required: false }
+        payload:
+          note_prompt: "Explica con tus palabras cómo decide Cassandra en qué nodo vive un dato (partition key → token → anillo) y qué significa replication factor 3."
+          summary_md: |
+            Ideas clave:
+            - Base de datos distribuida, sin nodo maestro (todos los nodos son iguales).
+            - Escala horizontal: agregas nodos y se reparte la carga.
+            - Muy rápida para ESCRIBIR y para leer por clave conocida.
+            - No hay JOINs ni transacciones como en SQL: duplicas datos a propósito (una tabla por consulta).
+            - Usos típicos: eventos por tiempo, IoT, historial de actividad, catálogos de alto tráfico.
+
+      - slug: cassandra-1-learn-vs-sql
+        type: learn
+        title: Cassandra vs. base de datos relacional
+        required: true
+        estimated_min: 30
+        skills: { cassandra: 1.0 }
+        resources:
+          - { ref: res-cassandra-data-modeling }
+        payload:
+          note_prompt: "Menciona 3 cosas que harías en SQL (Oracle/DB2/Postgres) que NO puedes o no debes hacer en Cassandra, y qué harías en su lugar."
+
+      - slug: cassandra-1-glossary
+        type: glossary
+        title: Vocabulario de la caverna
+        required: true
+        estimated_min: 15
+        skills: { cassandra: 0.8, distributed_systems: 0.2 }
+        payload:
+          terms: [cass-nosql, cass-wide-column, cass-node, cass-ring, cass-token, cass-partition, cass-replication-factor, cass-keyspace, cass-masterless]
+
+      - slug: cassandra-1-quiz
+        type: quiz
+        title: Quiz — Fundamentos de Cassandra
+        required: true
+        estimated_min: 15
+        skills: { cassandra: 0.8, distributed_systems: 0.2 }
+        questions:
+          - slug: c1-q1
+            type: mcq
+            prompt: "¿Qué decide en qué nodos se guarda una fila en Cassandra?"
+            options: ["El orden de inserción", "El hash de la partition key (token)", "El nodo al que te conectaste", "El tamaño de la fila"]
+            answer: 1
+            explanation: "La partition key se pasa por una función hash (Murmur3) que da un token; cada nodo es dueño de rangos de tokens en el anillo. Las réplicas van a los siguientes nodos según la estrategia."
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q2
+            type: tf
+            prompt: "Cassandra tiene un nodo maestro que coordina todas las escrituras."
+            answer: false
+            explanation: "Es masterless: cualquier nodo puede recibir una petición y actuar como coordinador. No hay un punto único de falla."
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q3
+            type: mcq
+            prompt: "Con replication factor 3, ¿cuántas copias de cada partición existen?"
+            options: ["1", "2", "3", "Una por nodo del cluster"]
+            answer: 2
+            explanation: "RF = número de réplicas de cada partición. Con RF=3 puedes perder un nodo y seguir leyendo y escribiendo con QUORUM."
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q4
+            type: mcq
+            prompt: "¿Para qué tipo de carga brilla Cassandra?"
+            options: ["Reportes con muchos JOINs", "Escrituras masivas y lecturas por clave conocida", "Transacciones bancarias entre muchas tablas", "Búsqueda de texto libre"]
+            answer: 1
+            explanation: "Su diseño (escritura secuencial + particionamiento) la hace ideal para alto throughput de escritura y consultas por partition key. Para analítica usarías BigQuery."
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q5
+            type: fill
+            prompt: "El contenedor de nivel más alto en Cassandra, donde se define la estrategia de replicación, se llama ______ (equivale a un 'schema' de SQL)."
+            answer: ["keyspace"]
+            explanation: "`CREATE KEYSPACE shop WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3};`"
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q6
+            type: tf
+            prompt: "En Cassandra es normal duplicar datos en varias tablas, una por cada consulta que necesitas."
+            answer: true
+            explanation: "La desnormalización es intencional: escribir es barato y cada consulta debe leer UNA partición. Es lo opuesto a la normalización de SQL."
+            skill: cassandra
+            difficulty: 1
+          - slug: c1-q7
+            type: mcq
+            prompt: "¿Qué significa que Cassandra escale 'horizontalmente'?"
+            options: ["Que usas un servidor más grande", "Que agregas más nodos y los datos se reparten entre ellos", "Que agregas más columnas", "Que usas más índices"]
+            answer: 1
+            explanation: "Scale-out: más máquinas comunes en lugar de una sola enorme (scale-up). El anillo redistribuye rangos de tokens al agregar nodos."
+            skill: distributed_systems
+            difficulty: 1
+          - slug: c1-q8
+            type: mcq
+            prompt: "Si uno de 3 nodos se cae (RF=3), ¿qué pasa con los datos?"
+            options: ["Se pierde un tercio de los datos", "Siguen disponibles en las otras réplicas", "El cluster se detiene", "Se borran las réplicas"]
+            answer: 1
+            explanation: "Cada partición tiene 3 copias en nodos distintos. Al volver el nodo, mecanismos como hinted handoff y repair lo ponen al día."
+            skill: cassandra
+            difficulty: 1
+
+      - slug: cassandra-1-micro-flashcards
+        type: micro
+        title: Repaso rápido del anillo
+        required: false
+        estimated_min: 10
+        skills: { cassandra: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [cass-ring, cass-token, cass-partition, cass-replication-factor]
+
+  # ================================================================ NIVEL 2
+  - slug: cassandra-2-apprentice
+    number: 2
+    title: "Apprentice — CQL y modelado orientado a consultas"
+    story: "En la segunda galería aprendes a tallar los cristales: cada forma responde exactamente a una pregunta."
+    quests:
+      - slug: cassandra-2-learn-cql
+        type: learn
+        title: CQL, partition key y clustering columns
+        required: true
+        estimated_min: 45
+        skills: { cassandra: 1.0 }
+        resources:
+          - { ref: res-cassandra-quickstart }
+          - { ref: res-cassandra-data-modeling }
+        payload:
+          note_prompt: "En `PRIMARY KEY ((customer_id), order_date, order_id)`, ¿qué es la partition key y qué son las clustering columns? ¿Qué consultas permite y cuáles no?"
+
+      - slug: cassandra-2-glossary
+        type: glossary
+        title: Vocabulario de modelado
+        required: true
+        estimated_min: 10
+        skills: { cassandra: 1.0 }
+        payload:
+          terms: [cass-cql, cass-primary-key, cass-partition-key, cass-clustering-column, cass-query-first, cass-denormalization, cass-allow-filtering]
+
+      - slug: cassandra-2-lab-cql
+        type: lab
+        title: "Lab: modela 'órdenes por cliente' en un nodo"
+        required: true
+        estimated_min: 60
+        skills: { cassandra: 1.0 }
+        payload:
+          goal: "Levantar Cassandra en Docker, crear un keyspace y una tabla diseñada para la consulta 'últimas órdenes de un cliente', y comprobar qué consultas funcionan."
+          steps:
+            - title: Levanta Cassandra (un nodo)
+              body: "Tarda ~1 minuto en arrancar. Limitamos la memoria para tu laptop."
+              commands:
+                - "docker run -d --name cass1 -p 9042:9042 -e MAX_HEAP_SIZE=512M -e HEAP_NEWSIZE=128M cassandra:5.0"
+                - "docker logs -f cass1   # espera 'Starting listening for CQL clients' y sal con Ctrl+C"
+            - title: Abre cqlsh
+              commands:
+                - "docker exec -it cass1 cqlsh"
+            - title: Crea el keyspace y la tabla (dentro de cqlsh)
+              body: "Consulta objetivo: 'dame las órdenes de un cliente, de la más reciente a la más vieja'."
+              commands:
+                - "CREATE KEYSPACE shop WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+                - "USE shop;"
+                - "CREATE TABLE orders_by_customer (customer_id text, order_ts timestamp, order_id text, total decimal, status text, PRIMARY KEY ((customer_id), order_ts, order_id)) WITH CLUSTERING ORDER BY (order_ts DESC, order_id ASC);"
+            - title: Inserta datos
+              commands:
+                - "INSERT INTO orders_by_customer (customer_id, order_ts, order_id, total, status) VALUES ('ana', '2026-11-01 10:00:00', 'o1', 120.00, 'PAID');"
+                - "INSERT INTO orders_by_customer (customer_id, order_ts, order_id, total, status) VALUES ('ana', '2026-11-03 18:30:00', 'o3', 80.00, 'PAID');"
+                - "INSERT INTO orders_by_customer (customer_id, order_ts, order_id, total, status) VALUES ('luis', '2026-11-02 09:15:00', 'o2', 35.50, 'PENDING');"
+            - title: Prueba consultas
+              body: "Anota cuáles funcionan y cuáles dan error, y por qué."
+              commands:
+                - "SELECT * FROM orders_by_customer WHERE customer_id = 'ana';"
+                - "SELECT * FROM orders_by_customer WHERE customer_id = 'ana' AND order_ts >= '2026-11-02';"
+                - "SELECT * FROM orders_by_customer WHERE status = 'PAID';"
+                - "SELECT * FROM orders_by_customer WHERE order_id = 'o1';"
+            - title: Diseña una segunda tabla
+              body: "Crea `orders_by_id` con PRIMARY KEY `(order_id)` para la consulta 'dame una orden por su id'. Inserta las mismas 3 órdenes. Esto es desnormalizar: una tabla por consulta."
+          expected: "Las dos primeras consultas funcionan (la de ana sale de la más reciente a la más vieja). La de `status` y la de `order_id` fallan pidiendo ALLOW FILTERING, porque no usan la partition key."
+          checklist:
+            - "Cassandra corre en Docker y entro con cqlsh"
+            - "La consulta por cliente devuelve sus órdenes ordenadas de más nueva a más vieja"
+            - "Entiendo por qué la consulta por status pide ALLOW FILTERING (y por qué no se debe usar en producción)"
+            - "Creé `orders_by_id` para la consulta por id"
+          hints:
+            - "Si `cqlsh` dice que no puede conectar, Cassandra aún está arrancando: espera 30 s."
+            - "ALLOW FILTERING obliga a recorrer TODAS las particiones del cluster: con millones de filas es un desastre."
+          evidence_hint: "Pega la salida de las 4 consultas (incluidos los errores) y tu CREATE TABLE de orders_by_id."
+
+      - slug: cassandra-2-quiz
+        type: quiz
+        title: Quiz — CQL y modelado
+        required: true
+        estimated_min: 15
+        skills: { cassandra: 1.0 }
+        questions:
+          - slug: c2-q1
+            type: mcq
+            prompt: "En `PRIMARY KEY ((sensor_id, day), reading_ts)`, ¿cuál es la partition key?"
+            options: ["sensor_id", "(sensor_id, day)", "reading_ts", "Toda la clave"]
+            answer: 1
+            explanation: "Lo que va entre los paréntesis internos es la partition key (aquí compuesta). `reading_ts` es clustering column: ordena las filas dentro de la partición."
+            skill: cassandra
+            difficulty: 2
+          - slug: c2-q2
+            type: mcq
+            prompt: "¿Cuál es el primer paso del modelado en Cassandra?"
+            options: ["Dibujar el modelo entidad-relación normalizado", "Listar las consultas que la aplicación necesita", "Crear índices secundarios", "Elegir el número de nodos"]
+            answer: 1
+            explanation: "Query-first: las consultas definen las tablas. Cada consulta frecuente debería resolverse leyendo una sola partición."
+            skill: cassandra
+            difficulty: 1
+          - slug: c2-q3
+            type: tf
+            prompt: "Puedes consultar por una clustering column sin especificar la partition key, y será eficiente."
+            answer: false
+            explanation: "Sin la partition key, Cassandra no sabe en qué nodo buscar y tendría que escanear todo el cluster (por eso pide ALLOW FILTERING)."
+            skill: cassandra
+            difficulty: 1
+          - slug: c2-q4
+            type: mcq
+            prompt: "¿Qué hace un INSERT en Cassandra si la fila con esa primary key ya existe?"
+            options: ["Falla por clave duplicada", "La sobrescribe (upsert)", "Crea una segunda fila", "La ignora"]
+            answer: 1
+            explanation: "INSERT y UPDATE son upserts. Esto hace que reintentar un INSERT sea naturalmente idempotente (útil con los mensajes duplicados de Event Harbor)."
+            skill: cassandra
+            difficulty: 2
+          - slug: c2-q5
+            type: fill
+            prompt: "Para que las filas de una partición se guarden de la más reciente a la más vieja usas `WITH CLUSTERING ______ BY (order_ts DESC)`."
+            answer: ["ORDER"]
+            explanation: "El orden se define al crear la tabla: así 'las últimas N órdenes' es una lectura secuencial muy rápida."
+            skill: cassandra
+            difficulty: 1
+          - slug: c2-q6
+            type: mcq
+            prompt: "Necesitas 'órdenes por cliente' y 'orden por id'. ¿Qué haces en Cassandra?"
+            options: ["Una tabla con un índice secundario", "Dos tablas, una por consulta, y escribes en ambas", "Un JOIN", "Una vista en SQL"]
+            answer: 1
+            explanation: "Desnormalizas: `orders_by_customer` y `orders_by_id`. Para mantenerlas coherentes puedes escribir con un BATCH lógico (mismo dato en varias tablas)."
+            skill: cassandra
+            difficulty: 2
+          - slug: c2-q7
+            type: mcq
+            prompt: "¿Por qué ALLOW FILTERING es peligroso en producción?"
+            options: ["Porque borra datos", "Porque puede leer todas las particiones del cluster y es lento e impredecible", "Porque desactiva la replicación", "Porque cambia el esquema"]
+            answer: 1
+            explanation: "Funciona en un laptop con 3 filas, pero en producción convierte una consulta en un escaneo completo. Si lo necesitas, te falta una tabla."
+            skill: cassandra
+            difficulty: 1
+          - slug: c2-q8
+            type: order
+            prompt: "Ordena el proceso de modelado en Cassandra:"
+            options: ["Identificar las entidades y el flujo de la aplicación", "Listar las consultas (access patterns)", "Diseñar una tabla por consulta (partition + clustering)", "Estimar el tamaño de las particiones y ajustar"]
+            answer: [0, 1, 2, 3]
+            explanation: "Coincide con el método conceptual → lógico → físico de la documentación oficial. El último paso evita particiones gigantes."
+            skill: cassandra
+            difficulty: 2
+
+  # ================================================================ NIVEL 3
+  - slug: cassandra-3-journeyman
+    number: 3
+    title: "Journeyman — Consistencia, tombstones, TTL y cluster de 3 nodos"
+    story: "Tres cristales brillan a la vez. Si uno parpadea, ¿a cuál le crees? Aprende a elegir cuántos deben estar de acuerdo."
+    quests:
+      - slug: cassandra-3-learn-consistency
+        type: learn
+        title: Niveles de consistencia y la regla R + W > RF
+        required: true
+        estimated_min: 45
+        skills: { cassandra: 0.6, distributed_systems: 0.4 }
+        resources:
+          - { ref: res-cassandra-dynamo }
+          - { ref: res-ddia, required: false }
+        payload:
+          note_prompt: "Con RF=3, explica qué pasa si escribes con ONE y lees con ONE, y por qué QUORUM + QUORUM sí garantiza leer lo último escrito."
+
+      - slug: cassandra-3-learn-deletes
+        type: learn
+        title: Tombstones y TTL
+        required: true
+        estimated_min: 30
+        skills: { cassandra: 1.0 }
+        resources:
+          - { ref: res-cassandra-docs }
+        payload:
+          note_prompt: "¿Por qué borrar en Cassandra no libera espacio de inmediato? ¿Qué problema causan muchos tombstones en una lectura?"
+
+      - slug: cassandra-3-glossary
+        type: glossary
+        title: Vocabulario de consistencia
+        required: true
+        estimated_min: 10
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        payload:
+          terms: [cass-consistency-level, cass-quorum, cass-coordinator, cass-tombstone, cass-ttl, cass-hinted-handoff, cass-repair]
+
+      - slug: cassandra-3-lab-cluster
+        type: lab
+        title: "Lab: cluster de 3 nodos y niveles de consistencia"
+        required: true
+        estimated_min: 90
+        skills: { cassandra: 0.6, distributed_systems: 0.4 }
+        payload:
+          goal: "Levantar un cluster de 3 nodos con Docker Compose, crear un keyspace con RF=3 y ver qué niveles de consistencia funcionan cuando cae un nodo."
+          steps:
+            - title: Limpia el lab anterior
+              commands:
+                - "docker rm -f cass1"
+            - title: Crea docker-compose.yml para el cluster
+              body: "Cada nodo usa 512 MB de heap. Necesitas ~4 GB libres en Docker Desktop. Los nodos 2 y 3 esperan a que el 1 esté sano."
+              commands:
+                - |
+                  mkdir $HOME\questmap-labs\cassandra-cluster; cd $HOME\questmap-labs\cassandra-cluster
+                  @'
+                  x-cass: &cass
+                    image: cassandra:5.0
+                    environment: &env
+                      CASSANDRA_CLUSTER_NAME: questmap
+                      CASSANDRA_SEEDS: cass1
+                      CASSANDRA_DC: dc1
+                      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+                      MAX_HEAP_SIZE: 512M
+                      HEAP_NEWSIZE: 128M
+                    healthcheck:
+                      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1"]
+                      interval: 15s
+                      timeout: 10s
+                      retries: 20
+                  services:
+                    cass1:
+                      <<: *cass
+                      ports: ["127.0.0.1:9042:9042"]
+                    cass2:
+                      <<: *cass
+                      depends_on: { cass1: { condition: service_healthy } }
+                    cass3:
+                      <<: *cass
+                      depends_on: { cass2: { condition: service_healthy } }
+                  '@ | Set-Content docker-compose.yml
+            - title: Arranca y comprueba el anillo
+              body: "Puede tardar 3–5 minutos. `UN` = Up/Normal."
+              commands:
+                - "docker compose up -d"
+                - "docker exec cass1 nodetool status"
+            - title: Keyspace con RF=3 y datos
+              commands:
+                - "docker exec -it cass1 cqlsh"
+                - "CREATE KEYSPACE shop WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3};"
+                - "CREATE TABLE shop.payments (payment_id text PRIMARY KEY, order_id text, amount decimal);"
+                - "CONSISTENCY QUORUM;"
+                - "INSERT INTO shop.payments (payment_id, order_id, amount) VALUES ('p-1', 'o-100', 120);"
+                - "TRACING ON; SELECT * FROM shop.payments WHERE payment_id = 'p-1'; TRACING OFF;"
+            - title: Tumba un nodo y prueba niveles
+              body: "En otra ventana detén cass3. Luego, en cqlsh (conectado a cass1), prueba lecturas con distintos niveles."
+              commands:
+                - "docker stop cass3"
+                - "CONSISTENCY ONE; SELECT * FROM shop.payments WHERE payment_id = 'p-1';"
+                - "CONSISTENCY QUORUM; SELECT * FROM shop.payments WHERE payment_id = 'p-1';"
+                - "CONSISTENCY ALL; SELECT * FROM shop.payments WHERE payment_id = 'p-1';"
+            - title: TTL y tombstone
+              commands:
+                - "CONSISTENCY QUORUM; INSERT INTO shop.payments (payment_id, order_id, amount) VALUES ('p-tmp', 'o-1', 1) USING TTL 30;"
+                - "SELECT payment_id, TTL(amount) FROM shop.payments WHERE payment_id = 'p-tmp';"
+                - "DELETE FROM shop.payments WHERE payment_id = 'p-1';"
+            - title: Vuelve a levantar el nodo y apaga todo
+              commands:
+                - "docker start cass3"
+                - "docker exec cass1 nodetool status"
+                - "docker compose down   # usa 'down -v' si quieres borrar los datos"
+          expected: "Con un nodo caído: ONE y QUORUM funcionan (2 de 3 réplicas responden); ALL falla con 'Cannot achieve consistency level ALL'. El TTL va bajando hasta que la fila desaparece. Al volver cass3, nodetool status muestra 3 nodos UN."
+          checklist:
+            - "Vi 3 nodos en estado UN con nodetool status"
+            - "Leí con TRACING y vi qué réplicas participaron"
+            - "Con un nodo caído, QUORUM funcionó y ALL falló"
+            - "Vi el TTL bajar y la fila desaparecer"
+            - "Puedo explicar por qué QUORUM + QUORUM con RF=3 da lecturas consistentes"
+          hints:
+            - "Si un nodo no arranca por memoria, sube la memoria de Docker Desktop (Settings → Resources) o baja MAX_HEAP_SIZE a 384M."
+            - "Con RF=3, QUORUM = 2 réplicas. Escribir en 2 y leer de 2 garantiza que al menos una réplica tiene el dato nuevo (2 + 2 > 3)."
+          evidence_hint: "Pega la salida de `nodetool status` y de las tres lecturas (ONE, QUORUM, ALL) con el nodo caído."
+
+      - slug: cassandra-3-quiz
+        type: quiz
+        title: Quiz — Consistencia y borrados
+        required: true
+        estimated_min: 15
+        skills: { cassandra: 0.6, distributed_systems: 0.4 }
+        questions:
+          - slug: c3-q1
+            type: mcq
+            prompt: "Con RF=3, ¿cuántas réplicas deben responder en una operación QUORUM?"
+            options: ["1", "2", "3", "Todas las del cluster"]
+            answer: 1
+            explanation: "QUORUM = (RF / 2) + 1 redondeado hacia abajo = 2. Toleras la caída de un nodo por partición."
+            skill: cassandra
+            difficulty: 1
+          - slug: c3-q2
+            type: mcq
+            prompt: "¿Qué combinación garantiza leer siempre el último dato escrito con RF=3?"
+            options: ["W=ONE, R=ONE", "W=QUORUM, R=QUORUM", "W=ONE, R=QUORUM", "W=ANY, R=ONE"]
+            answer: 1
+            explanation: "Si R + W > RF, los conjuntos de réplicas de lectura y escritura se cruzan: 2 + 2 = 4 > 3. Con ONE + QUORUM = 3, no se cumple."
+            skill: distributed_systems
+            difficulty: 2
+            hint: "R + W > RF."
+          - slug: c3-q3
+            type: tf
+            prompt: "Un DELETE en Cassandra borra el dato del disco inmediatamente."
+            answer: false
+            explanation: "Escribe un tombstone (marca de borrado). El espacio se libera en una compaction después de `gc_grace_seconds`, para que las réplicas que estaban caídas no 'resuciten' el dato."
+            skill: cassandra
+            difficulty: 2
+          - slug: c3-q4
+            type: mcq
+            prompt: "Una consulta lee una partición con 100 000 tombstones. ¿Qué es lo más probable?"
+            options: ["Será rapidísima", "Será lenta y puede fallar con TombstoneOverwhelmingException", "Se borrarán solos", "Se reparará el cluster"]
+            answer: 1
+            explanation: "Cassandra debe leer y descartar cada tombstone. Patrones como 'cola en una tabla' (insertar y borrar sin parar) generan este problema."
+            skill: cassandra
+            difficulty: 2
+          - slug: c3-q5
+            type: mcq
+            prompt: "¿Para qué sirve el TTL?"
+            options: ["Para acelerar lecturas", "Para que un dato expire solo después de N segundos", "Para replicar a otro datacenter", "Para cifrar columnas"]
+            answer: 1
+            explanation: "`USING TTL 86400` hace que la columna expire en un día (al expirar se convierte en tombstone). Útil para sesiones, caches o datos temporales."
+            skill: cassandra
+            difficulty: 1
+          - slug: c3-q6
+            type: mcq
+            prompt: "Un nodo estuvo caído 20 minutos. ¿Qué mecanismo le entrega las escrituras que se perdió en ese rato?"
+            options: ["Hinted handoff", "ALLOW FILTERING", "TTL", "Bootstrap"]
+            answer: 0
+            explanation: "El coordinador guarda 'hints' para la réplica caída y se los entrega al volver (dentro de una ventana limitada). Para caídas largas se usa `nodetool repair`."
+            skill: cassandra
+            difficulty: 2
+          - slug: c3-q7
+            type: fill
+            prompt: "El nodo que recibe la petición del cliente y la reenvía a las réplicas se llama ______ (en inglés)."
+            answer: ["coordinator"]
+            explanation: "Cualquier nodo puede ser coordinador; los drivers token-aware envían directo a una réplica para ahorrar un salto."
+            skill: cassandra
+            difficulty: 1
+          - slug: c3-q8
+            type: mcq
+            prompt: "Teorema CAP: durante una partición de red, Cassandra con consistencia ONE prioriza…"
+            options: ["Consistencia sobre disponibilidad", "Disponibilidad sobre consistencia", "Ninguna de las dos", "Latencia cero"]
+            answer: 1
+            explanation: "Con niveles bajos sigue respondiendo aunque algunas réplicas no estén sincronizadas (AP). Subiendo a QUORUM/ALL te mueves hacia consistencia a costa de disponibilidad: la consistencia es ajustable."
+            skill: distributed_systems
+            difficulty: 2
+
+  # ================================================================ NIVEL 4
+  - slug: cassandra-4-expert
+    number: 4
+    title: "Expert — Alto throughput, hot partitions y operación"
+    story: "La caverna recibe millones de visitantes. Un cristal se calienta demasiado mientras otros duermen. Aprende a repartir la carga y a cuidar el anillo."
+    quests:
+      - slug: cassandra-4-learn-partitions
+        type: learn
+        title: Hot partitions, bucketing y tamaño de partición
+        required: true
+        estimated_min: 45
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-cassandra-data-modeling }
+          - { ref: res-ddia, required: false }
+        payload:
+          note_prompt: "Diseña la partition key para 'eventos de órdenes por tienda' si una tienda grande genera 5 millones de eventos al día. ¿Cómo evitas una partición gigante y caliente?"
+
+      - slug: cassandra-4-learn-ops
+        type: learn
+        title: Compaction, nodetool y qué pasa si cae un nodo
+        required: true
+        estimated_min: 40
+        skills: { cassandra: 1.0 }
+        resources:
+          - { ref: res-cassandra-nodetool }
+          - { ref: res-cassandra-docs, required: false }
+        payload:
+          note_prompt: "Explica para qué sirven `nodetool status`, `nodetool repair` y `nodetool compactionstats`, y cuándo usarías cada uno durante un incidente."
+
+      - slug: cassandra-4-glossary
+        type: glossary
+        title: Vocabulario de operación
+        required: true
+        estimated_min: 10
+        skills: { cassandra: 1.0 }
+        payload:
+          terms: [cass-hot-partition, cass-bucketing, cass-compaction, cass-sstable, cass-memtable, cass-nodetool]
+
+      - slug: cassandra-4-lab-hot-partition
+        type: lab
+        title: "Lab: arregla una hot partition con bucketing"
+        required: true
+        estimated_min: 90
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        payload:
+          goal: "Comparar un modelo con una partición caliente contra uno con buckets por día y medir el tamaño de las particiones con nodetool."
+          steps:
+            - title: Levanta el cluster del nivel 3
+              commands:
+                - "cd $HOME\\questmap-labs\\cassandra-cluster; docker compose up -d"
+            - title: Modelo ingenuo
+              body: "En cqlsh crea `shop.events_by_store_naive` con `PRIMARY KEY ((store_id), event_ts, event_id)`."
+              commands:
+                - "CREATE TABLE shop.events_by_store_naive (store_id text, event_ts timestamp, event_id uuid, type text, PRIMARY KEY ((store_id), event_ts, event_id)) WITH CLUSTERING ORDER BY (event_ts DESC, event_id ASC);"
+            - title: Modelo con bucket por día
+              commands:
+                - "CREATE TABLE shop.events_by_store_day (store_id text, day date, event_ts timestamp, event_id uuid, type text, PRIMARY KEY ((store_id, day), event_ts, event_id)) WITH CLUSTERING ORDER BY (event_ts DESC, event_id ASC);"
+            - title: Genera carga con cassandra-stress o con un script
+              body: |
+                La forma más simple: un script de PowerShell que genere un archivo .cql con 20 000 INSERT para la tienda 'big', repartidos en 10 días.
+
+                ```powershell
+                1..20000 | ForEach-Object {
+                  $d = (Get-Date '2026-11-01').AddDays($_ % 10)
+                  "INSERT INTO shop.events_by_store_naive (store_id, event_ts, event_id, type) VALUES ('big', '$($d.AddSeconds($_).ToString('yyyy-MM-dd HH:mm:ss'))', uuid(), 'ORDER_PLACED');"
+                } | Set-Content naive.cql
+                ```
+
+                Haz lo mismo para `events_by_store_day` (archivo `day.cql`) agregando la columna `day` con `$d.ToString('yyyy-MM-dd')`.
+              commands:
+                - "docker cp naive.cql cass1:/tmp/naive.cql; docker exec cass1 cqlsh -f /tmp/naive.cql"
+                - "docker cp day.cql cass1:/tmp/day.cql; docker exec cass1 cqlsh -f /tmp/day.cql"
+            - title: Mide
+              commands:
+                - "docker exec cass1 nodetool flush shop"
+                - "docker exec cass1 nodetool tablestats shop.events_by_store_naive shop.events_by_store_day"
+                - "docker exec cass1 nodetool tablehistograms shop events_by_store_day"
+            - title: Consulta con buckets
+              body: "Escribe la consulta 'eventos de la tienda big del 2026-11-03'. ¿Cómo consultarías una semana completa? (pista: 7 consultas en paralelo, una por bucket)."
+          expected: "En tablestats, la tabla naive tiene 1 partición enorme (`Compacted partition maximum bytes` mucho mayor); la tabla por día tiene ~10 particiones más pequeñas y repartidas entre nodos."
+          checklist:
+            - "Cargué los mismos datos en ambas tablas"
+            - "Comparé el tamaño máximo de partición en tablestats"
+            - "Escribí la consulta por bucket de un día"
+            - "Puedo explicar el trade-off: menos particiones calientes vs. más consultas para rangos largos"
+          hints:
+            - "Si `cqlsh -f` es lento, baja a 5 000 inserts: la diferencia ya se nota."
+            - "Si una tienda fuera MUY grande incluso por día, se agrega un bucket extra (por hora o un número 0..N calculado con hash)."
+          evidence_hint: "Pega las líneas relevantes de `nodetool tablestats` de ambas tablas (Number of partitions y Compacted partition maximum bytes)."
+
+      - slug: cassandra-4-quiz
+        type: quiz
+        title: Quiz — Throughput y operación
+        required: true
+        estimated_min: 15
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        questions:
+          - slug: c4-q1
+            type: mcq
+            prompt: "¿Qué es una hot partition?"
+            options: ["Una partición cifrada", "Una partición que recibe una porción desproporcionada del tráfico", "Una partición recién creada", "Una partición en memoria"]
+            answer: 1
+            explanation: "Todo el tráfico de esa clave cae en las mismas 3 réplicas mientras el resto del cluster está ocioso: agregar nodos no ayuda."
+            skill: cassandra
+            difficulty: 1
+          - slug: c4-q2
+            type: mcq
+            prompt: "La partition key `(store_id)` en eventos genera particiones de 10 GB. ¿Qué haces?"
+            options: ["Agregar más RAM", "Agregar un bucket de tiempo: `(store_id, day)`", "Usar ALLOW FILTERING", "Bajar el RF"]
+            answer: 1
+            explanation: "El bucketing limita el tamaño de cada partición. Regla práctica: mantener particiones por debajo de unos ~100 MB y de unos cientos de miles de filas."
+            skill: cassandra
+            difficulty: 2
+          - slug: c4-q3
+            type: order
+            prompt: "Ordena el camino de una escritura dentro de un nodo de Cassandra:"
+            options: ["Se agrega al commit log (disco, secuencial)", "Se escribe en la memtable (memoria)", "Al llenarse, la memtable se vuelca (flush) a un SSTable inmutable", "La compaction combina SSTables y descarta datos viejos y tombstones vencidos"]
+            answer: [0, 1, 2, 3]
+            explanation: "Escribir es rápido porque es secuencial y en memoria; el costo se paga después en las compactions."
+            skill: cassandra
+            difficulty: 2
+          - slug: c4-q4
+            type: mcq
+            prompt: "¿Qué comando usarías primero para ver si todos los nodos están arriba?"
+            options: ["nodetool repair", "nodetool status", "nodetool compact", "nodetool decommission"]
+            answer: 1
+            explanation: "`nodetool status` muestra cada nodo con UN/DN (Up/Down, Normal/Joining…), su carga y su porcentaje de tokens."
+            skill: cassandra
+            difficulty: 1
+          - slug: c4-q5
+            type: tf
+            prompt: "`nodetool repair` sincroniza las réplicas y debe correrse periódicamente (dentro de gc_grace_seconds) para evitar datos 'resucitados'."
+            answer: true
+            explanation: "Si una réplica nunca recibió un tombstone y este se elimina por compaction, el dato viejo podría volver. Repairs regulares lo evitan."
+            skill: cassandra
+            difficulty: 3
+          - slug: c4-q6
+            type: mcq
+            prompt: "Las latencias de lectura p99 suben de golpe y `nodetool compactionstats` muestra cientos de compactions pendientes. ¿Causa probable?"
+            options: ["Pocas lecturas", "Las lecturas consultan demasiados SSTables porque la compaction va atrasada", "El TTL está mal", "La red está perfecta"]
+            answer: 1
+            explanation: "Más SSTables por lectura = más disco por consulta. Se revisa la estrategia de compaction, el I/O de disco y si hubo un pico de escrituras."
+            skill: cassandra
+            difficulty: 3
+          - slug: c4-q7
+            type: fill
+            prompt: "Los archivos inmutables en disco donde Cassandra guarda los datos se llaman ______ (Sorted String Tables)."
+            answer: ["SSTables", "SSTable", "sstables"]
+            explanation: "Nunca se modifican: las actualizaciones y borrados se escriben como datos nuevos y la compaction los fusiona."
+            skill: cassandra
+            difficulty: 1
+          - slug: c4-q8
+            type: mcq
+            prompt: "Con buckets por día, ¿cómo lees los eventos de una semana?"
+            options: ["Un SELECT con ALLOW FILTERING", "7 consultas (una por bucket), idealmente en paralelo, y unes los resultados", "No se puede", "Con un JOIN"]
+            answer: 1
+            explanation: "Es el trade-off del bucketing: particiones sanas a cambio de varias consultas para rangos largos. Con CompletableFuture las haces en paralelo."
+            skill: cassandra
+            difficulty: 2
+
+  # ================================================================ NIVEL 5
+  - slug: cassandra-5-boss
+    number: 5
+    title: "Boss — Modela un caso real con escenario de fallo"
+    story: "El guardián de la caverna te entrega un problema real de órdenes y eventos por tiempo, y apaga un cristal a mitad de la prueba."
+    quests:
+      - slug: cassandra-5-learn-review
+        type: learn
+        title: Repaso — modelado y fallos
+        required: true
+        estimated_min: 30
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        resources:
+          - { ref: res-cassandra-data-modeling }
+          - { ref: res-kleppmann-lectures, required: false }
+        payload:
+          note_prompt: "Para un sistema de órdenes de Home Depot (millones por día), lista 3 consultas clave y la tabla Cassandra que diseñarías para cada una."
+
+      - slug: cassandra-5-quiz-final
+        type: quiz
+        title: Examen final — Cassandra Caverns
+        required: true
+        estimated_min: 20
+        skills: { cassandra: 0.7, distributed_systems: 0.3 }
+        questions:
+          - slug: c5-q1
+            type: mcq
+            prompt: "Necesitas 'últimas 20 órdenes de un cliente' con millones de clientes. ¿Mejor PRIMARY KEY?"
+            options: ["((order_ts), customer_id)", "((customer_id), order_ts, order_id) con CLUSTERING ORDER BY order_ts DESC", "((order_id))", "((status), customer_id)"]
+            answer: 1
+            explanation: "La partición es por cliente (bien distribuida) y la clustering por tiempo descendente hace que `LIMIT 20` sea una lectura secuencial."
+            skill: cassandra
+            difficulty: 2
+          - slug: c5-q2
+            type: mcq
+            prompt: "¿Por qué `((status))` es una mala partition key para órdenes?"
+            options: ["Porque es texto", "Porque tiene muy pocos valores: pocas particiones gigantes y calientes", "Porque no se puede indexar", "Porque es obligatoria"]
+            answer: 1
+            explanation: "Baja cardinalidad = mala distribución. Todo 'PENDING' cae en 3 nodos."
+            skill: cassandra
+            difficulty: 1
+          - slug: c5-q3
+            type: mcq
+            prompt: "Usas LWT (`INSERT ... IF NOT EXISTS`) para evitar órdenes duplicadas. ¿Qué costo tiene?"
+            options: ["Ninguno", "Mucha más latencia por el consenso Paxos entre réplicas", "Pierdes la replicación", "No funciona con RF=3"]
+            answer: 1
+            explanation: "Las lightweight transactions dan 'compare-and-set' con varios viajes de red. Úsalas solo donde la unicidad es crítica; para idempotencia normal basta el upsert con una clave estable."
+            skill: cassandra
+            difficulty: 3
+          - slug: c5-q4
+            type: tf
+            prompt: "Con RF=3 y escrituras en QUORUM, perder 2 de los 3 nodos que tienen una partición deja esa partición sin poder escribirse en QUORUM."
+            answer: true
+            explanation: "QUORUM necesita 2 réplicas vivas de ESA partición. Con una sola, solo funcionan ONE/ANY (si la aplicación lo acepta)."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: c5-q5
+            type: mcq
+            prompt: "En una entrevista te preguntan '¿por qué Cassandra y no Postgres para eventos de órdenes?'. ¿Mejor respuesta?"
+            options:
+              - "Porque Cassandra siempre es más rápida"
+              - "Por el volumen de escrituras y la necesidad de escalar horizontalmente y tolerar fallos de nodo, aceptando modelado por consulta y consistencia ajustable"
+              - "Porque es NoSQL y es moderno"
+              - "Porque Postgres no soporta JSON"
+            answer: 1
+            explanation: "Las buenas respuestas nombran el requisito (throughput, disponibilidad, escala) y el trade-off que aceptas (sin JOINs, desnormalización, consistencia eventual configurable)."
+            skill: cassandra
+            difficulty: 2
+          - slug: c5-q6
+            type: mcq
+            prompt: "Un servicio Java usa el driver de Cassandra. ¿Qué configuración evita un salto extra de red por petición?"
+            options: ["Un load balancing policy token-aware", "ALLOW FILTERING", "Consistencia ALL", "Desactivar el pool de conexiones"]
+            answer: 0
+            explanation: "El driver token-aware calcula el token de la partition key y envía la petición directo a una réplica, que actúa como coordinador."
+            skill: cassandra
+            difficulty: 3
+          - slug: c5-q7
+            type: fill
+            prompt: "Si R + W > ______, las lecturas ven la última escritura confirmada."
+            answer: ["RF", "rf", "replication factor"]
+            explanation: "Es la regla de solapamiento de quórums: los conjuntos de réplicas de lectura y escritura se cruzan en al menos un nodo."
+            skill: distributed_systems
+            difficulty: 2
+          - slug: c5-q8
+            type: mcq
+            prompt: "Usar una tabla Cassandra como cola (insertar trabajos y borrarlos al procesarlos) suele ser mala idea porque…"
+            options: ["Cassandra no permite DELETE", "Genera muchísimos tombstones que hacen lentas las lecturas", "No soporta timestamps", "Pierde mensajes"]
+            answer: 1
+            explanation: "Es un antipatrón clásico. Para colas usa un sistema de mensajería (Pub/Sub); para eso existe Event Harbor."
+            skill: cassandra
+            difficulty: 2
+
+      - slug: cassandra-5-boss-fight
+        type: boss
+        title: "Jefe: modela órdenes y eventos por tiempo con un nodo caído"
+        required: true
+        estimated_min: 90
+        skills: { cassandra: 0.6, distributed_systems: 0.2, english: 0.2 }
+        payload:
+          task: "Modela en Cassandra un sistema de órdenes con estas consultas: (1) orden por id, (2) últimas órdenes de un cliente, (3) eventos de una tienda por día, (4) órdenes pendientes de envío por centro de distribución. Entrega los CREATE TABLE, el keyspace (RF y estrategia), los niveles de consistencia por operación y qué pasa con cada consulta si cae un nodo de tres. Luego defiéndelo en inglés."
+          rubric: [correctness, depth, clarity, tradeoffs]
+          interview_focus: ["query-first modeling", "partition sizing and hot partitions", "consistency levels under failure", "tombstones and anti-patterns"]
+
+      - slug: cassandra-5-interview
+        type: interview
+        title: "Mini-entrevista: Cassandra screen"
+        required: false
+        estimated_min: 30
+        skills: { cassandra: 0.6, english: 0.4 }
+        payload:
+          mode: technical_screen
+          zone: cassandra-caverns

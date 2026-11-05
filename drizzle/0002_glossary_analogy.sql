@@ -1,0 +1,1 @@
+ALTER TABLE "glossary_terms" ADD COLUMN "analogy" text;

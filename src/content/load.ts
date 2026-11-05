@@ -94,6 +94,15 @@ function validateReferences(c: ContentBundle) {
     }
   }
   for (const g of c.glossary) for (const t of g.terms) unique("glossary_term", t.slug);
+  const termSlugs = new Set(c.glossary.flatMap((g) => g.terms.map((t) => t.slug)));
+  for (const z of c.zones)
+    for (const l of z.levels)
+      for (const q of l.quests) {
+        const terms = q.payload.terms;
+        if (Array.isArray(terms))
+          for (const t of terms)
+            if (!termSlugs.has(String(t))) errors.push(`quest ${q.slug}: término de glosario desconocido "${t}"`);
+      }
   for (const f of c.interviews) for (const t of f.templates) unique("interview_template", t.slug);
 
   if (errors.length) throw new Error(`Referencias inválidas en content/:\n  - ${errors.join("\n  - ")}`);

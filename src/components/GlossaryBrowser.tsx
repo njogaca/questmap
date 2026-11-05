@@ -12,6 +12,7 @@ export type GlossaryRow = {
   definitionEs: string;
   definitionEn: string;
   exampleEn: string | null;
+  analogy: string | null;
   analogyMq: string | null;
   seeAlso: string[];
   /** null = nunca estudiado */
@@ -24,7 +25,7 @@ export function GlossaryBrowser({ rows }: { rows: GlossaryRow[] }) {
   const [q, setQ] = useState("");
   const [zone, setZone] = useState("");
   const [cat, setCat] = useState("");
-  const [onlyMq, setOnlyMq] = useState(false);
+  const [onlyAnalogy, setOnlyAnalogy] = useState(false);
 
   const zones = useMemo(
     () => [...new Map(rows.filter((r) => r.zoneSlug).map((r) => [r.zoneSlug!, r.zoneTitle ?? r.zoneSlug!])).entries()],
@@ -35,9 +36,9 @@ export function GlossaryBrowser({ rows }: { rows: GlossaryRow[] }) {
   const filtered = rows.filter((r) => {
     if (zone && r.zoneSlug !== zone) return false;
     if (cat && r.category !== cat) return false;
-    if (onlyMq && !r.analogyMq) return false;
+    if (onlyAnalogy && !r.analogy && !r.analogyMq) return false;
     if (!q) return true;
-    const hay = norm(`${r.term} ${r.definitionEs} ${r.definitionEn} ${r.analogyMq ?? ""}`);
+    const hay = norm(`${r.term} ${r.definitionEs} ${r.definitionEn} ${r.analogy ?? ""} ${r.analogyMq ?? ""}`);
     return hay.includes(norm(q));
   });
 
@@ -68,8 +69,8 @@ export function GlossaryBrowser({ rows }: { rows: GlossaryRow[] }) {
         </select>
       </div>
       <label className="mt-2 flex items-center gap-2 text-sm text-dim">
-        <input type="checkbox" checked={onlyMq} onChange={(e) => setOnlyMq(e.target.checked)} className="accent-[var(--na-warn)]" />
-        Solo términos con analogía IBM MQ/IIB
+        <input type="checkbox" checked={onlyAnalogy} onChange={(e) => setOnlyAnalogy(e.target.checked)} className="accent-[var(--na-warn)]" />
+        Solo términos con analogía
       </label>
 
       <p className="mt-3 font-mono text-xs text-dim">{filtered.length} términos</p>
@@ -90,9 +91,15 @@ export function GlossaryBrowser({ rows }: { rows: GlossaryRow[] }) {
               {r.definitionEn}
             </p>
             {r.exampleEn && <p className="mt-2 border-l-2 border-available pl-3 text-sm italic">&ldquo;{r.exampleEn}&rdquo;</p>}
+            {r.analogy && (
+              <p className="mt-2 rounded bg-surface-2 p-2 text-xs">
+                <span className="font-mono text-warn">Analogía › </span>
+                {r.analogy}
+              </p>
+            )}
             {r.analogyMq && (
               <p className="mt-2 rounded bg-surface-2 p-2 text-xs">
-                <span className="font-mono text-warn">MQ/IIB › </span>
+                <span className="font-mono text-dim">En MQ/IIB › </span>
                 {r.analogyMq}
               </p>
             )}

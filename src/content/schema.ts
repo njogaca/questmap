@@ -132,6 +132,7 @@ export const glossaryTermSchema = z.object({
   definition_es: z.string().min(1),
   definition_en: z.string().min(1),
   example_en: z.string().optional(),
+  analogy: z.string().optional(),
   analogy_mq: z.string().optional(),
   see_also: z.array(z.string()).default([]),
 });

@@ -1,0 +1,349 @@
+# Pista transversal de inglés (sección 7 del SPEC): ≥ 30 micro-quests de ≤ 15 min.
+# Cada nivel desbloquea el siguiente. Alimenta la skill `english`.
+slug: english-track
+title: English Track
+order: 11
+emoji: "🗣️"
+unlocked_from_start: true
+map: { x: 330, y: 70 }
+prerequisites: []
+skills: [english]
+story: >
+  Pista transversal. Un canal de comunicaciones cifrado: cada día descifras unas pocas palabras,
+  dices una frase en voz alta y tu inglés técnico gana señal. 10–15 minutos al día bastan.
+
+# Cómo hacer las micro de "speaking" en la PC:
+# Windows tiene dictado por voz: haz clic en la caja de texto, presiona Win + H y habla en inglés.
+# Windows escribe lo que dijiste: esa es tu transcripción. (Configura el idioma de dictado en inglés:
+# Configuración → Hora e idioma → Voz). Si el dictado no entiende una palabra, ¡esa es la que debes practicar!
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: english-1
+    number: 1
+    title: "Señal débil — sobrevivir en una reunión técnica"
+    story: "Primer contacto. Aprende a pedir que repitan, a ganar tiempo para pensar y a decir con claridad qué haces."
+    quests:
+      - slug: en-1-vocab-survival
+        type: micro
+        title: "Flashcards: frases de supervivencia"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-could-you-repeat, en-let-me-think, en-to-clarify, en-as-far-as-i-know, en-im-not-sure-but]
+
+      - slug: en-1-speak-role
+        type: micro
+        title: "Habla: tu rol actual en 2 frases"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Di en voz alta (20–30 s) y dicta con Win + H: quién eres y qué haces hoy. Modelo: 'I'm an integration engineer with eight years of experience. I design and support message-based integrations for a tier-one bank, mainly with IBM MQ and IIB.' Cambia los detalles para que sean tuyos. Pega aquí la transcripción."
+
+      - slug: en-1-write-clarify
+        type: micro
+        title: "Escribe: pide una aclaración"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: writing
+          instructions: "Imagina que el entrevistador dijo algo muy rápido sobre 'consumer lag'. Escribe 2 frases distintas para pedir que lo repita o lo explique, sin sonar inseguro. Ejemplo: 'Sorry, could you say that again? I want to make sure I understand the question.'"
+
+      - slug: en-1-vocab-numbers
+        type: micro
+        title: "Flashcards: números y unidades en voz alta"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-throughput-numbers, en-latency-ms, en-percent-p99, en-orders-of-magnitude]
+
+      - slug: en-1-speak-numbers
+        type: micro
+        title: "Habla: describe un sistema con números"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Dicta (Win + H) una descripción con cifras de un sistema que conoces. Modelo: 'The system processes around two million messages per day, with a peak of five hundred messages per second. The p99 latency is under two hundred milliseconds.' Revisa en la transcripción si Windows escribió bien los números."
+
+      - slug: en-1-reading-docs
+        type: micro
+        title: "Lee: 10 minutos de documentación en inglés"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: reading
+          instructions: "Abre la página 'Pub/Sub overview' (recurso de Event Harbor) y lee los primeros párrafos EN VOZ ALTA. Anota 3 palabras que no conocías y búscalas. Marca como hecho cuando termines."
+
+  # ================================================================ NIVEL 2
+  - slug: english-2
+    number: 2
+    title: "Señal media — explicar conceptos de Java"
+    story: "La señal mejora. Ahora traduces tu conocimiento técnico: explicar es más difícil que entender."
+    quests:
+      - slug: en-2-vocab-explain
+        type: micro
+        title: "Flashcards: verbos para explicar"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-in-other-words, en-for-example, en-the-main-difference, en-under-the-hood, en-it-depends-on]
+
+      - slug: en-2-speak-class-object
+        type: micro
+        title: "Habla: clase vs. objeto"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Explica en 30 s, como en una entrevista, la diferencia entre una clase y un objeto, con un ejemplo de órdenes. Usa 'the main difference is…' y 'for example…'. Dicta con Win + H y pega la transcripción."
+
+      - slug: en-2-speak-interface
+        type: micro
+        title: "Habla: ¿por qué usar interfaces?"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Responde en 30–45 s: 'Why would you use an interface in Java?' Menciona testing con mocks o cambiar implementaciones. Dicta y pega."
+
+      - slug: en-2-write-streams
+        type: micro
+        title: "Escribe: describe un stream"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: writing
+          instructions: "Escribe en inglés (3–4 frases) qué hace este código: orders.stream().filter(o -> o.total() > 100).map(Order::customer).distinct().toList(). Usa verbos como 'filters', 'maps', 'removes duplicates', 'collects'."
+
+      - slug: en-2-vocab-tradeoffs
+        type: micro
+        title: "Flashcards: hablar de trade-offs"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-trade-off, en-on-the-other-hand, en-the-downside-is, en-it-comes-at-the-cost-of, en-good-enough]
+
+      - slug: en-2-speak-exceptions
+        type: micro
+        title: "Habla: checked vs. unchecked"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Explica en 30–45 s la diferencia entre checked y unchecked exceptions y cuál prefieres en un servicio REST y por qué. Incluye un trade-off ('the downside is…'). Dicta y pega."
+
+  # ================================================================ NIVEL 3
+  - slug: english-3
+    number: 3
+    title: "Señal clara — mensajería y datos"
+    story: "Ya hablas en el canal. Ahora describe flujos de eventos y bases de datos sin perder el hilo."
+    quests:
+      - slug: en-3-vocab-messaging
+        type: micro
+        title: "Flashcards: verbos de mensajería"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-to-publish, en-to-acknowledge, en-to-retry, en-to-fan-out, en-to-redeliver]
+
+      - slug: en-3-speak-mq-pubsub
+        type: micro
+        title: "Habla: tu historia de MQ a Pub/Sub"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "En 45–60 s compara IBM MQ con Pub/Sub como si se lo explicaras a un entrevistador de Home Depot: qué es igual, qué cambia y qué tuviste que aprender. Modelo de inicio: 'In my current role I work with IBM MQ, so the core ideas of Pub/Sub felt familiar. The main difference is…'. Dicta y pega."
+
+      - slug: en-3-write-idempotency
+        type: micro
+        title: "Escribe: explica idempotencia"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: writing
+          instructions: "Escribe 3–4 frases en inglés: qué es un consumidor idempotente y por qué es necesario con at-least-once delivery. Incluye un ejemplo con pagos."
+
+      - slug: en-3-vocab-data
+        type: micro
+        title: "Flashcards: hablar de datos"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-to-scale-out, en-bottleneck, en-to-partition, en-to-query, en-under-load]
+
+      - slug: en-3-speak-cassandra
+        type: micro
+        title: "Habla: ¿por qué Cassandra?"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Responde en 45 s: 'When would you choose Cassandra over a relational database?' Menciona throughput de escritura, escalar horizontalmente y el trade-off del modelado por consulta. Dicta y pega."
+
+      - slug: en-3-shadowing-1
+        type: micro
+        title: "Shadowing: 3 minutos con un video técnico"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: reading
+          instructions: "Busca en YouTube un video corto en inglés sobre 'Pub/Sub explained' o 'Cassandra data modeling'. Elige un fragmento de 1 minuto y haz shadowing: reproduce 1–2 frases, pausa y repítelas imitando ritmo y entonación. Repite el fragmento completo 3 veces. Marca como hecho al terminar."
+
+  # ================================================================ NIVEL 4
+  - slug: english-4
+    number: 4
+    title: "Transmisión — contar tu experiencia"
+    story: "Ahora transmites. En entrevistas no basta con saber: tienes que contar historias concretas en pasado y con resultados."
+    quests:
+      - slug: en-4-vocab-past
+        type: micro
+        title: "Flashcards: verbos de logros en pasado"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-i-led, en-i-designed, en-i-reduced, en-i-migrated, en-i-was-responsible-for]
+
+      - slug: en-4-write-achievement
+        type: micro
+        title: "Escribe: un logro con números"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: writing
+          instructions: "Escribe en inglés un logro real de tu trabajo en 3 frases: qué hiciste (verbo en pasado), cómo, y el resultado medible. Ejemplo: 'I redesigned the retry logic of a payment integration. I added a backout queue and alerts. As a result, failed payments dropped by 40 percent.'"
+
+      - slug: en-4-speak-incident
+        type: micro
+        title: "Habla: un incidente que resolviste"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Cuenta en 60 s un incidente de producción: qué pasó, cómo encontraste la causa raíz y qué cambiaste para que no se repita. Usa 'the root cause was…' y 'to prevent it from happening again, we…'. Dicta y pega."
+
+      - slug: en-4-vocab-ownership
+        type: micro
+        title: "Flashcards: colaboración y ownership"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-stakeholder, en-ownership, en-on-call, en-to-roll-back, en-post-mortem]
+
+      - slug: en-4-speak-conflict
+        type: micro
+        title: "Habla: un desacuerdo técnico"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Cuenta en 60 s una vez que no estuviste de acuerdo con una decisión técnica: cómo lo planteaste, qué datos usaste y cómo terminó. Evita culpar a otros; usa 'we'. Dicta y pega."
+
+      - slug: en-4-write-ai
+        type: micro
+        title: "Escribe: cómo usas IA en tu trabajo"
+        required: true
+        estimated_min: 10
+        skills: { english: 0.7, ai_tools: 0.3 }
+        payload:
+          kind: writing
+          instructions: "La oferta menciona herramientas de IA. Escribe 3–4 frases en inglés sobre cómo usas asistentes como Claude de forma responsable: para qué sí, qué revisas siempre (pruebas, seguridad) y un ejemplo concreto."
+
+  # ================================================================ NIVEL 5
+  - slug: english-5
+    number: 5
+    title: "Señal fuerte — fluidez y pronunciación"
+    story: "Última frecuencia: hablar sin pausas largas y con palabras que el entrevistador entienda a la primera."
+    quests:
+      - slug: en-5-vocab-pronunciation
+        type: micro
+        title: "Flashcards: palabras técnicas que se pronuncian mal"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [en-pron-cache, en-pron-queue, en-pron-schema, en-pron-throughput, en-pron-data]
+
+      - slug: en-5-speak-pronunciation
+        type: micro
+        title: "Habla: prueba de pronunciación con el dictado"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Dicta con Win + H esta frase 3 veces: 'We cache the schema in memory and push events to the queue to increase throughput.' Pega la mejor transcripción. Si el dictado se equivoca en una palabra, practícala sola y vuelve a intentarlo."
+
+      - slug: en-5-shadowing-2
+        type: micro
+        title: "Shadowing: una entrevista técnica simulada"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: reading
+          instructions: "Busca en YouTube 'mock system design interview' o 'mock backend interview'. Haz shadowing de 2 minutos de las respuestas del candidato: pausa, repite e imita. Anota 3 frases útiles para reutilizar."
+
+      - slug: en-5-speak-elevator
+        type: micro
+        title: "Habla: por qué Home Depot"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Responde en 45 s: 'Why do you want to work at Home Depot on this team?' Conecta tu experiencia (sistemas críticos, alto volumen, mensajería) con lo que hace el equipo (backend y sistemas distribuidos de alto throughput). Dicta y pega."
+
+      - slug: en-5-write-questions
+        type: micro
+        title: "Escribe: 3 preguntas para el entrevistador"
+        required: true
+        estimated_min: 10
+        skills: { english: 1.0 }
+        payload:
+          kind: writing
+          instructions: "Escribe 3 preguntas inteligentes en inglés para el final de la entrevista (sobre on-call, cómo miden el éxito del equipo, su stack de eventos, etc.)."
+
+      - slug: en-5-speak-full
+        type: micro
+        title: "Habla: 2 minutos sin parar"
+        required: true
+        estimated_min: 15
+        skills: { english: 1.0 }
+        payload:
+          kind: speaking
+          instructions: "Habla 2 minutos seguidos sobre el proyecto técnico del que estás más orgulloso: contexto, arquitectura, tu rol, un problema difícil y el resultado. No te detengas a corregirte: la meta es fluidez. Dicta y pega."

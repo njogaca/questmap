@@ -70,7 +70,7 @@ skills:
     name: Git
     description: Control de versiones
     core: false
-    target_xp: 90 # 875×.10 = 88
+    target_xp: 28 # real Z1 (commits en labs: 4 labs × 50 × peso .1–.2 = 25) + margen; Johan ya domina Git
   - code: debugging_rca
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz

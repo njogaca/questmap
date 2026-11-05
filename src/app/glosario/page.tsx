@@ -22,7 +22,7 @@ export default async function GlossaryPage() {
       <p className="font-mono text-xs text-available">&gt; questmap://glosario</p>
       <h1 className="mt-1 text-3xl font-bold">Glosario</h1>
       <p className="mt-1 text-sm text-dim">
-        Términos en inglés como aparecen en entrevistas, con definición en español simple y su equivalente en IBM MQ/IIB.
+        Términos en inglés como aparecen en entrevistas, con definición en español simple, un ejemplo y una analogía para recordarlos.
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-line bg-surface p-4">
@@ -46,6 +46,7 @@ export default async function GlossaryPage() {
             definitionEs: t.definitionEs,
             definitionEn: t.definitionEn,
             exampleEn: t.exampleEn,
+            analogy: t.analogy,
             analogyMq: t.analogyMq,
             seeAlso: t.seeAlso,
             nextReview: srsBy.get(t.id)?.dueAt.toISOString() ?? null,

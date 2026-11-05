@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db, schema as s } from "@/db/client";
 import type { Card } from "@/components/Flashcards";
 import { GlossaryQuest } from "@/components/quest/GlossaryQuest";
+import { LabQuest, type LabPayload } from "@/components/quest/LabQuest";
 import { LearnQuest } from "@/components/quest/LearnQuest";
 import { MicroQuest } from "@/components/quest/MicroQuest";
 import { QuizRunner, type ClientQuestion } from "@/components/quest/QuizRunner";
@@ -26,6 +27,7 @@ async function cardsFor(termSlugs: string[] | undefined, zoneSlug: string, limit
     definitionEs: t.definitionEs,
     definitionEn: t.definitionEn,
     exampleEn: t.exampleEn,
+    analogy: t.analogy,
     analogyMq: t.analogyMq,
   }));
 }
@@ -69,6 +71,7 @@ export default async function QuestPage({ params }: { params: Promise<{ slug: st
         completed={completed}
         notePrompt={String(payload.note_prompt ?? "Explica con tus palabras (2–3 líneas) lo más importante que aprendiste.")}
         savedNote={prog?.notes ?? ""}
+        summary={(payload.summary_md as string | undefined) ?? undefined}
         resources={links.map(({ r, qr }) => ({
           id: r.id,
           title: r.title,
@@ -125,6 +128,11 @@ export default async function QuestPage({ params }: { params: Promise<{ slug: st
           finishedAt: h.finishedAt?.toISOString() ?? null,
         }))}
       />
+    );
+  } else if (quest.type === "lab") {
+    const [prog] = await db.select().from(s.questProgress).where(eq(s.questProgress.questId, quest.id));
+    body = (
+      <LabQuest slug={quest.slug} payload={payload as LabPayload} completed={completed} savedEvidence={prog?.evidence ?? ""} />
     );
   } else if (quest.type === "micro") {
     const kind = String(payload.kind ?? "flashcards");

@@ -188,7 +188,7 @@ levels:
 
 Formato de pregunta de quiz: `type` (mcq | tf | order | fill), `prompt`, `options`, `answer`, `explanation` (siempre explica por qué), `skill`, `difficulty` (1–3), `hint`.
 
-Formato de término de glosario: `term`, `category`, `definition_es` (simple, 1–3 frases), `definition_en` (simple, 1–2 frases), `example_en` (frase corta), `analogy_mq` (opcional: equivalente en IBM MQ/IIB/DataPower cuando aplique), `see_also`.
+Formato de término de glosario: `term`, `category`, `definition_es` (simple, 1–3 frases), `definition_en` (simple, 1–2 frases), `example_en` (frase corta), `analogy` (opcional: analogía cotidiana o de cualquier tipo que ayude a recordarlo), `analogy_mq` (opcional y poco frecuente: equivalente en IBM MQ/IIB/DataPower solo cuando realmente ayuda, por ejemplo en el mapa MQ → Pub/Sub), `see_also`. No forzar analogías con MQ/IIB: el usuario prefiere analogías variadas.
 
 **Cantidad mínima de contenido inicial (v1):**
 - Zonas 1, 2 y 3 completas (5 niveles, quests, quizzes de ≥ 8 preguntas por nivel, ≥ 25 términos por zona).
@@ -269,7 +269,7 @@ Regla visible en la quest: se puede usar Claude Code, pero hay que poder explica
 5. Boss: **Mock Loop completo** (45–60 min: técnico + conductual + diseño) + negociación y preguntas para hacer al entrevistador
 Incluye una quest sobre uso responsable de asistentes de IA en el desarrollo (revisar código generado, pruebas, seguridad), porque la oferta lo menciona explícitamente.
 
-**Pista transversal 🗣️ English Track:** `micro` quests diarias (vocabulario técnico, una frase hablada de 20–30 s para grabar y pegar su transcripción, shadowing de un video corto). Alimenta la skill `english`.
+**Pista transversal 🗣️ English Track:** `micro` quests diarias (vocabulario técnico, una frase hablada de 20–30 s para grabar y pegar su transcripción, shadowing de un video corto). Alimenta la skill `english`. Implementación: es una zona más (`english-track`, desbloqueada desde el inicio) con 5 niveles de 6 micro-quests que se desbloquean en cadena. Para las micro de hablar se usa el dictado de Windows (Win + H) como transcriptor, porque el usuario estudia siempre desde la PC.
 
 ## 8. Modelo de datos (Postgres)
 
@@ -335,7 +335,7 @@ Comando `npm run content:new -- --zone <slug> --level <n>` (o una página de adm
 - **Fuentes (Google Fonts):** Rajdhani para títulos, Inter para lecciones y contenido (legible en español), JetBrains Mono para comandos, código y quizzes.
 - **v1 (Fases 1–4):** solo el tema, la paleta, las fuentes y los estados de los nodos. Transiciones básicas de CSS como máximo. El estilo visual no debe frenar las Fases 1–4: si una decisión de diseño toma más de unos minutos, elige lo simple y sigue.
 - **Fase 6 (después):** animaciones de glitch corto al ganar XP, línea de escaneo, texto "decrypt" al subir de rango, y la mecánica de zonas bloqueadas como "datos cifrados" que se descifran con el progreso. Sin sonidos por defecto; opción para activarlos.
-- Diseño responsive, mobile-first para Dashboard, Daily Quest, glosario y quizzes (son las pantallas que se usan desde el celular vía Tailscale).
+- Diseño responsive. Actualización (2026-11-05): el usuario usará la app siempre desde la PC, así que la prioridad es el escritorio; el acceso por Tailscale queda como opción documentada, no como requisito.
 
 ## 13. Fases de implementación
 
@@ -345,7 +345,7 @@ Comando `npm run content:new -- --zone <slug> --level <n>` (o una página de adm
 
 **Fase 3 — Quests de aprendizaje:** `learn` con recursos y notas, `glossary` con SRS, `quiz` autocalificado con historial, `micro`, XP, rangos, racha (con la regla de congelación de la sección 5), insignias, Dashboard con Cobertura + Readiness real, Daily Quest mobile-first.
 
-**Fase 4 — Contenido real:** zonas 1, 2 y 3 completas (sección 7), glosarios y quizzes; English Track completo; Zona 10 nivel 1 completo; resto de zonas 4–10 como esqueleto. README con la guía de Tailscale (`tailscale serve`, MagicDNS y HTTPS).
+**Fase 4 — Contenido real:** zonas 1, 2 y 3 completas (sección 7), glosarios y quizzes; English Track completo; Zona 10 nivel 1 completo; resto de zonas 4–10 como esqueleto. README con la guía de Tailscale (`tailscale serve`, MagicDNS y HTTPS). Incluye la vista básica de `lab` (pasos, comandos copiables, checklist y evidencia self-attest), porque los niveles 2–4 la necesitan; la revisión de evidencia por Claude sigue en la Fase 5.
 
 **Fase 5 — Claude y entrevistas:** Modo A (prompts copiar/pegar) y Modo B (API), `open_answer`, `lab` con evidencia, `boss`, Interview Arena, historial y gráficos de progreso.
 

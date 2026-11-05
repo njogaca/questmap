@@ -1,0 +1,283 @@
+zone: event-harbor
+terms:
+  # ---------------------------------------------------------------- Nivel 1
+  - slug: eda-async-messaging
+    term: asynchronous messaging
+    category: basics
+    definition_es: "Comunicación en la que el emisor envía un mensaje y sigue trabajando sin esperar la respuesta; un intermediario (broker) lo guarda hasta que el receptor lo procesa."
+    definition_en: "Communication where the sender doesn't wait; a broker stores the message until it is processed."
+    example_en: "The checkout publishes an event and returns immediately."
+    analogy: "Dejar un mensaje de voz en lugar de llamar y esperar a que contesten."
+    see_also: [eda-topic]
+
+  - slug: eda-topic
+    term: topic
+    category: basics
+    definition_es: "Canal con nombre donde los publishers envían mensajes. Por sí solo no guarda nada para nadie: entrega una copia a cada subscription."
+    definition_en: "A named channel where publishers send messages."
+    example_en: "All order events go to the orders topic."
+    analogy: "Una emisora de radio: transmite, y cada oyente sintonizado recibe la señal."
+    analogy_mq: "Como un topic de publish/subscribe en MQ, no como una queue local."
+    see_also: [eda-subscription, eda-fan-out]
+
+  - slug: eda-subscription
+    term: subscription
+    category: basics
+    definition_es: "Representa a un consumidor interesado en un topic. Guarda su propia copia de cada mensaje hasta que se confirma (ack)."
+    definition_en: "A named consumer view of a topic that retains messages until acknowledged."
+    example_en: "Billing and shipping each have their own subscription."
+    analogy: "Tu buzón personal en un edificio: el cartero deja una copia de la circular en cada buzón."
+    analogy_mq: "Lo más parecido a una queue: es donde los mensajes esperan a ser consumidos."
+    see_also: [eda-topic, eda-ack]
+
+  - slug: eda-publisher
+    term: publisher
+    category: basics
+    definition_es: "Aplicación que envía (publica) mensajes a un topic, sin saber quién los va a leer."
+    definition_en: "An application that sends messages to a topic."
+    example_en: "The order service is the publisher of OrderPlaced."
+    analogy: "Un periódico: imprime la edición sin conocer a cada lector."
+    see_also: [eda-subscriber]
+
+  - slug: eda-subscriber
+    term: subscriber
+    category: basics
+    definition_es: "Aplicación que recibe y procesa mensajes de una subscription."
+    definition_en: "An application that receives messages from a subscription."
+    example_en: "The shipping subscriber creates a shipment for each paid order."
+    analogy: "El lector del periódico: decide qué hace con cada noticia."
+    see_also: [eda-publisher]
+
+  - slug: eda-point-to-point
+    term: point-to-point (competing consumers)
+    category: patterns
+    definition_es: "Cada mensaje lo procesa UN solo consumidor de un grupo. En Pub/Sub: varios workers conectados a la misma subscription."
+    definition_en: "Each message is processed by only one consumer from a group."
+    example_en: "Three workers share one subscription to process payments faster."
+    analogy: "Las cajas de un supermercado con una sola fila: cada cliente pasa por una caja, no por todas."
+    analogy_mq: "Como varias instancias haciendo MQGET de la misma queue local."
+    see_also: [eda-fan-out]
+
+  - slug: eda-fan-out
+    term: fan-out
+    category: patterns
+    definition_es: "Un mensaje llega a varios consumidores distintos. En Pub/Sub: un topic con varias subscriptions."
+    definition_en: "One message is delivered to many different consumers."
+    example_en: "OrderPlaced fans out to billing, shipping and analytics."
+    analogy: "Un chat grupal: un mensaje, todos lo reciben."
+    see_also: [eda-point-to-point, eda-topic]
+
+  - slug: eda-event-vs-command
+    term: event vs. command
+    category: patterns
+    definition_es: "Un evento informa algo que ya ocurrió (OrderPlaced) y cualquiera puede reaccionar. Un comando pide a alguien concreto que haga algo (ChargeCard)."
+    definition_en: "An event states a fact that happened; a command asks a specific service to do something."
+    example_en: "Name events in the past tense, like PaymentFailed."
+    analogy: "'Llegó un paquete' (evento) vs. 'Recoge el paquete' (comando)."
+    see_also: [eda-async-messaging]
+
+  - slug: eda-message-attributes
+    term: message attributes
+    category: basics
+    definition_es: "Metadatos clave-valor que viajan junto al cuerpo del mensaje (tipo de evento, versión) y se leen sin deserializar el contenido."
+    definition_en: "Key-value metadata sent alongside the message body."
+    example_en: "We set eventType and version as attributes."
+    analogy: "Las etiquetas de un paquete: 'frágil', 'urgente', sin abrir la caja."
+    analogy_mq: "Equivalente a las message properties / MQMD."
+    see_also: [eda-schema-evolution]
+
+  # ---------------------------------------------------------------- Nivel 2
+  - slug: eda-ack
+    term: ack (acknowledgement)
+    category: delivery
+    definition_es: "Confirmación de que el mensaje se procesó; Pub/Sub lo saca del backlog de esa subscription y ya no lo reenvía."
+    definition_en: "A confirmation that a message was processed so it is not redelivered."
+    example_en: "Only ack after the payment is saved."
+    analogy: "Firmar el recibo de un paquete: hasta que firmas, el repartidor vuelve a intentarlo."
+    analogy_mq: "Como el commit de un MQGET bajo syncpoint."
+    see_also: [eda-ack-deadline]
+
+  - slug: eda-ack-deadline
+    term: ack deadline
+    category: delivery
+    definition_es: "Tiempo que tiene el suscriptor para confirmar un mensaje. Si vence sin ack, Pub/Sub lo vuelve a entregar."
+    definition_en: "How long a subscriber has to ack before the message is redelivered."
+    example_en: "The client library extends the ack deadline while the message is still being processed."
+    analogy: "El tiempo de una reserva en un restaurante: si no llegas a tiempo, le dan la mesa a otro."
+    see_also: [eda-ack, eda-at-least-once]
+
+  - slug: eda-pull
+    term: pull subscription
+    category: delivery
+    definition_es: "El consumidor pide mensajes cuando está listo (o mantiene un stream abierto). Controla su propio ritmo."
+    definition_en: "The subscriber requests messages from Pub/Sub."
+    example_en: "Batch jobs usually use pull subscriptions."
+    analogy: "Ir a recoger tu pedido al mostrador cuando tienes tiempo."
+    see_also: [eda-push]
+
+  - slug: eda-push
+    term: push subscription
+    category: delivery
+    definition_es: "Pub/Sub envía cada mensaje con un HTTP POST a un endpoint; una respuesta exitosa cuenta como ack."
+    definition_en: "Pub/Sub sends each message as an HTTP request to an endpoint."
+    example_en: "A Cloud Run service receives events through a push subscription."
+    analogy: "Delivery a domicilio: te lo llevan y tienes que abrir la puerta."
+    see_also: [eda-pull]
+
+  - slug: eda-emulator
+    term: Pub/Sub emulator
+    category: tooling
+    definition_es: "Versión local y gratuita de Pub/Sub para desarrollar y probar. Las librerías se conectan con `PUBSUB_EMULATOR_HOST`."
+    definition_en: "A free local version of Pub/Sub for development and tests."
+    example_en: "Our integration tests run against the emulator in Docker."
+    analogy: "Un simulador de vuelo: practicas sin gastar combustible ni arriesgar el avión."
+    see_also: [eda-topic]
+
+  - slug: eda-backlog
+    term: backlog
+    category: delivery
+    definition_es: "Mensajes publicados que todavía no tienen ack en una subscription: el trabajo pendiente."
+    definition_en: "Messages in a subscription that have not been acknowledged yet."
+    example_en: "The backlog grew to 2 million messages during the outage."
+    analogy: "La pila de correos sin leer en tu bandeja."
+    analogy_mq: "Como la profundidad de una cola (queue depth)."
+    see_also: [eda-consumer-lag]
+
+  # ---------------------------------------------------------------- Nivel 3
+  - slug: eda-at-least-once
+    term: at-least-once delivery
+    category: reliability
+    definition_es: "Garantía de que cada mensaje se entrega una o más veces: no se pierde, pero puede duplicarse."
+    definition_en: "Every message is delivered one or more times; duplicates can happen."
+    example_en: "With at-least-once delivery, the consumer must handle duplicates."
+    analogy: "Un mensajero que, si no está seguro de haberte entregado la carta, vuelve a dejar otra copia."
+    see_also: [eda-exactly-once, eda-idempotency]
+
+  - slug: eda-exactly-once
+    term: exactly-once delivery
+    category: reliability
+    definition_es: "Opción de Pub/Sub que evita reentregas de un mensaje ya confirmado, con límites (solo pull, misma región). No elimina duplicados del publisher ni fallos de tu propio procesamiento."
+    definition_en: "A Pub/Sub option that avoids redelivery after a successful ack, with limits."
+    example_en: "Exactly-once delivery reduces duplicates, but we still keep the consumer idempotent."
+    analogy: "Una cerradura extra en la puerta: ayuda mucho, pero no reemplaza tener cuidado con quién tiene llave."
+    see_also: [eda-at-least-once, eda-idempotency]
+
+  - slug: eda-idempotency
+    term: idempotency
+    category: reliability
+    definition_es: "Propiedad de una operación que, repetida N veces, deja el mismo resultado que hacerla una vez."
+    definition_en: "An operation is idempotent if repeating it has the same effect as doing it once."
+    example_en: "The payment consumer is idempotent, so a duplicate message doesn't charge twice."
+    analogy: "El botón del ascensor: presionarlo cinco veces no trae cinco ascensores."
+    see_also: [eda-idempotency-key]
+
+  - slug: eda-idempotency-key
+    term: idempotency key
+    category: reliability
+    definition_es: "Identificador estable de la intención de negocio (paymentId) que se guarda para detectar y descartar repeticiones."
+    definition_en: "A stable business identifier used to detect repeated requests."
+    example_en: "We store the paymentId in the same transaction as the charge."
+    analogy: "El número de folio de un trámite: si lo presentas dos veces, la oficina ve que ya existe."
+    see_also: [eda-idempotency]
+
+  - slug: eda-dead-letter-topic
+    term: dead-letter topic (DLT / DLQ)
+    category: reliability
+    definition_es: "Topic donde Pub/Sub reenvía los mensajes que fallaron más veces que el máximo de intentos, para revisarlos sin bloquear el resto."
+    definition_en: "A topic that receives messages that failed too many delivery attempts."
+    example_en: "After five failed attempts, the message goes to the dead-letter topic."
+    analogy: "La oficina de correo no entregado: allí van las cartas con dirección imposible."
+    analogy_mq: "Como la backout queue (BOTHRESH/BOQNAME)."
+    see_also: [eda-poison-message]
+
+  - slug: eda-poison-message
+    term: poison message
+    category: reliability
+    definition_es: "Mensaje que siempre hace fallar al consumidor (formato inválido, dato imposible). Reintentarlo nunca lo arregla."
+    definition_en: "A message that always makes the consumer fail."
+    example_en: "A poison message with a negative amount blocked the queue for hours."
+    analogy: "Una moneda falsa en una máquina expendedora: la rechaza una y otra vez."
+    see_also: [eda-dead-letter-topic]
+
+  - slug: eda-retry-backoff
+    term: retry with exponential backoff
+    category: reliability
+    definition_es: "Reintentar esperando cada vez más (1 s, 2 s, 4 s…, con algo de azar o jitter) para no saturar a un servicio que está fallando."
+    definition_en: "Retrying with increasing delays to avoid overloading a failing service."
+    example_en: "The client retries with exponential backoff and jitter."
+    analogy: "Si alguien no contesta el teléfono, no marcas 50 veces seguidas: esperas un rato cada vez más largo."
+    see_also: [eda-dead-letter-topic]
+
+  - slug: eda-ordering-key
+    term: ordering key
+    category: reliability
+    definition_es: "Clave que hace que Pub/Sub entregue en orden los mensajes con la misma clave (en la misma región). Las demás claves siguen en paralelo."
+    definition_en: "A key that guarantees in-order delivery for messages with the same key."
+    example_en: "We use the orderId as the ordering key."
+    analogy: "Las filas por destino en un aeropuerto: dentro de cada fila hay orden; las filas avanzan en paralelo."
+    see_also: [eda-at-least-once]
+
+  # ---------------------------------------------------------------- Nivel 4
+  - slug: eda-schema-evolution
+    term: schema evolution
+    category: contracts
+    definition_es: "Cambiar el formato de un evento con el tiempo sin romper a productores ni consumidores existentes."
+    definition_en: "Changing an event format over time without breaking existing clients."
+    example_en: "Adding an optional field is a safe schema evolution."
+    analogy: "Agregar un campo opcional a un formulario: quien llena el viejo sigue pudiendo enviarlo."
+    see_also: [eda-backward-compatibility]
+
+  - slug: eda-backward-compatibility
+    term: backward compatibility
+    category: contracts
+    definition_es: "Un cambio es compatible hacia atrás si lo que ya existe sigue funcionando con él (por ejemplo, consumidores viejos con eventos nuevos)."
+    definition_en: "A change that keeps existing clients working."
+    example_en: "Renaming a field is not backward compatible."
+    analogy: "Un control remoto nuevo que sigue funcionando con la tele vieja."
+    see_also: [eda-schema-evolution]
+
+  - slug: eda-backpressure
+    term: backpressure
+    category: flow
+    definition_es: "Mecanismo para que el componente lento limite cuánto trabajo recibe, en lugar de acumularlo hasta reventar."
+    definition_en: "A way for a slow component to limit how much work it receives."
+    example_en: "Without backpressure, the subscriber ran out of memory."
+    analogy: "Una manguera con llave: regulas el agua según lo que puede tragar el desagüe."
+    see_also: [eda-flow-control]
+
+  - slug: eda-flow-control
+    term: flow control
+    category: flow
+    definition_es: "Configuración del cliente de Pub/Sub que limita mensajes o bytes 'en vuelo' (sin ack) en un subscriber, o en espera en un publisher."
+    definition_en: "Client settings that limit outstanding messages or bytes."
+    example_en: "We set max outstanding messages to 100 per instance."
+    analogy: "El aforo de un local: no entra nadie más hasta que alguien sale."
+    see_also: [eda-backpressure]
+
+  - slug: eda-consumer-lag
+    term: consumer lag
+    category: flow
+    definition_es: "Qué tan atrasados van los consumidores respecto a lo publicado; en Pub/Sub se mide con el backlog y la edad del mensaje más viejo sin ack."
+    definition_en: "How far behind consumers are compared to what was published."
+    example_en: "We alert when the oldest unacked message is older than five minutes."
+    analogy: "Lo atrasado que vas con una serie respecto a los capítulos ya estrenados."
+    see_also: [eda-backlog]
+
+  # ---------------------------------------------------------------- Extra (boss)
+  - slug: eda-outbox
+    term: transactional outbox
+    category: patterns
+    definition_es: "Patrón que guarda el cambio de negocio y el evento a publicar en la MISMA transacción (tabla outbox); otro proceso publica después lo pendiente. Evita el 'dual write'."
+    definition_en: "Saving the state change and the event in one transaction, and publishing later."
+    example_en: "The outbox guarantees that every saved order eventually emits OrderPlaced."
+    analogy: "Dejar la carta en la bandeja de salida de la oficina: aunque te vayas, el mensajero pasa y la envía."
+    see_also: [eda-idempotency]
+
+  - slug: eda-eventual-consistency
+    term: eventual consistency
+    category: patterns
+    definition_es: "Los distintos servicios no ven el mismo estado al instante, pero convergen al correcto después de un tiempo."
+    definition_en: "Systems converge to the same state after some time, not immediately."
+    example_en: "The order shows 'payment pending' until the payment event arrives."
+    analogy: "Una noticia que se difunde por un pueblo: tarde o temprano todos la saben, no todos al mismo segundo."
+    see_also: [eda-outbox]

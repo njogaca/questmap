@@ -216,6 +216,7 @@ async function main() {
             definitionEs: t.definition_es,
             definitionEn: t.definition_en,
             exampleEn: t.example_en ?? null,
+            analogy: t.analogy ?? null,
             analogyMq: t.analogy_mq ?? null,
             seeAlso: t.see_also,
             status: "published" as const,

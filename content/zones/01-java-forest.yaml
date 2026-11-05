@@ -1,4 +1,3 @@
-# Zona de PRUEBA (Fase 1). El contenido completo de la Zona 1 llega en la Fase 4.
 slug: java-forest
 title: Java Forest
 order: 1
@@ -9,89 +8,821 @@ prerequisites: []
 skills: [java, git, testing]
 story: >
   Sector 01. Un bosque de datos donde cada árbol es una clase y cada hoja un objeto.
-  Para infiltrarte en el reino necesitas hablar su lenguaje: Java.
+  Para infiltrarte en el reino necesitas hablar su lenguaje: Java. Al final del bosque
+  te espera un guardián que solo deja pasar a quien construye un servicio REST con pruebas.
+
 levels:
+  # ================================================================ NIVEL 1
   - slug: java-1-novice
     number: 1
-    title: Novice — Java y OOP
-    story: "Entras al bosque. Los árboles son clases y los frutos, objetos. Primero aprende sus nombres."
+    title: Novice — Java y programación orientada a objetos
+    story: "Entras al bosque. Los árboles son clases y los frutos, objetos. Primero aprende sus nombres y prepara tu equipo."
     quests:
-      - slug: java-1-learn-oop
+      - slug: java-1-learn-basics
         type: learn
-        title: Conceptos de OOP en Java
+        title: Sintaxis básica de Java
         required: true
-        estimated_min: 45
+        estimated_min: 60
         skills: { java: 1.0 }
         resources:
           - { ref: res-java-mooc-part1 }
-          - { ref: res-devjava-learn, required: false }
         payload:
-          note_prompt: "Explica con tus palabras (2–3 líneas) qué es una clase y qué es un objeto."
+          note_prompt: "Con tus palabras: ¿qué diferencias ves entre Java y los lenguajes que ya usas (ESQL, scripts, etc.)? Menciona tipos de datos y cómo se declara una variable."
+
+      - slug: java-1-learn-oop
+        type: learn
+        title: Clases, objetos, herencia e interfaces
+        required: true
+        estimated_min: 60
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-java-mooc-part4 }
+          - { ref: res-java-mooc-part9 }
+          - { ref: res-devjava-oop, required: false }
+        payload:
+          note_prompt: "Explica (2–3 líneas) la diferencia entre una clase abstracta y una interfaz, y cuándo usarías cada una."
 
       - slug: java-1-glossary
         type: glossary
-        title: Vocabulario básico de Java
+        title: Vocabulario de OOP
         required: true
-        estimated_min: 10
+        estimated_min: 15
         skills: { java: 1.0 }
         payload:
-          glossary_file: java
-          terms: [java-class, java-object, java-interface]
+          terms: [java-class, java-object, java-constructor, java-interface, java-inheritance, java-encapsulation, java-polymorphism, java-access-modifier]
+
+      - slug: java-1-lab-setup
+        type: lab
+        title: "Lab: instala el JDK y ejecuta tu primera clase"
+        required: true
+        estimated_min: 30
+        skills: { java: 0.8, git: 0.2 }
+        payload:
+          goal: "Tener Java 21 funcionando en tu PC y ejecutar un programa con una clase, una interfaz y herencia."
+          steps:
+            - title: Instala el JDK 21 (Temurin)
+              body: "Abre PowerShell. Si `winget` no encuentra el paquete, descárgalo desde adoptium.net. Cierra y abre PowerShell después de instalar."
+              commands:
+                - "winget install --id EclipseAdoptium.Temurin.21.JDK -e"
+                - "java -version"
+            - title: Crea una carpeta de práctica con Git
+              commands:
+                - "mkdir $HOME\\questmap-labs\\java-forest; cd $HOME\\questmap-labs\\java-forest; git init"
+            - title: Escribe Zoo.java
+              body: |
+                Crea el archivo `Zoo.java` con este contenido (puedes usar VS Code: `code Zoo.java`):
+
+                ```java
+                import java.util.List;
+
+                interface Speaker { String speak(); }
+
+                abstract class Animal implements Speaker {
+                    protected final String name;
+                    Animal(String name) { this.name = name; }
+                }
+
+                class Dog extends Animal {
+                    Dog(String name) { super(name); }
+                    public String speak() { return name + " says woof"; }
+                }
+
+                class Cat extends Animal {
+                    Cat(String name) { super(name); }
+                    public String speak() { return name + " says meow"; }
+                }
+
+                public class Zoo {
+                    public static void main(String[] args) {
+                        List<Speaker> animals = List.of(new Dog("Rex"), new Cat("Mia"));
+                        for (Speaker s : animals) System.out.println(s.speak());
+                    }
+                }
+                ```
+            - title: Ejecútalo sin compilar a mano
+              body: "Desde Java 11 puedes ejecutar un archivo .java directamente."
+              commands:
+                - "java Zoo.java"
+            - title: Haz commit
+              commands:
+                - "git add Zoo.java; git commit -m \"java-forest: primer programa OOP\""
+          expected: "Rex says woof\nMia says meow"
+          checklist:
+            - "`java -version` muestra la versión 21"
+            - "`java Zoo.java` imprime las dos líneas esperadas"
+            - "Agregué un tercer animal (por ejemplo `Cow`) y funcionó sin tocar el bucle (eso es polimorfismo)"
+            - "Hice commit en mi carpeta de labs"
+          hints:
+            - "Si `java` no se reconoce, cierra y vuelve a abrir PowerShell para que tome el nuevo PATH."
+            - "Para el tercer animal, copia la clase `Cat`, cambia el nombre y el sonido, y agrégalo a `List.of(...)`."
+          evidence_hint: "Pega la salida de `java -version` y de `java Zoo.java` (con tu tercer animal)."
 
       - slug: java-1-quiz
         type: quiz
-        title: Quiz — OOP básico
+        title: Quiz — Java y OOP básico
         required: true
         estimated_min: 15
         skills: { java: 1.0 }
         questions:
-          - type: mcq
+          - slug: j1-q1
+            type: mcq
             prompt: "¿Qué es un objeto en Java?"
-            options:
-              - "Una instancia concreta de una clase"
-              - "Un archivo .java"
-              - "Un tipo primitivo como int"
-              - "Un paquete de clases"
+            options: ["Una instancia concreta de una clase", "Un archivo .java", "Un tipo primitivo como int", "Un paquete de clases"]
             answer: 0
-            explanation: "La clase es el molde; el objeto es una instancia creada con `new` a partir de ese molde."
+            explanation: "La clase es el molde; el objeto es una instancia creada con `new` a partir de ese molde, con sus propios valores."
             skill: java
             difficulty: 1
             hint: "Piensa en molde vs. pieza."
-          - type: tf
+          - slug: j1-q2
+            type: tf
             prompt: "En Java una clase puede implementar varias interfaces."
             answer: true
-            explanation: "Java no permite herencia múltiple de clases, pero sí implementar varias interfaces."
+            explanation: "Java no permite heredar de varias clases (`extends` solo una), pero sí implementar varias interfaces con `implements A, B`."
             skill: java
             difficulty: 1
             hint: "La restricción es con `extends`, no con `implements`."
+          - slug: j1-q3
+            type: mcq
+            prompt: "¿Cuál de estos es un tipo primitivo en Java?"
+            options: ["String", "Integer", "int", "List"]
+            answer: 2
+            explanation: "`int` es primitivo (guarda el valor directamente). `Integer` es su clase envoltorio (wrapper) y `String`/`List` son tipos referencia."
+            skill: java
+            difficulty: 1
+            hint: "Los primitivos empiezan con minúscula."
+          - slug: j1-q4
+            type: mcq
+            prompt: "¿Qué hace la palabra clave `private` en un campo?"
+            options: ["Lo hace constante", "Solo se puede acceder desde dentro de la misma clase", "Lo comparte entre todas las instancias", "Lo hace visible para el mismo paquete"]
+            answer: 1
+            explanation: "`private` es la base de la encapsulación: nadie fuera de la clase puede leer ni cambiar ese campo directamente. Constante es `final`; compartido es `static`."
+            skill: java
+            difficulty: 1
+            hint: "Encapsulación."
+          - slug: j1-q5
+            type: fill
+            prompt: "Para que la clase `Dog` herede de `Animal` escribes: `class Dog ______ Animal`."
+            answer: ["extends"]
+            explanation: "`extends` se usa para heredar de una clase; `implements` para implementar interfaces."
+            skill: java
+            difficulty: 1
+          - slug: j1-q6
+            type: mcq
+            prompt: "Tienes `List<Speaker> animals` con un Dog y un Cat. Llamas `s.speak()` para cada uno y cada objeto responde distinto. ¿Cómo se llama esto?"
+            options: ["Encapsulación", "Sobrecarga (overloading)", "Polimorfismo", "Composición"]
+            answer: 2
+            explanation: "Polimorfismo: el mismo mensaje (`speak()`) produce comportamientos diferentes según el tipo real del objeto. La sobrecarga es tener varios métodos con el mismo nombre y distintos parámetros."
+            skill: java
+            difficulty: 2
+          - slug: j1-q7
+            type: tf
+            prompt: "Una clase abstracta se puede instanciar directamente con `new`."
+            answer: false
+            explanation: "No: una clase abstracta existe para ser heredada. Puedes crear objetos de sus subclases concretas, pero no de ella."
+            skill: java
+            difficulty: 2
+          - slug: j1-q8
+            type: order
+            prompt: "Ordena lo que pasa cuando ejecutas `new Dog(\"Rex\")` donde `Dog extends Animal`:"
+            options:
+              - "Se reserva memoria para el objeto"
+              - "Se ejecuta el constructor de Animal (vía super)"
+              - "Se ejecuta el resto del constructor de Dog"
+              - "Se devuelve la referencia al nuevo objeto"
+            answer: [0, 1, 2, 3]
+            explanation: "Java reserva memoria, luego el constructor de la subclase llama primero a `super(...)` (constructor del padre), después termina el suyo y finalmente `new` devuelve la referencia."
+            skill: java
+            difficulty: 2
+            hint: "El padre se construye antes que el hijo."
 
       - slug: java-1-micro-flashcards
         type: micro
-        title: Repaso rápido de flashcards
+        title: Repaso rápido de flashcards de OOP
         required: false
         estimated_min: 10
         skills: { java: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [java-class, java-object, java-interface, java-inheritance, java-polymorphism]
 
+  # ================================================================ NIVEL 2
   - slug: java-2-apprentice
     number: 2
     title: Apprentice — Colecciones, streams y Java moderno
-    status: outline
-    quests: []
+    story: "El bosque se vuelve espeso: miles de hojas que ordenar, filtrar y contar. Aprende a manejarlas en grupo."
+    quests:
+      - slug: java-2-learn-collections
+        type: learn
+        title: Colecciones y generics
+        required: true
+        estimated_min: 60
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-devjava-collections-streams }
+          - { ref: res-devjava-fp, required: false }
+        payload:
+          note_prompt: "¿Cuándo usarías una List, un Set y un Map? Da un ejemplo de cada uno con datos de órdenes de compra."
 
+      - slug: java-2-learn-streams
+        type: learn
+        title: Streams, lambdas, Optional y records
+        required: true
+        estimated_min: 60
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-java-mooc-part10 }
+          - { ref: res-baeldung-optional, required: false }
+        payload:
+          note_prompt: "Explica qué hace este código con tus palabras: orders.stream().filter(o -> o.total() > 100).map(Order::customer).distinct().toList()"
+
+      - slug: java-2-glossary
+        type: glossary
+        title: Vocabulario de colecciones y Java moderno
+        required: true
+        estimated_min: 15
+        skills: { java: 1.0 }
+        payload:
+          terms: [java-generics, java-list, java-map, java-set, java-lambda, java-stream, java-optional, java-record]
+
+      - slug: java-2-lab-streams
+        type: lab
+        title: "Lab: estadísticas de órdenes con records y streams"
+        required: true
+        estimated_min: 45
+        skills: { java: 0.9, git: 0.1 }
+        payload:
+          goal: "Procesar una lista de órdenes con records y streams, sin bucles `for`."
+          steps:
+            - title: Crea OrderStats.java en tu carpeta de labs
+              body: |
+                ```java
+                import java.util.*;
+                import java.util.stream.*;
+
+                public class OrderStats {
+                    record Order(String id, String customer, String status, double total) {}
+
+                    public static void main(String[] args) {
+                        List<Order> orders = List.of(
+                            new Order("o1", "ana", "PAID", 120.0),
+                            new Order("o2", "luis", "PENDING", 35.5),
+                            new Order("o3", "ana", "PAID", 80.0),
+                            new Order("o4", "marta", "CANCELLED", 200.0),
+                            new Order("o5", "luis", "PAID", 15.0));
+
+                        // 1) Total pagado
+                        double paid = orders.stream()
+                            .filter(o -> o.status().equals("PAID"))
+                            .mapToDouble(Order::total)
+                            .sum();
+                        System.out.println("Total PAID: " + paid);
+
+                        // 2) TODO: cantidad de órdenes por status  -> Map<String, Long>
+                        // 3) TODO: clientes únicos ordenados alfabéticamente -> List<String>
+                        // 4) TODO: la orden más cara que NO esté cancelada -> Optional<Order>
+                    }
+                }
+                ```
+            - title: Completa los TODO
+              body: "Usa `Collectors.groupingBy(Order::status, Collectors.counting())`, `.map(...).distinct().sorted().toList()` y `.max(Comparator.comparingDouble(Order::total))`."
+            - title: Ejecuta y haz commit
+              commands:
+                - "java OrderStats.java"
+                - "git add OrderStats.java; git commit -m \"java-forest: streams lab\""
+          expected: "Total PAID: 215.0\nUn mapa con PAID=3, PENDING=1, CANCELLED=1 (el orden puede variar)\n[ana, luis, marta]\nLa orden o1 (120.0) como la más cara no cancelada"
+          checklist:
+            - "Los 4 resultados salen correctos"
+            - "No usé ningún bucle `for` ni `while`"
+            - "Usé un `Optional` y lo imprimí con `ifPresent` u `orElse`"
+            - "Hice commit"
+          hints:
+            - "Para el punto 2: `Map<String, Long> byStatus = orders.stream().collect(Collectors.groupingBy(Order::status, Collectors.counting()));`"
+            - "Para el punto 4: filtra primero `!o.status().equals(\"CANCELLED\")` y luego `.max(...)`."
+          evidence_hint: "Pega la salida completa de `java OrderStats.java`."
+
+      - slug: java-2-quiz
+        type: quiz
+        title: Quiz — Colecciones y streams
+        required: true
+        estimated_min: 15
+        skills: { java: 1.0 }
+        questions:
+          - slug: j2-q1
+            type: mcq
+            prompt: "Necesitas guardar correos de clientes SIN duplicados. ¿Qué colección usas?"
+            options: ["ArrayList", "HashSet", "LinkedList", "Array"]
+            answer: 1
+            explanation: "Un `Set` no admite elementos repetidos. `HashSet` es la implementación más común (no garantiza orden)."
+            skill: java
+            difficulty: 1
+          - slug: j2-q2
+            type: mcq
+            prompt: "¿Qué devuelve `Map.get(key)` si la clave no existe?"
+            options: ["Lanza una excepción", "null", "Un Optional vacío", "0"]
+            answer: 1
+            explanation: "`get` devuelve `null`. Si quieres un valor por defecto usa `getOrDefault(key, valor)`."
+            skill: java
+            difficulty: 1
+          - slug: j2-q3
+            type: tf
+            prompt: "Una operación intermedia de un stream (como `filter` o `map`) no se ejecuta hasta que se llama una operación terminal (como `toList` o `count`)."
+            answer: true
+            explanation: "Los streams son perezosos (lazy): las operaciones intermedias solo describen el trabajo; la terminal lo dispara."
+            skill: java
+            difficulty: 2
+          - slug: j2-q4
+            type: mcq
+            prompt: "¿Qué es un `record` en Java (16+)?"
+            options: ["Un tipo de colección", "Una clase inmutable concisa para transportar datos", "Un log de eventos", "Una interfaz funcional"]
+            answer: 1
+            explanation: "`record Order(String id, double total)` genera constructor, getters (`id()`), `equals`, `hashCode` y `toString`. Sus campos son `final`."
+            skill: java
+            difficulty: 1
+          - slug: j2-q5
+            type: mcq
+            prompt: "¿Cuál es el uso correcto de `Optional`?"
+            options:
+              - "Como tipo de campo en todas las entidades"
+              - "Como tipo de retorno cuando un resultado puede no existir"
+              - "Para reemplazar todas las excepciones"
+              - "Como parámetro de todos los métodos"
+            answer: 1
+            explanation: "`Optional` comunica 'puede que no haya valor' en el retorno de un método (ej. `findById`). Usarlo en campos o parámetros suele considerarse mala práctica."
+            skill: java
+            difficulty: 2
+          - slug: j2-q6
+            type: fill
+            prompt: "Completa: `List<String> names = customers.stream().map(Customer::name).______();` (para obtener una lista, Java 16+)"
+            answer: ["toList"]
+            explanation: "`toList()` es la operación terminal más corta para obtener una lista inmutable. Antes se usaba `collect(Collectors.toList())`."
+            skill: java
+            difficulty: 1
+          - slug: j2-q7
+            type: mcq
+            prompt: "¿Qué ventaja da usar generics (`List<Order>` en vez de `List`)?"
+            options: ["El programa corre más rápido", "El compilador detecta errores de tipo y evitas casts", "Usa menos memoria", "Permite herencia múltiple"]
+            answer: 1
+            explanation: "Con generics el compilador sabe que la lista solo contiene `Order`: detecta errores antes de ejecutar y no necesitas `(Order) list.get(0)`."
+            skill: java
+            difficulty: 1
+          - slug: j2-q8
+            type: order
+            prompt: "Ordena las operaciones para obtener los nombres únicos, en mayúsculas y ordenados, de clientes con órdenes > 100:"
+            options: ["filter(o -> o.total() > 100)", "map(o -> o.customer().toUpperCase())", "distinct()", "sorted()", "toList()"]
+            answer: [0, 1, 2, 3, 4]
+            explanation: "Primero filtras (reduce el trabajo), luego transformas, quitas duplicados, ordenas y al final la operación terminal."
+            skill: java
+            difficulty: 2
+            hint: "La operación terminal siempre va al final."
+
+  # ================================================================ NIVEL 3
   - slug: java-3-journeyman
     number: 3
     title: Journeyman — Excepciones, concurrencia y pruebas
-    status: outline
-    quests: []
+    story: "Algunas ramas se rompen y otras crecen en paralelo. Aprende a manejar fallos, a trabajar en varios hilos y a probar que todo sigue en pie."
+    quests:
+      - slug: java-3-learn-exceptions
+        type: learn
+        title: Excepciones y manejo de errores
+        required: true
+        estimated_min: 45
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-java-mooc-part11 }
+          - { ref: res-devjava-exceptions, required: false }
+        payload:
+          note_prompt: "Explica la diferencia entre checked y unchecked exceptions, y por qué try-with-resources es mejor que cerrar recursos a mano."
 
+      - slug: java-3-learn-concurrency
+        type: learn
+        title: Concurrencia básica — ExecutorService y CompletableFuture
+        required: true
+        estimated_min: 45
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-baeldung-completablefuture }
+        payload:
+          note_prompt: "Describe un caso real donde llamar a 3 servicios en paralelo con CompletableFuture sea mejor que llamarlos uno tras otro. ¿Qué pasa si uno falla?"
+
+      - slug: java-3-learn-testing
+        type: learn
+        title: Pruebas con JUnit y Mockito
+        required: true
+        estimated_min: 45
+        skills: { testing: 0.7, java: 0.3 }
+        resources:
+          - { ref: res-junit-guide }
+          - { ref: res-mockito }
+        payload:
+          note_prompt: "¿Qué es un mock y por qué lo usarías en una prueba unitaria de un servicio que llama a una base de datos?"
+
+      - slug: java-3-glossary
+        type: glossary
+        title: Vocabulario de errores, hilos y pruebas
+        required: true
+        estimated_min: 15
+        skills: { java: 0.6, testing: 0.4 }
+        payload:
+          terms: [java-checked-exception, java-try-with-resources, java-thread, java-executorservice, java-completablefuture, java-race-condition, java-unit-test, java-mock, java-assertion]
+
+      - slug: java-3-lab-tests
+        type: lab
+        title: "Lab: servicio con JUnit 5 + Mockito"
+        required: true
+        estimated_min: 75
+        skills: { testing: 0.6, java: 0.3, git: 0.1 }
+        payload:
+          goal: "Crear un proyecto Maven con Spring Initializr y probar un servicio de órdenes con JUnit y Mockito, sin base de datos real."
+          steps:
+            - title: Genera el proyecto
+              body: "Spring Initializr arma el proyecto por ti. `spring-boot-starter-test` ya incluye JUnit Jupiter y Mockito."
+              commands:
+                - "cd $HOME\\questmap-labs; Invoke-WebRequest \"https://start.spring.io/starter.zip?type=maven-project&language=java&javaVersion=21&groupId=com.questmap&artifactId=orders&name=orders&packageName=com.questmap.orders&dependencies=web,validation\" -OutFile orders.zip"
+                - "Expand-Archive orders.zip -DestinationPath orders; cd orders; git init"
+            - title: Crea el dominio y el servicio
+              body: "En `src/main/java/com/questmap/orders/` crea:\n\n- `Order.java`: `public record Order(String id, String customer, double total) {}`\n- `OrderRepository.java`: interfaz con `Optional<Order> findById(String id);` y `Order save(Order o);`\n- `OrderService.java`: recibe el repository por constructor y tiene:\n  - `Order create(String customer, double total)`: lanza `IllegalArgumentException` si total ≤ 0; si no, guarda una orden con id `UUID.randomUUID().toString()`.\n  - `Order get(String id)`: devuelve la orden o lanza `OrderNotFoundException` (crea esta clase extendiendo `RuntimeException`)."
+            - title: Escribe las pruebas
+              body: "En `src/test/java/com/questmap/orders/OrderServiceTest.java`, con `@ExtendWith(MockitoExtension.class)`, `@Mock OrderRepository repo` y `@InjectMocks OrderService service`, escribe 4 pruebas:\n1. `create` con total válido llama a `repo.save` una vez (`verify`).\n2. `create` con total 0 lanza `IllegalArgumentException` (`assertThrows`) y NUNCA llama a save (`verify(repo, never())`).\n3. `get` con id existente devuelve la orden (`when(repo.findById(...)).thenReturn(Optional.of(...))`).\n4. `get` con id inexistente lanza `OrderNotFoundException`."
+            - title: Corre las pruebas y haz commit
+              commands:
+                - ".\\mvnw.cmd test"
+                - "git add .; git commit -m \"orders: service + unit tests\""
+          expected: "Al final de la salida: Tests run: 5, Failures: 0, Errors: 0 (4 tuyas + la prueba contextLoads que trae el proyecto) y BUILD SUCCESS."
+          checklist:
+            - "Las 4 pruebas pasan con `.\\mvnw.cmd test`"
+            - "Ninguna prueba usa una base de datos real (solo mocks)"
+            - "Cada prueba sigue Arrange / Act / Assert y tiene un nombre que explica el caso"
+            - "Hice commit"
+          hints:
+            - "Para verificar que se guardó: `verify(repo).save(any(Order.class));` (importa `static org.mockito.ArgumentMatchers.any`)."
+            - "Para excepciones: `assertThrows(IllegalArgumentException.class, () -> service.create(\"ana\", 0));`"
+          evidence_hint: "Pega el resumen final de `.\\mvnw.cmd test` (las líneas de 'Tests run' y 'BUILD SUCCESS')."
+
+      - slug: java-3-quiz
+        type: quiz
+        title: Quiz — Excepciones, concurrencia y pruebas
+        required: true
+        estimated_min: 15
+        skills: { java: 0.6, testing: 0.4 }
+        questions:
+          - slug: j3-q1
+            type: mcq
+            prompt: "¿Cuál es una checked exception?"
+            options: ["NullPointerException", "IllegalArgumentException", "IOException", "ArithmeticException"]
+            answer: 2
+            explanation: "`IOException` es checked: el compilador te obliga a capturarla o declararla con `throws`. Las otras heredan de `RuntimeException` (unchecked)."
+            skill: java
+            difficulty: 1
+          - slug: j3-q2
+            type: tf
+            prompt: "Con try-with-resources, el recurso se cierra automáticamente aunque ocurra una excepción."
+            answer: true
+            explanation: "Cualquier objeto que implemente `AutoCloseable` declarado en `try (...)` se cierra al salir del bloque, haya error o no."
+            skill: java
+            difficulty: 1
+          - slug: j3-q3
+            type: mcq
+            prompt: "Dos hilos incrementan `count++` sobre la misma variable sin sincronización. ¿Qué puede pasar?"
+            options: ["Nada, `++` es atómico", "Se pierden incrementos (race condition)", "El programa no compila", "Se lanza siempre una excepción"]
+            answer: 1
+            explanation: "`count++` es leer + sumar + escribir. Si dos hilos se intercalan, ambos leen el mismo valor y se pierde un incremento. Solución: `AtomicInteger`, `synchronized` o evitar estado compartido."
+            skill: java
+            difficulty: 2
+          - slug: j3-q4
+            type: mcq
+            prompt: "¿Para qué sirve un `ExecutorService`?"
+            options: ["Para compilar en paralelo", "Para administrar un pool de hilos y enviarle tareas", "Para ejecutar SQL", "Para programar cron jobs en Linux"]
+            answer: 1
+            explanation: "En lugar de crear un `Thread` por tarea, el executor reutiliza un grupo fijo de hilos. Recuerda cerrarlo (`shutdown`)."
+            skill: java
+            difficulty: 1
+          - slug: j3-q5
+            type: mcq
+            prompt: "Con CompletableFuture, ¿qué método combina dos futuros independientes cuando ambos terminan?"
+            options: ["thenApply", "thenCompose", "thenCombine", "exceptionally"]
+            answer: 2
+            explanation: "`thenCombine` une dos resultados independientes. `thenApply` transforma un resultado; `thenCompose` encadena una operación que devuelve otro futuro; `exceptionally` maneja errores."
+            skill: java
+            difficulty: 3
+            hint: "'Combinar' dos cosas."
+          - slug: j3-q6
+            type: mcq
+            prompt: "En una prueba unitaria de `OrderService`, ¿por qué mockeas `OrderRepository`?"
+            options:
+              - "Porque Mockito es obligatorio en Spring"
+              - "Para aislar la lógica del servicio y no depender de una base de datos"
+              - "Para que las pruebas sean más lentas pero más reales"
+              - "Para probar el repositorio"
+            answer: 1
+            explanation: "Una prueba unitaria prueba UNA unidad. El mock reemplaza la dependencia con un doble controlado: rápido, determinista y sin infraestructura."
+            skill: testing
+            difficulty: 1
+          - slug: j3-q7
+            type: fill
+            prompt: "Para comprobar que se lanza una excepción en JUnit usas `assert______(IllegalArgumentException.class, () -> ...)`."
+            answer: ["Throws"]
+            explanation: "`assertThrows` ejecuta el lambda y falla si NO se lanza la excepción esperada. Además devuelve la excepción para que verifiques su mensaje."
+            skill: testing
+            difficulty: 1
+          - slug: j3-q8
+            type: order
+            prompt: "Ordena las fases de una prueba unitaria bien escrita:"
+            options: ["Arrange: preparar datos y mocks", "Act: ejecutar el método bajo prueba", "Assert: verificar el resultado y las interacciones"]
+            answer: [0, 1, 2]
+            explanation: "Arrange-Act-Assert (o Given-When-Then) hace que cada prueba se lea como una historia corta."
+            skill: testing
+            difficulty: 1
+
+  # ================================================================ NIVEL 4
   - slug: java-4-expert
     number: 4
     title: Expert — Spring Boot REST
-    status: outline
-    quests: []
+    story: "Llegas al claro donde los árboles se comunican por HTTP. Construye la torre de vigilancia: una API REST robusta."
+    quests:
+      - slug: java-4-learn-spring
+        type: learn
+        title: Spring Boot, inyección de dependencias y REST
+        required: true
+        estimated_min: 60
+        skills: { java: 0.8, microservices_gcp: 0.2 }
+        resources:
+          - { ref: res-spring-rest-guide }
+          - { ref: res-spring-boot-docs, required: false }
+        payload:
+          note_prompt: "Explica qué hace Spring cuando ve `@RestController` y `@Service`, y qué significa que el servicio se 'inyecta' por constructor."
 
+      - slug: java-4-learn-config-errors
+        type: learn
+        title: Configuración, profiles, validación, errores y logging
+        required: true
+        estimated_min: 45
+        skills: { java: 0.8, debugging_rca: 0.2 }
+        resources:
+          - { ref: res-spring-boot-docs }
+          - { ref: res-spring-testing-web, required: false }
+        payload:
+          note_prompt: "¿Cómo harías que tu API devuelva un 400 con un mensaje claro cuando falta un campo, y un 404 cuando la orden no existe? Menciona las anotaciones."
+
+      - slug: java-4-glossary
+        type: glossary
+        title: Vocabulario de Spring Boot
+        required: true
+        estimated_min: 15
+        skills: { java: 1.0 }
+        payload:
+          terms: [spring-dependency-injection, spring-bean, spring-rest-controller, spring-profile, spring-bean-validation, spring-controller-advice, spring-actuator, http-status-codes]
+
+      - slug: java-4-lab-rest
+        type: lab
+        title: "Lab: API REST de órdenes con validación y errores"
+        required: true
+        estimated_min: 120
+        skills: { java: 0.7, microservices_gcp: 0.1, testing: 0.1, git: 0.1 }
+        payload:
+          goal: "Exponer tu `OrderService` del nivel 3 como API REST con validación, manejo de errores, dos profiles y logs."
+          steps:
+            - title: Repositorio en memoria
+              body: "Crea `InMemoryOrderRepository` (anotado con `@Repository`) que implemente `OrderRepository` con un `ConcurrentHashMap<String, Order>`. Anota `OrderService` con `@Service`."
+            - title: DTO con validación
+              body: "Crea `record CreateOrderRequest(@NotBlank String customer, @Positive double total) {}` (paquete `jakarta.validation.constraints`)."
+            - title: Controller
+              body: "`@RestController @RequestMapping(\"/orders\")` con:\n- `POST /orders` → recibe `@Valid @RequestBody CreateOrderRequest`, devuelve 201 Created con la orden.\n- `GET /orders/{id}` → devuelve la orden o 404."
+            - title: Errores en un solo lugar
+              body: "Crea una clase `@RestControllerAdvice` con `@ExceptionHandler(OrderNotFoundException.class)` → 404 y `@ExceptionHandler(MethodArgumentNotValidException.class)` → 400. Devuelve un JSON simple: `{\"error\": \"...\"}` (o usa `ProblemDetail` de Spring)."
+            - title: Profiles y logs
+              body: "En `src/main/resources/application.properties` pon `app.greeting=hola desde default`; crea `application-dev.properties` con `app.greeting=hola desde dev` y `logging.level.com.questmap=DEBUG`. Agrega un `log.info` al crear una orden (usa `LoggerFactory.getLogger(...)` de SLF4J)."
+            - title: Ejecuta con el profile dev y prueba
+              commands:
+                - ".\\mvnw.cmd spring-boot:run \"-Dspring-boot.run.profiles=dev\""
+                - "# En otra ventana de PowerShell:"
+                - "Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body '{\"customer\":\"ana\",\"total\":120}'"
+                - "Invoke-RestMethod -Method Post -Uri http://localhost:8080/orders -ContentType 'application/json' -Body '{\"customer\":\"\",\"total\":-5}' -SkipHttpErrorCheck -StatusCodeVariable sc; $sc"
+                - "Invoke-RestMethod http://localhost:8080/orders/no-existe -SkipHttpErrorCheck -StatusCodeVariable sc; $sc"
+            - title: Prueba del controller y commit
+              body: "Agrega una prueba con `@WebMvcTest(OrderController.class)` y `MockMvc` que verifique que un POST inválido devuelve 400 (ver la guía 'Testing the Web Layer')."
+              commands:
+                - ".\\mvnw.cmd test"
+                - "git add .; git commit -m \"orders: REST API with validation and error handling\""
+          expected: "POST válido → JSON con id (201). POST inválido → 400 con mensaje. GET inexistente → 404. En la consola de la app ves tu log de 'orden creada'."
+          checklist:
+            - "POST válido devuelve 201 con la orden"
+            - "POST inválido devuelve 400 con un mensaje entendible"
+            - "GET de un id inexistente devuelve 404"
+            - "El profile dev cambia el nivel de log (veo mis DEBUG)"
+            - "Tengo al menos una prueba con MockMvc y todas pasan"
+            - "Hice commit"
+          hints:
+            - "Si `@Valid` no hace nada, revisa que el proyecto tenga la dependencia `validation` (la incluimos al generarlo)."
+            - "Para devolver 201: `return ResponseEntity.status(HttpStatus.CREATED).body(order);`"
+            - "`-SkipHttpErrorCheck` y `-StatusCodeVariable` requieren PowerShell 7 (`pwsh`)."
+          evidence_hint: "Pega la salida de los 3 Invoke-RestMethod (con los códigos 400 y 404) y el resumen de `.\\mvnw.cmd test`."
+
+      - slug: java-4-quiz
+        type: quiz
+        title: Quiz — Spring Boot REST
+        required: true
+        estimated_min: 15
+        skills: { java: 1.0 }
+        questions:
+          - slug: j4-q1
+            type: mcq
+            prompt: "¿Qué código HTTP corresponde a 'recurso creado'?"
+            options: ["200 OK", "201 Created", "204 No Content", "202 Accepted"]
+            answer: 1
+            explanation: "201 indica que se creó un recurso (idealmente con el header `Location`). 202 = aceptado para procesar después (útil en flujos asíncronos)."
+            skill: java
+            difficulty: 1
+          - slug: j4-q2
+            type: mcq
+            prompt: "El cliente envía un JSON con `total: -5` y tu validación lo rechaza. ¿Qué código devuelves?"
+            options: ["500", "404", "400", "409"]
+            answer: 2
+            explanation: "400 Bad Request: el error es del cliente (datos inválidos). 500 es error del servidor; 409 es conflicto con el estado actual."
+            skill: java
+            difficulty: 1
+          - slug: j4-q3
+            type: tf
+            prompt: "La inyección por constructor es la forma recomendada en Spring porque permite campos `final` y facilita las pruebas."
+            answer: true
+            explanation: "Con inyección por constructor las dependencias son obligatorias e inmutables, y en las pruebas puedes pasar mocks sin reflexión."
+            skill: java
+            difficulty: 1
+          - slug: j4-q4
+            type: mcq
+            prompt: "¿Para qué sirve `@RestControllerAdvice`?"
+            options: ["Para definir rutas", "Para centralizar el manejo de excepciones de todos los controllers", "Para configurar la base de datos", "Para documentar la API"]
+            answer: 1
+            explanation: "Evita repetir try/catch en cada endpoint: un solo lugar traduce excepciones a respuestas HTTP coherentes."
+            skill: java
+            difficulty: 1
+          - slug: j4-q5
+            type: fill
+            prompt: "Para activar el profile `dev` al arrancar: `java -jar app.jar --spring.profiles.______=dev`"
+            answer: ["active"]
+            explanation: "`spring.profiles.active` decide qué `application-{profile}.properties` se carga además del base."
+            skill: java
+            difficulty: 2
+          - slug: j4-q6
+            type: mcq
+            prompt: "¿Qué ofrece Spring Boot Actuator?"
+            options:
+              - "Un ORM para bases de datos"
+              - "Endpoints operativos como /actuator/health y métricas"
+              - "Un servidor de mensajería"
+              - "Autenticación con OAuth2"
+            answer: 1
+            explanation: "Actuator expone salud, info y métricas (vía Micrometer). Lo usarás en el Observatory con Prometheus."
+            skill: java
+            difficulty: 1
+          - slug: j4-q7
+            type: mcq
+            prompt: "Un GET a `/orders/{id}` debe ser idempotente. ¿Qué significa?"
+            options:
+              - "Que siempre devuelve 200"
+              - "Que repetir la misma petición no cambia el estado del servidor más allá de la primera vez"
+              - "Que es más rápido"
+              - "Que requiere autenticación"
+            answer: 1
+            explanation: "Idempotente = hacerlo 1 o N veces deja el mismo efecto. GET, PUT y DELETE deberían serlo; POST normalmente no. Este concepto vuelve fuerte en Event Harbor."
+            skill: java
+            difficulty: 2
+          - slug: j4-q8
+            type: order
+            prompt: "Ordena el recorrido de una petición POST /orders en Spring Boot:"
+            options:
+              - "El DispatcherServlet recibe la petición HTTP"
+              - "Jackson convierte el JSON en CreateOrderRequest"
+              - "Bean Validation revisa @NotBlank/@Positive"
+              - "El controller llama a OrderService"
+              - "Se devuelve la respuesta 201 en JSON"
+            answer: [0, 1, 2, 3, 4]
+            explanation: "La validación ocurre antes de entrar a tu método; si falla, nunca se llama al servicio y el advice devuelve 400."
+            skill: java
+            difficulty: 2
+
+      - slug: java-4-open-tradeoffs
+        type: open_answer
+        title: "Pregunta abierta: ¿por qué un DTO y no exponer la entidad?"
+        required: false
+        estimated_min: 20
+        skills: { java: 1.0 }
+        payload:
+          prompt_en: "Why would you use a separate request DTO instead of exposing your domain entity directly in a REST API? Mention at least two trade-offs."
+          rubric: [correctness, depth, clarity, tradeoffs]
+
+  # ================================================================ NIVEL 5
   - slug: java-5-boss
     number: 5
     title: Boss — Servicio REST con pruebas
-    status: outline
-    quests: []
+    story: "El guardián del bosque te espera. Te hará preguntas difíciles, revisará tu código y te pedirá defenderlo en inglés."
+    quests:
+      - slug: java-5-learn-review
+        type: learn
+        title: Repaso para el jefe
+        required: true
+        estimated_min: 30
+        skills: { java: 1.0 }
+        resources:
+          - { ref: res-spring-testing-web }
+          - { ref: res-effective-java, required: false }
+        payload:
+          note_prompt: "Escribe las 3 decisiones técnicas de tu API de órdenes que más te costaron y por qué las tomaste (te servirán para la mini-entrevista)."
+
+      - slug: java-5-quiz-final
+        type: quiz
+        title: Examen final — Java Forest
+        required: true
+        estimated_min: 20
+        skills: { java: 0.8, testing: 0.2 }
+        questions:
+          - slug: j5-q1
+            type: mcq
+            prompt: "`HashMap` vs `ConcurrentHashMap`: ¿cuándo necesitas el segundo?"
+            options: ["Siempre", "Cuando varios hilos leen y escriben el mismo mapa", "Cuando hay más de 1000 elementos", "Cuando las claves son String"]
+            answer: 1
+            explanation: "`HashMap` no es thread-safe; con escrituras concurrentes puede corromperse. Un controller de Spring atiende peticiones en varios hilos, por eso tu repositorio en memoria usó `ConcurrentHashMap`."
+            skill: java
+            difficulty: 2
+          - slug: j5-q2
+            type: mcq
+            prompt: "Si sobrescribes `equals` en una clase, ¿qué más debes sobrescribir?"
+            options: ["toString", "hashCode", "compareTo", "clone"]
+            answer: 1
+            explanation: "Si dos objetos son `equals`, deben tener el mismo `hashCode`; si no, `HashMap`/`HashSet` fallan. Los records lo hacen por ti."
+            skill: java
+            difficulty: 2
+          - slug: j5-q3
+            type: tf
+            prompt: "Por defecto, los beans de Spring son singletons: hay una sola instancia compartida por todas las peticiones."
+            answer: true
+            explanation: "Por eso un `@Service` no debe guardar estado mutable por petición en sus campos: varios hilos lo comparten."
+            skill: java
+            difficulty: 2
+          - slug: j5-q4
+            type: mcq
+            prompt: "Tu prueba con `@SpringBootTest` tarda 15 s y solo quieres probar el controller. ¿Qué usas?"
+            options: ["@DataJpaTest", "@WebMvcTest", "@Disabled", "@RepeatedTest"]
+            answer: 1
+            explanation: "`@WebMvcTest` levanta solo la capa web (controllers, advice, validación) y mockeas los servicios con `@MockitoBean`/`@MockBean`: mucho más rápido."
+            skill: testing
+            difficulty: 2
+          - slug: j5-q5
+            type: mcq
+            prompt: "`CompletableFuture.supplyAsync(...)` sin especificar executor usa:"
+            options: ["Un hilo nuevo por tarea", "El ForkJoinPool común", "El hilo del servidor web", "Un executor de Spring"]
+            answer: 1
+            explanation: "Usa `ForkJoinPool.commonPool()`. Para llamadas I/O (HTTP, BD) conviene pasar tu propio executor para no bloquear el pool común (o usar virtual threads en Java 21)."
+            skill: java
+            difficulty: 3
+          - slug: j5-q6
+            type: mcq
+            prompt: "Un endpoint lanza `NullPointerException` y el cliente recibe 500. ¿Qué es lo más profesional?"
+            options:
+              - "Capturar Exception en el controller y devolver 200"
+              - "Encontrar la causa raíz, corregirla y agregar una prueba que reproduzca el caso"
+              - "Desactivar los logs"
+              - "Reiniciar el servicio"
+            answer: 1
+            explanation: "RCA: reproducir, entender, corregir y dejar una prueba de regresión. Ocultar el error con un 200 empeora el debugging de todos."
+            skill: java
+            difficulty: 1
+          - slug: j5-q7
+            type: fill
+            prompt: "La anotación de Mockito que crea el objeto bajo prueba e inyecta los mocks es `@Inject______`."
+            answer: ["Mocks"]
+            explanation: "`@InjectMocks` crea el servicio y le pasa los campos `@Mock` por constructor (o setters/campos)."
+            skill: testing
+            difficulty: 2
+          - slug: j5-q8
+            type: mcq
+            prompt: "¿Qué hace `Optional.map(...).orElseThrow(...)` en `repo.findById(id).map(this::toDto).orElseThrow(OrderNotFoundException::new)`?"
+            options:
+              - "Lanza siempre la excepción"
+              - "Si hay orden, la convierte a DTO; si no, lanza OrderNotFoundException"
+              - "Devuelve null si no hay orden"
+              - "No compila"
+            answer: 1
+            explanation: "`map` solo se aplica si hay valor; `orElseThrow` lanza la excepción cuando está vacío. Es la forma idiomática de un 'get or 404'."
+            skill: java
+            difficulty: 2
+
+      - slug: java-5-boss-fight
+        type: boss
+        title: "Jefe: defiende tu servicio REST"
+        required: true
+        estimated_min: 90
+        skills: { java: 0.6, testing: 0.2, english: 0.2 }
+        payload:
+          task: "Sube tu proyecto `orders` (niveles 3–4) a un repositorio de GitHub y pega la URL. Claude revisará el código y te hará una mini-entrevista de code review en inglés."
+          rubric: [correctness, depth, clarity, tradeoffs]
+          interview_focus: ["validation and error handling", "testing strategy", "thread safety of the in-memory repository", "what you would change for production"]
+
+      - slug: java-5-interview
+        type: interview
+        title: "Mini-entrevista: Java screen"
+        required: false
+        estimated_min: 30
+        skills: { java: 0.6, english: 0.4 }
+        payload:
+          mode: technical_screen
+          zone: java-forest

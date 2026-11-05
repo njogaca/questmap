@@ -1,0 +1,285 @@
+zone: cassandra-caverns
+terms:
+  # ---------------------------------------------------------------- Nivel 1
+  - slug: cass-nosql
+    term: NoSQL
+    category: basics
+    definition_es: "Familia de bases de datos que no usan el modelo relacional clásico (tablas normalizadas con JOINs) para ganar escala, flexibilidad o velocidad en casos concretos."
+    definition_en: "Databases that don't follow the classic relational model."
+    example_en: "We chose a NoSQL store for the event history."
+    analogy: "Herramientas especializadas en lugar de una navaja suiza: cada una muy buena para un trabajo."
+    see_also: [cass-wide-column]
+
+  - slug: cass-wide-column
+    term: wide-column store
+    category: basics
+    definition_es: "Modelo donde los datos se agrupan en particiones; cada partición puede tener muchas filas ordenadas. Cassandra es el ejemplo clásico."
+    definition_en: "A model where data is grouped in partitions with many sorted rows."
+    example_en: "Cassandra is a wide-column store designed for high write throughput."
+    analogy: "Un archivero con carpetas (particiones); dentro de cada carpeta, hojas ordenadas por fecha."
+    see_also: [cass-partition]
+
+  - slug: cass-node
+    term: node
+    category: architecture
+    definition_es: "Una instancia de Cassandra (un servidor o contenedor) que guarda parte de los datos."
+    definition_en: "A single Cassandra instance that stores part of the data."
+    example_en: "Our cluster has six nodes in two racks."
+    analogy: "Una sucursal de una cadena de tiendas: cada una tiene parte del inventario."
+    see_also: [cass-ring]
+
+  - slug: cass-ring
+    term: token ring
+    category: architecture
+    definition_es: "Representación del cluster como un anillo de tokens: cada nodo es dueño de rangos y los datos se ubican según el token de su partition key."
+    definition_en: "The cluster seen as a ring of token ranges owned by nodes."
+    example_en: "Adding a node takes over part of the token ring."
+    analogy: "Una mesa redonda donde cada comensal se encarga de las porciones de pizza frente a él."
+    see_also: [cass-token, cass-node]
+
+  - slug: cass-token
+    term: token
+    category: architecture
+    definition_es: "Número que resulta de aplicar una función hash a la partition key; decide en qué posición del anillo (y en qué nodos) vive la partición."
+    definition_en: "The hash of a partition key, which decides where the data lives."
+    example_en: "The driver computes the token to route the request."
+    analogy: "El código postal de un paquete: dice a qué centro de reparto le toca."
+    see_also: [cass-partition-key]
+
+  - slug: cass-partition
+    term: partition
+    category: modeling
+    definition_es: "Grupo de filas con la misma partition key. Se guarda junto, en las mismas réplicas, y es la unidad de lectura eficiente."
+    definition_en: "All rows that share a partition key, stored together."
+    example_en: "Each customer's orders live in one partition."
+    analogy: "Un cajón con todas las facturas de un mismo cliente."
+    see_also: [cass-partition-key, cass-hot-partition]
+
+  - slug: cass-replication-factor
+    term: replication factor (RF)
+    category: architecture
+    definition_es: "Cuántas copias de cada partición guarda el cluster (en nodos distintos). RF=3 es lo habitual en producción."
+    definition_en: "How many copies of each partition the cluster keeps."
+    example_en: "With RF=3 we can lose one node and still use QUORUM."
+    analogy: "Guardar tus fotos en 3 discos distintos: si uno se daña, tienes otras dos copias."
+    see_also: [cass-quorum]
+
+  - slug: cass-keyspace
+    term: keyspace
+    category: basics
+    definition_es: "Contenedor de tablas donde se define la estrategia de replicación (RF por datacenter). Similar a un schema de SQL."
+    definition_en: "A container of tables that defines replication settings."
+    example_en: "The shop keyspace uses NetworkTopologyStrategy with RF=3."
+    analogy: "Un edificio de archivos con su propia política de copias de seguridad."
+    see_also: [cass-replication-factor]
+
+  - slug: cass-masterless
+    term: masterless (peer-to-peer)
+    category: architecture
+    definition_es: "No hay nodo principal: todos los nodos son iguales y cualquiera puede atender peticiones. No existe un único punto de falla."
+    definition_en: "No leader node; every node can serve requests."
+    example_en: "Because Cassandra is masterless, there's no failover step."
+    analogy: "Un equipo sin jefe donde cualquiera puede atender a un cliente y sabe a quién pasarle el caso."
+    see_also: [cass-coordinator]
+
+  # ---------------------------------------------------------------- Nivel 2
+  - slug: cass-cql
+    term: CQL (Cassandra Query Language)
+    category: modeling
+    definition_es: "Lenguaje parecido a SQL para crear tablas y consultar Cassandra, pero sin JOINs ni subconsultas, y con reglas estrictas sobre qué columnas puedes filtrar."
+    definition_en: "A SQL-like language for Cassandra, without joins."
+    example_en: "The CQL query must include the partition key."
+    analogy: "Un idioma primo del español: se parece mucho, pero algunas palabras significan otra cosa."
+    see_also: [cass-primary-key]
+
+  - slug: cass-primary-key
+    term: primary key
+    category: modeling
+    definition_es: "En Cassandra tiene dos partes: la partition key (dónde vive el dato) y las clustering columns (cómo se ordena dentro de la partición)."
+    definition_en: "The partition key plus the clustering columns."
+    example_en: "PRIMARY KEY ((customer_id), order_ts) groups orders by customer and sorts them by time."
+    analogy: "Dirección de una casa: la ciudad (partición) y la calle y número (orden dentro de la ciudad)."
+    see_also: [cass-partition-key, cass-clustering-column]
+
+  - slug: cass-partition-key
+    term: partition key
+    category: modeling
+    definition_es: "Parte de la primary key que decide la partición y el nodo. Debe tener muchos valores distintos y repartir bien la carga."
+    definition_en: "The part of the primary key that decides the partition and nodes."
+    example_en: "A good partition key spreads writes evenly."
+    analogy: "La primera letra del apellido en un fichero: si todos se apellidan García, un solo cajón revienta."
+    see_also: [cass-token, cass-hot-partition]
+
+  - slug: cass-clustering-column
+    term: clustering column
+    category: modeling
+    definition_es: "Columna(s) de la primary key que ordenan las filas dentro de una partición y permiten rangos (>, <) en las consultas."
+    definition_en: "Columns that sort rows inside a partition."
+    example_en: "order_ts is a clustering column, so we can query a date range."
+    analogy: "El orden de las hojas dentro de una carpeta: por fecha, de la más reciente a la más vieja."
+    see_also: [cass-primary-key]
+
+  - slug: cass-query-first
+    term: query-first modeling
+    category: modeling
+    definition_es: "Método de diseño en Cassandra: primero listas las consultas que necesitas y diseñas una tabla para cada una."
+    definition_en: "Designing tables from the queries the application needs."
+    example_en: "With query-first modeling, each table answers one question."
+    analogy: "Organizar tu cocina según lo que cocinas cada día, no según el orden alfabético de los ingredientes."
+    see_also: [cass-denormalization]
+
+  - slug: cass-denormalization
+    term: denormalization
+    category: modeling
+    definition_es: "Duplicar datos a propósito en varias tablas para que cada consulta lea una sola partición, a cambio de escribir más."
+    definition_en: "Intentionally duplicating data to make reads fast."
+    example_en: "We write each order to two tables: by id and by customer."
+    analogy: "Tener el número de un amigo en el celular y también en una libreta junto al teléfono de casa."
+    see_also: [cass-query-first]
+
+  - slug: cass-allow-filtering
+    term: ALLOW FILTERING
+    category: modeling
+    definition_es: "Cláusula que permite consultas sin la partition key escaneando muchas particiones. Casi siempre indica que falta una tabla."
+    definition_en: "A clause that allows scanning many partitions; usually a red flag."
+    example_en: "If you need ALLOW FILTERING in production, redesign the table."
+    analogy: "Buscar un documento revisando todos los cajones de la oficina, uno por uno."
+    see_also: [cass-query-first]
+
+  # ---------------------------------------------------------------- Nivel 3
+  - slug: cass-consistency-level
+    term: consistency level
+    category: consistency
+    definition_es: "Cuántas réplicas deben responder para que una lectura o escritura se considere exitosa (ONE, QUORUM, ALL, LOCAL_QUORUM…). Se elige por operación."
+    definition_en: "How many replicas must respond for an operation to succeed."
+    example_en: "We write and read with LOCAL_QUORUM."
+    analogy: "Cuántos testigos necesitas para dar algo por cierto: uno, la mayoría o todos."
+    see_also: [cass-quorum]
+
+  - slug: cass-quorum
+    term: QUORUM
+    category: consistency
+    definition_es: "Nivel que exige la mayoría de las réplicas (con RF=3, 2). Escribir y leer con QUORUM garantiza ver lo último escrito (R + W > RF)."
+    definition_en: "A majority of replicas; with RF=3 that is two."
+    example_en: "QUORUM reads and writes give us strong consistency with RF=3."
+    analogy: "Una votación donde basta la mayoría: aunque falte uno, se decide."
+    see_also: [cass-consistency-level, cass-replication-factor]
+
+  - slug: cass-coordinator
+    term: coordinator node
+    category: architecture
+    definition_es: "Nodo que recibe la petición del cliente y la reparte a las réplicas correspondientes; cualquier nodo puede serlo."
+    definition_en: "The node that receives a request and forwards it to the replicas."
+    example_en: "Token-aware drivers make a replica the coordinator."
+    analogy: "La recepcionista que recibe tu solicitud y la pasa a los departamentos indicados."
+    see_also: [cass-masterless]
+
+  - slug: cass-tombstone
+    term: tombstone
+    category: consistency
+    definition_es: "Marca que registra un borrado (o un TTL vencido). El dato no desaparece de inmediato: se elimina en una compaction después de gc_grace_seconds."
+    definition_en: "A marker that records a deletion until compaction removes it."
+    example_en: "Too many tombstones made the read time out."
+    analogy: "Tachar una línea en un cuaderno en vez de arrancar la hoja: hasta que pasas en limpio, la línea sigue ahí."
+    see_also: [cass-ttl, cass-compaction]
+
+  - slug: cass-ttl
+    term: TTL (time to live)
+    category: consistency
+    definition_es: "Tiempo después del cual un dato expira automáticamente (`USING TTL 3600`)."
+    definition_en: "A time after which data expires automatically."
+    example_en: "Session data is stored with a one-hour TTL."
+    analogy: "La fecha de vencimiento de un yogur."
+    see_also: [cass-tombstone]
+
+  - slug: cass-hinted-handoff
+    term: hinted handoff
+    category: consistency
+    definition_es: "Si una réplica está caída, el coordinador guarda un 'hint' con la escritura y se lo entrega cuando vuelve (durante un tiempo limitado)."
+    definition_en: "The coordinator stores writes for a down replica and delivers them later."
+    example_en: "Hinted handoff covered the short outage of node three."
+    analogy: "Un vecino que te recibe los paquetes mientras estás de viaje y te los da al volver."
+    see_also: [cass-repair]
+
+  - slug: cass-repair
+    term: repair (anti-entropy)
+    category: operations
+    definition_es: "Proceso (`nodetool repair`) que compara réplicas y corrige diferencias. Debe correrse con regularidad."
+    definition_en: "A process that compares replicas and fixes differences."
+    example_en: "We run incremental repairs every week."
+    analogy: "Comparar tu lista de compras con la de tu pareja para que ambas queden iguales."
+    see_also: [cass-hinted-handoff]
+
+  # ---------------------------------------------------------------- Nivel 4
+  - slug: cass-hot-partition
+    term: hot partition
+    category: performance
+    definition_es: "Partición que recibe mucho más tráfico o datos que las demás; sobrecarga a sus réplicas mientras el resto del cluster está ocioso."
+    definition_en: "A partition that gets much more traffic than others."
+    example_en: "The biggest store created a hot partition."
+    analogy: "Una sola caja abierta en el supermercado con toda la gente formada ahí."
+    see_also: [cass-bucketing]
+
+  - slug: cass-bucketing
+    term: bucketing
+    category: performance
+    definition_es: "Agregar un componente (día, hora o número de bucket) a la partition key para partir una partición grande en varias más pequeñas."
+    definition_en: "Adding a time or number bucket to the partition key to split large partitions."
+    example_en: "We bucket events by store and day."
+    analogy: "Separar los recibos de un año en 12 sobres, uno por mes."
+    see_also: [cass-hot-partition]
+
+  - slug: cass-compaction
+    term: compaction
+    category: storage
+    definition_es: "Proceso de fondo que fusiona SSTables, quedándose con la versión más nueva de cada dato y eliminando tombstones vencidos."
+    definition_en: "A background process that merges SSTables and drops old data."
+    example_en: "Pending compactions increased read latency."
+    analogy: "Pasar en limpio un cuaderno lleno de tachones."
+    see_also: [cass-sstable, cass-tombstone]
+
+  - slug: cass-sstable
+    term: SSTable
+    category: storage
+    definition_es: "Archivo inmutable en disco con datos ordenados. Nunca se modifica: los cambios generan SSTables nuevos."
+    definition_en: "An immutable, sorted data file on disk."
+    example_en: "A read may need to check several SSTables."
+    analogy: "Un libro impreso: si hay correcciones, se imprime una edición nueva."
+    see_also: [cass-memtable, cass-compaction]
+
+  - slug: cass-memtable
+    term: memtable
+    category: storage
+    definition_es: "Estructura en memoria donde se acumulan las escrituras antes de volcarse (flush) a un SSTable."
+    definition_en: "An in-memory structure that buffers writes before flushing to disk."
+    example_en: "Writes go to the commit log and the memtable."
+    analogy: "La libreta donde anotas pedidos durante el día antes de pasarlos al sistema."
+    see_also: [cass-sstable]
+
+  - slug: cass-nodetool
+    term: nodetool
+    category: operations
+    definition_es: "Herramienta de línea de comandos para operar un nodo: `status`, `ring`, `repair`, `tablestats`, `compactionstats`, `flush`…"
+    definition_en: "The command-line tool to operate and inspect Cassandra nodes."
+    example_en: "nodetool status showed one node down."
+    analogy: "El tablero de mantenimiento de una máquina industrial."
+    see_also: [cass-repair]
+
+  # ---------------------------------------------------------------- Extra (boss)
+  - slug: cass-lwt
+    term: lightweight transaction (LWT)
+    category: consistency
+    definition_es: "Operación condicional (`IF NOT EXISTS`, `IF col = x`) que usa consenso Paxos para comparar y escribir de forma atómica. Es costosa: úsala con moderación."
+    definition_en: "A conditional write that uses Paxos; correct but slow."
+    example_en: "We use an LWT only to reserve unique usernames."
+    analogy: "Pedir que todos los jefes firmen antes de aprobar algo: seguro, pero lento."
+    see_also: [cass-quorum]
+
+  - slug: cass-cap
+    term: CAP theorem
+    category: theory
+    definition_es: "Durante una partición de red, un sistema distribuido debe elegir entre consistencia y disponibilidad. Cassandra deja ajustar esa elección por operación."
+    definition_en: "During a network partition, you must choose consistency or availability."
+    example_en: "With consistency ONE, Cassandra favors availability."
+    analogy: "Si se corta la comunicación entre dos sucursales: ¿sigues vendiendo (disponible) o cierras hasta confirmar el inventario (consistente)?"
+    see_also: [cass-consistency-level]

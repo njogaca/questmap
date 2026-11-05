@@ -15,6 +15,13 @@
       "when": 1793901092429,
       "tag": "0001_zone_map_position",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793902679973,
+      "tag": "0002_glossary_analogy",
+      "breakpoints": true
     }
   ]
 }

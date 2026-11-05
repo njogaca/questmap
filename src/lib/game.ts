@@ -191,3 +191,7 @@ export async function grantDailyReview(cardsReviewed: number): Promise<Reward> {
 export async function awardPerfectQuizBadge() {
   return awardBadge(db, "badge-first-perfect-quiz");
 }
+
+export async function awardFirstLabNoHintsBadge() {
+  return awardBadge(db, "badge-first-lab-no-hints");
+}

@@ -13,6 +13,7 @@ export type Card = {
   definitionEs: string;
   definitionEn: string;
   exampleEn: string | null;
+  analogy: string | null;
   analogyMq: string | null;
 };
 
@@ -77,9 +78,15 @@ export function Flashcards({ cards, onFinish }: { cards: Card[]; onFinish: (grad
             {card.exampleEn && (
               <p className="border-l-2 border-available pl-3 italic">&ldquo;{card.exampleEn}&rdquo;</p>
             )}
+            {card.analogy && (
+              <p className="rounded bg-surface-2 p-2 text-xs">
+                <span className="font-mono text-warn">Analogía › </span>
+                {card.analogy}
+              </p>
+            )}
             {card.analogyMq && (
               <p className="rounded bg-surface-2 p-2 text-xs">
-                <span className="font-mono text-warn">MQ/IIB › </span>
+                <span className="font-mono text-dim">En MQ/IIB › </span>
                 {card.analogyMq}
               </p>
             )}

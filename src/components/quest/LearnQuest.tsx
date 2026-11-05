@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { addCustomResource, completeLearn, setResourceSeen } from "@/app/actions";
 import type { Reward } from "@/lib/game";
 import { LEARN_NOTE_MIN_CHARS } from "@/lib/rules";
+import { RichText } from "../RichText";
 import { ErrorText, RewardBanner } from "../RewardBanner";
 import { btnGhost, btnPrimary } from "../ui";
 
@@ -33,11 +34,13 @@ export function LearnQuest({
   notePrompt,
   savedNote,
   completed,
+  summary,
 }: {
   slug: string;
   resources: LearnResource[];
   custom: CustomRes[];
   notePrompt: string;
+  summary?: string;
   savedNote: string;
   completed: boolean;
 }) {
@@ -68,6 +71,14 @@ export function LearnQuest({
 
   return (
     <div className="space-y-6">
+      {summary && (
+        <section className="rounded-md border-l-2 border-available bg-surface p-4">
+          <p className="font-mono text-xs text-available">resumen</p>
+          <p className="mt-1 whitespace-pre-line text-sm leading-relaxed">
+            <RichText text={summary} />
+          </p>
+        </section>
+      )}
       <section>
         <h2 className="text-lg font-semibold">Recursos</h2>
         <ul className="mt-2 space-y-2">

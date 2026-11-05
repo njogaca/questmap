@@ -10,6 +10,7 @@ const toCard = (t: typeof s.glossaryTerms.$inferSelect): Card => ({
   definitionEs: t.definitionEs,
   definitionEn: t.definitionEn,
   exampleEn: t.exampleEn,
+  analogy: t.analogy,
   analogyMq: t.analogyMq,
 });
 

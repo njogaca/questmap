@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db, schema as s } from "@/db/client";
 import {
   assertUnlocked,
+  awardFirstLabNoHintsBadge,
   awardPerfectQuizBadge,
   completeQuest,
   getQuestBySlug,
@@ -234,6 +235,34 @@ export async function submitQuiz(input: {
     }
     refresh();
     return { ok: true, score, passed, reward };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/* --------------------------------------------------------------------- lab */
+
+export async function completeLab(input: {
+  questSlug: string;
+  checked: number;
+  evidence: string;
+  hintsUsed: number;
+}): Promise<ActionResult<{ reward: Reward }>> {
+  try {
+    const { quest } = await getQuestBySlug(input.questSlug);
+    assertUnlocked(quest.state);
+    const checklist = (quest.payload.checklist as string[] | undefined) ?? [];
+    if (input.checked < checklist.length) throw new Error("Completa todo el checklist antes de entregar.");
+    const evidence = input.evidence.trim();
+    if (evidence.length < 20)
+      throw new Error("Pega tu evidencia: la salida de un comando o la URL de tu commit/repo (mínimo 20 caracteres).");
+    const reward = await completeQuest(input.questSlug, { evidence, hintsUsed: input.hintsUsed });
+    if (input.hintsUsed === 0 && reward.xp > 0) {
+      const b = await awardFirstLabNoHintsBadge();
+      if (b) reward.badges.push(b);
+    }
+    refresh();
+    return { ok: true, reward };
   } catch (e) {
     return fail(e);
   }

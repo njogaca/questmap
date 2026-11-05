@@ -1,7 +1,9 @@
 # Catálogo de recursos. Las quests los referencian con {ref: <slug>}.
-# Regla: verified: true SOLO si la URL se abrió y se confirmó. Si no, url: null + how_to_find.
+# Regla: verified: true SOLO si la URL se abrió y se confirmó (2026-11-05).
+# Si no se pudo abrir: url: null + how_to_find.
 
 resources:
+  # ------------------------------------------------------------------ Java
   - slug: res-java-mooc
     title: Java Programming MOOC — University of Helsinki
     type: course
@@ -14,14 +16,69 @@ resources:
     verified: true
 
   - slug: res-java-mooc-part1
-    title: Java Programming MOOC — Part 1
+    title: Java Programming MOOC — Part 1 (sintaxis básica)
     type: course
     url: https://java-programming.mooc.fi/part-1
     language: en
     duration_min: 600
     cost: free
     required: true
-    why: Sintaxis, variables, condicionales y bucles desde cero.
+    why: Variables, condicionales y bucles desde cero. Lee la teoría; haz solo los ejercicios que te cuesten.
+    verified: true
+
+  - slug: res-java-mooc-part4
+    title: Java Programming MOOC — Part 4 (programación orientada a objetos)
+    type: course
+    url: https://java-programming.mooc.fi/part-4
+    language: en
+    duration_min: 300
+    cost: free
+    required: true
+    why: Clases, objetos, constructores y métodos con ejemplos cortos.
+    verified: true
+
+  - slug: res-java-mooc-part5
+    title: Java Programming MOOC — Part 5 (objetos y referencias)
+    type: course
+    url: https://java-programming.mooc.fi/part-5
+    language: en
+    duration_min: 300
+    cost: free
+    required: false
+    why: Sobrecarga, primitivos vs referencias y cómo se comportan los objetos en memoria.
+    verified: true
+
+  - slug: res-java-mooc-part9
+    title: Java Programming MOOC — Part 9 (herencia, interfaces y polimorfismo)
+    type: course
+    url: https://java-programming.mooc.fi/part-9
+    language: en
+    duration_min: 300
+    cost: free
+    required: true
+    why: Herencia, interfaces y polimorfismo, con ejercicios.
+    verified: true
+
+  - slug: res-java-mooc-part10
+    title: Java Programming MOOC — Part 10 (streams, lambdas, Comparable, enums)
+    type: course
+    url: https://java-programming.mooc.fi/part-10
+    language: en
+    duration_min: 300
+    cost: free
+    required: true
+    why: Streams y lambdas explicados paso a paso.
+    verified: true
+
+  - slug: res-java-mooc-part11
+    title: Java Programming MOOC — Part 11 (paquetes y excepciones)
+    type: course
+    url: https://java-programming.mooc.fi/part-11
+    language: en
+    duration_min: 240
+    cost: free
+    required: true
+    why: Lanzar y manejar excepciones, paquetes e imports.
     verified: true
 
   - slug: res-devjava-learn
@@ -32,17 +89,344 @@ resources:
     duration_min: 120
     cost: free
     required: false
-    why: Tutoriales oficiales; la sección Object-Oriented Programming refuerza clases e interfaces.
+    why: Índice de tutoriales oficiales; útil como referencia.
+    verified: true
+
+  - slug: res-devjava-oop
+    title: Dev.java — Object Oriented Programming (clases, records, herencia, interfaces)
+    type: docs
+    url: https://dev.java/learn/language/oop/
+    language: en
+    duration_min: 90
+    cost: free
+    required: false
+    why: Tutorial oficial con la sintaxis moderna, incluidos los records.
+    verified: true
+
+  - slug: res-devjava-collections-streams
+    title: Dev.java — Collections and Streams
+    type: docs
+    url: https://dev.java/learn/api/collections-and-streams/
+    language: en
+    duration_min: 120
+    cost: free
+    required: true
+    why: El Collections Framework y la Stream API explicados por Oracle.
+    verified: true
+
+  - slug: res-devjava-fp
+    title: Dev.java — Generics, Lambda, and Pattern Matching
+    type: docs
+    url: https://dev.java/learn/language/fp/
+    language: en
+    duration_min: 90
+    cost: free
+    required: false
+    why: Generics y lambdas con ejemplos oficiales.
+    verified: true
+
+  - slug: res-devjava-exceptions
+    title: Dev.java — Annotations and Exceptions
+    type: docs
+    url: https://dev.java/learn/language/annotations-exceptions/
+    language: en
+    duration_min: 60
+    cost: free
+    required: false
+    why: Checked vs unchecked, try-with-resources y buenas prácticas.
+    verified: true
+
+  - slug: res-baeldung-completablefuture
+    title: Baeldung — Guide to CompletableFuture
+    type: article
+    url: null
+    how_to_find: "Buscar en Google: 'Baeldung Guide To CompletableFuture' (sitio baeldung.com)."
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: La referencia más usada para entender CompletableFuture con ejemplos.
+    verified: false
+
+  - slug: res-baeldung-optional
+    title: Baeldung — Guide to Java Optional
+    type: article
+    url: null
+    how_to_find: "Buscar en Google: 'Baeldung Guide To Java Optional' (sitio baeldung.com)."
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Cuándo usar Optional y cuándo no.
+    verified: false
+
+  - slug: res-junit-guide
+    title: JUnit User Guide (Jupiter)
+    type: docs
+    url: https://docs.junit.org/current/user-guide/
+    language: en
+    duration_min: 60
+    cost: free
+    required: true
+    why: Guía oficial de JUnit Jupiter (la API de JUnit 5 y sucesores). Lee "Writing Tests" y "Annotations".
+    verified: true
+
+  - slug: res-mockito
+    title: Mockito framework site
+    type: docs
+    url: https://site.mockito.org/
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Sitio oficial; el ejemplo de la portada resume mock, when y verify.
+    verified: true
+
+  - slug: res-spring-rest-guide
+    title: Spring Guide — Building a RESTful Web Service
+    type: lab
+    url: https://spring.io/guides/gs/rest-service/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: El "hola mundo" oficial de una API REST con Spring Boot.
+    verified: true
+
+  - slug: res-spring-testing-web
+    title: Spring Guide — Testing the Web Layer
+    type: lab
+    url: https://spring.io/guides/gs/testing-web/
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Cómo probar controllers con MockMvc.
+    verified: true
+
+  - slug: res-spring-boot-docs
+    title: Spring Boot — Reference Documentation
+    type: docs
+    url: https://docs.spring.io/spring-boot/index.html
+    language: en
+    duration_min: 60
+    cost: free
+    required: false
+    why: Referencia oficial (configuración, profiles, logging, Actuator).
     verified: true
 
   - slug: res-effective-java
     title: Effective Java (3rd ed.) — Joshua Bloch
     type: book
     url: null
-    how_to_find: "Buscar el libro 'Effective Java, Third Edition' de Joshua Bloch (Addison-Wesley) en tu librería o biblioteca preferida."
+    how_to_find: "Buscar el libro 'Effective Java, Third Edition' de Joshua Bloch (Addison-Wesley)."
     language: en
     duration_min: 900
     cost: paid
     required: false
-    why: El libro clásico de buenas prácticas en Java; útil para entrevistas.
+    why: El clásico de buenas prácticas en Java; muy citado en entrevistas.
+    verified: false
+
+  # --------------------------------------------------------------- Pub/Sub
+  - slug: res-pubsub-overview
+    title: Google Cloud — Pub/Sub overview
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/overview
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Qué es Pub/Sub, topics, subscriptions y casos de uso.
+    verified: true
+
+  - slug: res-pubsub-subscriptions
+    title: Google Cloud — Subscription overview (pull, push, ack deadline)
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/subscription-overview
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Tipos de suscripción y el plazo de acknowledgment.
+    verified: true
+
+  - slug: res-pubsub-emulator
+    title: Google Cloud — Testing apps locally with the Pub/Sub emulator
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/emulator
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo correr Pub/Sub en tu PC sin costo y sin cuenta de GCP.
+    verified: true
+
+  - slug: res-pubsub-dead-letter
+    title: Google Cloud — Handle message failures (dead-letter topics)
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/handling-failures
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Dead-letter topics y reintentos cuando un mensaje no se puede procesar.
+    verified: true
+
+  - slug: res-pubsub-ordering
+    title: Google Cloud — Message ordering (ordering keys)
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/ordering
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo y cuándo Pub/Sub garantiza orden.
+    verified: true
+
+  - slug: res-pubsub-exactly-once
+    title: Google Cloud — Exactly-once delivery
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/exactly-once-delivery
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Qué garantiza realmente y sus límites (por eso sigues necesitando idempotencia).
+    verified: true
+
+  - slug: res-pubsub-flow-control
+    title: Google Cloud — Flow control with messages
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/flow-control-messages
+    language: en
+    duration_min: 15
+    cost: free
+    required: false
+    why: Control de flujo al publicar (evita saturar memoria cuando publicas muy rápido).
+    verified: true
+
+  - slug: res-pubsub-schemas
+    title: Google Cloud — Pub/Sub schemas
+    type: docs
+    url: https://docs.cloud.google.com/pubsub/docs/schemas
+    language: en
+    duration_min: 25
+    cost: free
+    required: true
+    why: Esquemas Avro/Protocol Buffer en topics y revisiones de esquema.
+    verified: true
+
+  - slug: res-ddia
+    title: Designing Data-Intensive Applications — Martin Kleppmann
+    type: book
+    url: https://dataintensive.net/
+    language: en
+    duration_min: 1200
+    cost: paid
+    required: false
+    why: El libro de referencia de sistemas de datos. Cap. 11 (stream processing) para Event Harbor; cap. 5–6 para Cassandra.
+    verified: true
+
+  - slug: res-kleppmann-lectures
+    title: Concurrent and Distributed Systems — Martin Kleppmann (Cambridge)
+    type: course
+    url: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/
+    language: en
+    duration_min: 480
+    cost: free
+    required: false
+    why: Página del curso con notas; los videos están en YouTube.
+    how_to_find: "Videos: buscar en YouTube 'Distributed Systems lecture series Martin Kleppmann'."
+    verified: true
+
+  # ------------------------------------------------------------- Cassandra
+  - slug: res-cassandra-docs
+    title: Apache Cassandra Documentation
+    type: docs
+    url: https://cassandra.apache.org/doc/latest/
+    language: en
+    duration_min: 60
+    cost: free
+    required: false
+    why: Documentación oficial (elige la versión 5.0 en el selector).
+    verified: true
+
+  - slug: res-cassandra-quickstart
+    title: Apache Cassandra — Quickstart (Docker)
+    type: lab
+    url: https://cassandra.apache.org/_/quickstart.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Levantar Cassandra en Docker y conectarte con cqlsh.
+    verified: true
+
+  - slug: res-cassandra-dynamo
+    title: "Apache Cassandra — Architecture: Dynamo"
+    type: docs
+    url: https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html
+    language: en
+    duration_min: 40
+    cost: free
+    required: true
+    why: Consistent hashing, replicación, consistencia ajustable y gossip.
+    verified: true
+
+  - slug: res-cassandra-data-modeling
+    title: Apache Cassandra — Data Modeling
+    type: docs
+    url: https://cassandra.apache.org/doc/latest/cassandra/developing/data-modeling/index.html
+    language: en
+    duration_min: 90
+    cost: free
+    required: true
+    why: "El método oficial: modelar a partir de las consultas, no de las entidades."
+    verified: true
+
+  - slug: res-cassandra-nodetool
+    title: Apache Cassandra — nodetool reference
+    type: docs
+    url: https://cassandra.apache.org/doc/latest/cassandra/managing/tools/nodetool/nodetool.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Referencia de comandos de operación (status, ring, repair, compactionstats…).
+    verified: true
+
+  - slug: res-cassandra-docker-image
+    title: Docker Hub — cassandra (imagen oficial)
+    type: docs
+    url: https://hub.docker.com/_/cassandra
+    language: en
+    duration_min: 10
+    cost: free
+    required: false
+    why: Tags disponibles (5.0, 4.1…) y variables de entorno de la imagen.
+    verified: true
+
+  # --------------------------------------------------------------- Inglés
+  - slug: res-yt-tmay
+    title: "Video: cómo responder 'Tell me about yourself' para ingenieros de software"
+    type: video
+    url: null
+    how_to_find: "Buscar en YouTube: 'tell me about yourself software engineer interview'. Elige un video de ≤ 10 min de un reclutador técnico o ingeniero senior."
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Ver la estructura presente → pasado → futuro aplicada por alguien del área.
+    verified: false
+
+  - slug: res-yt-star
+    title: "Video: el método STAR para entrevistas conductuales"
+    type: video
+    url: null
+    how_to_find: "Buscar en YouTube: 'STAR method behavioral interview software engineer'."
+    language: en
+    duration_min: 15
+    cost: free
+    required: false
+    why: Te prepara para el nivel 2 del Interview Arena.
     verified: false

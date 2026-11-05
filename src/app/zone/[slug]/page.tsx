@@ -18,7 +18,7 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6">
-      <Link href="/" className="font-mono text-xs text-dim hover:text-available">
+      <Link href="/mapa" className="font-mono text-xs text-dim hover:text-available">
         &lt; volver al mapa
       </Link>
       <p className="mt-4 font-mono text-xs text-available">&gt; sector {String(zone.order).padStart(2, "0")}</p>

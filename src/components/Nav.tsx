@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 const LINKS = [
-  { href: "/", label: "Mapa" },
+  { href: "/", label: "Inicio" },
+  { href: "/mapa", label: "Mapa" },
+  { href: "/glosario", label: "Glosario" },
   { href: "/sistema", label: "Sistema" },
 ];
 
@@ -12,7 +14,7 @@ export function Nav() {
         <Link href="/" className="font-title text-xl font-bold tracking-wider">
           QUEST<span className="text-available">MAP</span>
         </Link>
-        <ul className="flex gap-4 font-mono text-sm">
+        <ul className="flex gap-3 font-mono text-xs sm:gap-4 sm:text-sm">
           {LINKS.map((l) => (
             <li key={l.href}>
               <Link href={l.href} className="text-dim transition-colors hover:text-available">

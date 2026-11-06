@@ -19,3 +19,9 @@ export function encrypt(text: string, revealed: number): string {
     })
     .join("");
 }
+
+/** Qué tanto se "descifró" un sector bloqueado: proporción de requisitos cumplidos (máx. 70 % hasta abrirse). */
+export function decryptRatio(prereqs: { met: boolean }[]): number {
+  if (!prereqs.length) return 0.15;
+  return 0.15 + 0.55 * (prereqs.filter((p) => p.met).length / prereqs.length);
+}

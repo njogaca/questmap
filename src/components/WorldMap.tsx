@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { encrypt } from "@/lib/encrypt";
+import { decryptRatio, encrypt } from "@/lib/encrypt";
 import type { NodeState } from "@/lib/progress";
 import { DecryptText } from "./effects/DecryptText";
 import { ProgressBar, StateBadge } from "./StateBadge";
@@ -27,11 +27,6 @@ export type MapEdge = { from: number; to: number; level: number; met: boolean };
 
 const R = 46;
 
-/** Qué tanto se "descifró" un sector bloqueado: proporción de requisitos cumplidos (máx. 70 % hasta abrirse). */
-function decryptRatio(z: MapZone) {
-  if (!z.prereqs.length) return 0.15;
-  return 0.15 + 0.55 * (z.prereqs.filter((p) => p.met).length / z.prereqs.length);
-}
 
 function hexPoints(cx: number, cy: number, r: number) {
   return Array.from({ length: 6 }, (_, i) => {
@@ -137,7 +132,7 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
                 >
                   {String(z.order).padStart(2, "0")} ·{" "}
                   {z.state === "locked"
-                    ? encrypt(z.title.split(" ")[0].toUpperCase(), decryptRatio(z))
+                    ? encrypt(z.title.split(" ")[0].toUpperCase(), decryptRatio(z.prereqs))
                     : z.title.split(" ")[0].toUpperCase()}
                 </text>
                 {z.state === "outline" && (
@@ -172,14 +167,14 @@ function ZonePanel({ zone }: { zone: MapZone }) {
       <h2 className="mt-1 text-2xl font-semibold">
         <span className="mr-2">{zone.emoji}</span>
         {zone.state === "locked" ? (
-          <span className="font-mono text-dim">{encrypt(zone.title, decryptRatio(zone))}</span>
+          <span className="font-mono text-dim">{encrypt(zone.title, decryptRatio(zone.prereqs))}</span>
         ) : (
           <DecryptText key={zone.id} text={zone.title} durationMs={500} />
         )}
       </h2>
       {zone.state === "locked" && (
         <p className="mt-1 font-mono text-xs text-dim">
-          ▓ datos cifrados · {Math.round(decryptRatio(zone) * 100)} % descifrado
+          ▓ datos cifrados · {Math.round(decryptRatio(zone.prereqs) * 100)} % descifrado
         </p>
       )}
       <div className="mt-2">

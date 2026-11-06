@@ -1,6 +1,7 @@
 import { WorldMap, type MapEdge, type MapZone } from "@/components/WorldMap";
 import { ProgressBar, StateBadge } from "@/components/StateBadge";
 import Link from "next/link";
+import { decryptRatio, encrypt } from "@/lib/encrypt";
 import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +57,13 @@ export default async function MapPage() {
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate">
                     <span className="mr-2">{z.emoji}</span>
-                    <span className="font-title text-lg">{z.title}</span>
+                    {z.progress.state === "locked" ? (
+                      <span className="font-mono text-lg text-dim" aria-label={`${z.title} (bloqueado)`}>
+                        {encrypt(z.title, decryptRatio(z.prereqs))}
+                      </span>
+                    ) : (
+                      <span className="font-title text-lg">{z.title}</span>
+                    )}
                   </span>
                   <StateBadge state={z.progress.state} />
                 </div>

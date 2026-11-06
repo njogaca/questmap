@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProgressBar, StateBadge } from "@/components/StateBadge";
 import { STATE_COLOR } from "@/components/state";
+import { decryptRatio, encrypt } from "@/lib/encrypt";
 import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +26,13 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <h1 className="text-3xl font-bold">
           <span className="mr-2">{zone.emoji}</span>
-          {zone.title}
+          {zone.progress.state === "locked" ? (
+            <span className="font-mono text-dim" aria-label={`${zone.title} (bloqueado)`}>
+              {encrypt(zone.title, decryptRatio(zone.prereqs))}
+            </span>
+          ) : (
+            zone.title
+          )}
         </h1>
         <StateBadge state={zone.progress.state} />
       </div>

@@ -67,3 +67,108 @@ templates:
         - "Why is using a Cassandra table as a queue an anti-pattern?"
         - "Design a table for 'the last 20 orders of a customer'. What is your primary key?"
         - "When would you choose Cassandra over PostgreSQL for an order-events workload, and what would you give up?"
+
+  - slug: technical-observability
+    mode: technical_screen
+    title: "Technical screen: Observability & incident response"
+    zone: observability-observatory
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "What is the difference between metrics, logs and traces? Give an example of when each one is the right tool."
+        - "Explain the four golden signals and how you would measure them for an order API."
+        - "What is the difference between a counter, a gauge and a histogram in Prometheus?"
+        - "Why do you wrap a counter in rate() in PromQL? What happens if the service restarts?"
+        - "How would you compute the p95 latency of an endpoint from a Prometheus histogram?"
+        - "What is label cardinality, and why is putting a customer ID in a label a bad idea?"
+        - "What are an SLI, an SLO and an error budget? Define one SLO for checkout."
+        - "What makes an alert actionable? Give an example of a bad alert and how you would fix it."
+        - "Why is alerting on burn rate better than alerting on a raw error-rate threshold?"
+        - "Walk me through how you would investigate a sudden spike in 5xx errors at 3 a.m."
+        - "What goes into a blameless postmortem, and why 'blameless'?"
+        - "How would you trace a single request across three microservices?"
+
+  - slug: technical-sql
+    mode: technical_screen
+    title: "Technical screen: SQL & BigQuery"
+    zone: bigquery-bay
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "Explain the difference between INNER JOIN and LEFT JOIN with an orders and customers example."
+        - "What is the difference between WHERE and HAVING?"
+        - "How would you find the top three products by revenue in each category? Which window function would you use?"
+        - "Explain the difference between ROW_NUMBER, RANK and DENSE_RANK."
+        - "How would you remove duplicate events, keeping only the latest version of each order?"
+        - "Why is BigQuery a columnar store, and how does that change the way you write queries?"
+        - "What is the difference between partitioning and clustering a table in BigQuery? When would you use each?"
+        - "Why is SELECT * expensive in BigQuery, and how do you estimate the cost before running a query?"
+        - "How do you query a repeated field like the items of an order?"
+        - "Compare an OLTP database like PostgreSQL with an analytical warehouse like BigQuery. Where would order data live and why?"
+        - "How would you calculate a seven-day moving average of daily revenue?"
+        - "How would you make sure a daily load into BigQuery does not create duplicate rows if it runs twice?"
+
+  - slug: technical-gcp
+    mode: technical_screen
+    title: "Technical screen: GCP, microservices & CI/CD"
+    zone: gcp-peaks
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "When would you choose Cloud Run over GKE for a Spring Boot service, and when the opposite?"
+        - "What is a cold start on Cloud Run, and how would you reduce its impact on a Java service?"
+        - "Explain IAM in GCP: principals, roles and resources. What is the principle of least privilege?"
+        - "How should one Cloud Run service authenticate to another Cloud Run service?"
+        - "Why is Workload Identity Federation better than storing a service account key in GitHub secrets?"
+        - "Walk me through a CI/CD pipeline you would build for a microservice, from commit to production."
+        - "How would you do a safe rollout of a new version, and how would you roll back?"
+        - "Where do configuration and secrets live in a twelve-factor app on GCP?"
+        - "What is a multi-stage Docker build and why does it matter for a Java service?"
+        - "What is a circuit breaker, and what problem does it solve between microservices?"
+        - "How would you split a monolith into microservices? What would you extract first and why?"
+        - "How do you keep a cloud learning project from generating unexpected costs?"
+
+  - slug: technical-security
+    mode: technical_screen
+    title: "Technical screen: Security & testing"
+    zone: security-fortress
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "What is the difference between authentication and authorization?"
+        - "Explain the OAuth 2.0 client credentials flow. When would a backend service use it?"
+        - "What is inside a JWT, and how does a resource server validate it?"
+        - "What is the difference between a 401 and a 403? Give an example of each."
+        - "What is BOLA, and what test would you write to prove it is fixed?"
+        - "How do you prevent SQL injection in a Java service?"
+        - "Why should you never log an Authorization header?"
+        - "Explain the test pyramid. How would you test an order service at each level?"
+        - "What does Testcontainers give you compared with an in-memory database like H2?"
+        - "How would you design a load test for the checkout endpoint? What thresholds would you set?"
+        - "What is chaos testing, and how would you start doing it safely?"
+        - "What is a flaky test, and what do you do when you find one?"
+
+  - slug: technical-distributed
+    mode: technical_screen
+    title: "Technical screen: Distributed systems fundamentals"
+    zone: distributed-citadel
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "A call to another service times out. What do you know, and what do you not know?"
+        - "Explain the CAP theorem without the 'pick two out of three' simplification. What does PACELC add?"
+        - "What is the difference between linearizability and eventual consistency? Give a use case for each."
+        - "With three replicas, how do read and write quorums guarantee that you read the latest value?"
+        - "Compare synchronous and asynchronous replication. What can you lose with each?"
+        - "Why is hash modulo N a bad partitioning scheme, and how does consistent hashing help?"
+        - "How would you make a 'create order' endpoint safe to retry?"
+        - "Why can't you trust wall-clock timestamps to order events across machines? What would you use instead?"
+        - "Explain at a high level how Raft elects a leader and why it needs a majority."
+        - "How would you implement a transaction that spans the orders, payments and inventory services?"
+        - "What is a retry storm, and how do backoff, jitter and retry budgets prevent it?"
+        - "What is split-brain, and how do fencing tokens protect against it?"

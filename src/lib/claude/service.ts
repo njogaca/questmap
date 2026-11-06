@@ -116,7 +116,10 @@ async function mockLoopContext(): Promise<InterviewContext> {
   const tech = all.filter((t) => t.mode === "technical_screen");
   const beh = all.find((t) => t.mode === "behavioral");
   const design = shuffle(all.filter((t) => t.mode === "system_design"))[0];
-  const techQs = tech.flatMap((t) => shuffle(((t.payload as { questions?: string[] }).questions ?? [])).slice(0, 1));
+  // 3 áreas técnicas al azar (una pregunta de cada una) para que el loop quepa en ~60 min.
+  const techQs = shuffle(tech)
+    .slice(0, 3)
+    .flatMap((t) => shuffle(((t.payload as { questions?: string[] }).questions ?? [])).slice(0, 1));
   const behQs = shuffle(((beh?.payload as { questions?: string[] })?.questions ?? [])).slice(0, 2);
   return {
     mode: "mock_loop",
@@ -146,8 +149,15 @@ export async function startInterview(input: {
     questId = quest.id;
     const level = world.levels.find((l) => l.id === quest.levelId)!;
     const zone = world.zones.find((z) => z.id === level.zoneId)!;
-    const p = quest.payload as { task?: string; interview_focus?: string[]; mode?: string; zone?: string };
-    if (quest.type === "boss") {
+    const p = quest.payload as { task?: string; interview_focus?: string[]; mode?: string; zone?: string; template?: string };
+    if (quest.type !== "boss" && p.mode === "mock_loop") {
+      ctx = { ...(await mockLoopContext()), zoneTitle: zone.title };
+    } else if (quest.type !== "boss" && p.template) {
+      const t = await templateBySlug(p.template);
+      if (!t) throw new Error(`Plantilla de entrevista no encontrada: ${p.template}`);
+      templateId = t.id;
+      ctx = { ...contextFromTemplate(t), zoneTitle: zone.title };
+    } else if (quest.type === "boss") {
       const deliverable = input.deliverable?.trim() ?? "";
       if (deliverable.length < 20) throw new Error("Pega tu entregable: URL del repo, diseño o texto (mínimo 20 caracteres).");
       ctx = {
@@ -163,7 +173,16 @@ export async function startInterview(input: {
       // Plantilla por modo/zona: technical-<zona> (java, eda, cassandra…). Si la zona aún no tiene
       // plantilla, el entrevistador improvisa sobre los temas de la zona.
       const mode = (p.mode ?? "technical_screen") as InterviewMode;
-      const zoneKey: Record<string, string> = { "java-forest": "java", "event-harbor": "eda", "cassandra-caverns": "cassandra" };
+      const zoneKey: Record<string, string> = {
+        "java-forest": "java",
+        "event-harbor": "eda",
+        "cassandra-caverns": "cassandra",
+        "observability-observatory": "observability",
+        "bigquery-bay": "sql",
+        "gcp-peaks": "gcp",
+        "security-fortress": "security",
+        "distributed-citadel": "distributed",
+      };
       const zoneForTemplate = p.zone ?? zone.slug;
       const all = await db.select().from(s.interviewTemplates).where(eq(s.interviewTemplates.status, "published"));
       const t =

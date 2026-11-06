@@ -7,7 +7,7 @@ terms:
     definition_en: "The classic opening question; a short professional summary."
     example_en: "Tell me about yourself and what brought you to this role."
     analogy: "El tráiler de una película: suficiente para que quieran ver el resto."
-    see_also: [arena-bridge-story]
+    see_also: [ arena-bridge-story ]
 
   - slug: arena-bridge-story
     term: bridge story
@@ -16,7 +16,7 @@ terms:
     definition_en: "The part of your story that connects past experience to the new role."
     example_en: "My bridge story connects IBM MQ with event-driven systems on GCP."
     analogy: "Un puente entre dos orillas: no niegas de dónde vienes, muestras cómo cruzas."
-    see_also: [arena-tmay]
+    see_also: [ arena-tmay ]
 
   - slug: arena-behavioral
     term: behavioral interview
@@ -24,7 +24,7 @@ terms:
     definition_es: "Entrevista sobre cómo actuaste en situaciones reales (conflictos, errores, liderazgo). Parte de la idea de que tu conducta pasada predice la futura."
     definition_en: "An interview about how you handled real situations in the past."
     example_en: "In the behavioral round they asked about a conflict with a teammate."
-    see_also: [arena-star]
+    see_also: [ arena-star ]
 
   - slug: arena-star
     term: STAR method
@@ -33,7 +33,7 @@ terms:
     definition_en: "Situation, Task, Action, Result: a structure for behavioral answers."
     example_en: "Use the STAR method and finish with a measurable result."
     analogy: "Una receta de cuento corto: inicio, conflicto, lo que hiciste y final."
-    see_also: [arena-behavioral]
+    see_also: [ arena-behavioral ]
 
   - slug: arena-technical-screen
     term: technical screen
@@ -41,7 +41,7 @@ terms:
     definition_es: "Primera entrevista técnica corta (30–60 min) para comprobar conocimientos base: preguntas conceptuales y a veces un poco de código."
     definition_en: "A short first technical interview to check fundamentals."
     example_en: "The technical screen covered Java, Pub/Sub and SQL basics."
-    see_also: [arena-system-design]
+    see_also: [ arena-system-design ]
 
   - slug: arena-system-design
     term: system design interview
@@ -50,7 +50,7 @@ terms:
     definition_en: "An interview where you design a system out loud and discuss trade-offs."
     example_en: "In the system design interview I designed an order events pipeline."
     analogy: "Dibujar los planos de un edificio frente al cliente, explicando cada decisión."
-    see_also: [arena-technical-screen]
+    see_also: [ arena-technical-screen ]
 
   - slug: arena-take-home
     term: take-home assignment
@@ -58,7 +58,7 @@ terms:
     definition_es: "Ejercicio de programación que resuelves en tu casa con un tiempo límite y luego defiendes en una entrevista."
     definition_en: "A coding exercise you complete at home and later discuss."
     example_en: "The take-home was a small REST service with tests."
-    see_also: [arena-technical-screen]
+    see_also: [ arena-technical-screen ]
 
   - slug: arena-hiring-manager
     term: hiring manager
@@ -66,4 +66,174 @@ terms:
     definition_es: "La persona que será tu jefe directo y toma la decisión final de contratación."
     definition_en: "The person who would be your manager and makes the hiring decision."
     example_en: "My last round is with the hiring manager."
-    see_also: [arena-behavioral]
+    see_also: [ arena-behavioral ]
+  - slug: arena-story-bank
+    term: story bank
+    category: interviews
+    definition_es: Tu colección preparada de 6–8 historias reales (con números) que reutilizas para responder distintas preguntas conductuales.
+    definition_en: A prepared set of real stories you adapt to many behavioral questions.
+    example_en: My story bank has eight stories, and each one covers two or three themes.
+    analogy: "Una caja de herramientas: no compras una herramienta para cada arreglo, eliges la que mejor sirve."
+    see_also:
+      - arena-star
+      - arena-behavioral
+  - slug: arena-ownership
+    term: ownership
+    category: interviews
+    definition_es: Hacerte cargo de un problema o resultado de principio a fin, aunque no sea formalmente tu tarea. Muy valorado en entrevistas.
+    definition_en: Taking responsibility for an outcome from start to finish.
+    example_en: I took ownership of the failing integration even though another team built it.
+    analogy: El vecino que ve una fuga en el edificio y llama al plomero, en vez de pensar 'no es mi departamento'.
+    see_also:
+      - arena-star
+  - slug: arena-follow-up-question
+    term: follow-up question
+    category: interviews
+    definition_es: Pregunta que el entrevistador hace después de tu respuesta para profundizar ('Why did you choose that?', 'What would you do differently?').
+    definition_en: A question that digs deeper into your previous answer.
+    example_en: The follow-up question asked how I measured the improvement.
+    analogy: Cuando el médico, después de 'me duele la cabeza', pregunta '¿desde cuándo y dónde exactamente?'.
+    see_also:
+      - arena-behavioral
+  - slug: arena-impact-numbers
+    term: quantified impact
+    category: interviews
+    definition_es: "Expresar el resultado de tu trabajo con números: tiempos, volúmenes, porcentajes, dinero o incidentes evitados."
+    definition_en: Describing your results with concrete numbers.
+    example_en: "Quantified impact: we cut recovery time by about ninety percent."
+    analogy: Decir 'bajé 8 kilos en 3 meses' en lugar de 'estoy más en forma'.
+    see_also:
+      - arena-star
+  - slug: arena-filler-words
+    term: filler words
+    category: speaking
+    definition_es: Muletillas que llenan silencios ('um', 'uh', 'like', 'you know', 'basically'). Unas pocas son normales; muchas restan claridad.
+    definition_en: Words like 'um' or 'like' that fill pauses.
+    example_en: I recorded myself to reduce filler words.
+    analogy: "Como el 'este…' o el 'o sea' en español: una vez no pasa nada, cada tres palabras distrae."
+    see_also:
+      - arena-tmay
+  - slug: arena-think-aloud
+    term: thinking out loud
+    category: interviews
+    definition_es: Razonar en voz alta durante una pregunta técnica o de diseño para que el entrevistador vea tu proceso, no solo la respuesta final.
+    definition_en: Explaining your reasoning as you work through a problem.
+    example_en: Thinking out loud helped the interviewer guide me when I got stuck.
+    analogy: "Un copiloto que narra la ruta: 'giro aquí porque la otra calle tiene tráfico'."
+    see_also:
+      - arena-technical-screen
+      - arena-clarifying-question
+  - slug: arena-clarifying-question
+    term: clarifying question
+    category: interviews
+    definition_es: Pregunta que haces para entender bien qué te piden antes de responder (alcance, escala, restricciones).
+    definition_en: A question you ask to understand the problem before answering.
+    example_en: My first clarifying question was about the expected traffic.
+    analogy: Antes de cocinar para alguien, preguntar si tiene alergias.
+    see_also:
+      - arena-think-aloud
+      - arena-system-design
+  - slug: ai-hallucination
+    term: hallucination (AI)
+    category: ai-tools
+    definition_es: "Cuando un modelo de IA genera con total seguridad información falsa: una API, una versión, un parámetro o una cita que no existe."
+    definition_en: When an AI model confidently produces false information.
+    example_en: The assistant hallucinated a configuration property, so I checked the official docs.
+    analogy: Un turista que, por no admitir que no sabe, te da indicaciones a un lugar que no existe con total seguridad.
+    see_also:
+      - ai-human-review
+  - slug: ai-context
+    term: context (for AI assistants)
+    category: ai-tools
+    definition_es: "La información que le das al asistente para hacer bien la tarea: archivos relevantes, convenciones, restricciones y cómo verificar el resultado."
+    definition_en: The information you give an AI assistant to do the task well.
+    example_en: With the failing test as context, the assistant found the bug quickly.
+    analogy: Explicarle bien a un electricista qué falla y dónde, en vez de decir 'arregle la casa'.
+    see_also:
+      - ai-human-review
+  - slug: ai-human-review
+    term: human in the loop / human review
+    category: ai-tools
+    definition_es: Principio de que una persona revisa, entiende y aprueba lo que genera la IA antes de que llegue a producción.
+    definition_en: A person reviews and approves AI output before it is used.
+    example_en: Every AI-generated change goes through human review and the full test suite.
+    analogy: El piloto automático vuela el avión, pero el piloto sigue en la cabina mirando los instrumentos.
+    see_also:
+      - ai-hallucination
+      - ai-data-leakage
+  - slug: ai-data-leakage
+    term: data leakage (AI tools)
+    category: ai-tools
+    definition_es: Exponer secretos, datos de clientes o código confidencial al pegarlos en una herramienta de IA no aprobada.
+    definition_en: Exposing sensitive data by sharing it with an unapproved AI tool.
+    example_en: To avoid data leakage, we only use the company-approved assistant and mask customer data.
+    analogy: Contarle los secretos de la empresa a un desconocido en el tren porque parece muy listo.
+    see_also:
+      - ai-human-review
+  - slug: arena-scope
+    term: scope (to scope down)
+    category: interviews
+    definition_es: El alcance de lo que vas a construir. 'Scope down' es reducirlo a propósito para entregar algo sólido a tiempo.
+    definition_en: What you decide to build; scoping down means reducing it on purpose.
+    example_en: I scoped down the take-home to the core API and documented the rest.
+    analogy: Con poco tiempo para cocinar, haces un buen plato principal en vez de cinco platos a medias.
+    see_also:
+      - arena-take-home
+      - arena-assumption
+  - slug: arena-assumption
+    term: assumption
+    category: interviews
+    definition_es: Algo que das por cierto para avanzar cuando falta información. En entrevistas se dice en voz alta y se anota.
+    definition_en: Something you take as true to move forward without full information.
+    example_en: My assumption is that orders are mostly written once and read many times.
+    analogy: Planear un picnic asumiendo que no llueve, pero llevando un paraguas por si acaso.
+    see_also:
+      - arena-clarifying-question
+      - arena-scope
+  - slug: arena-recruiter-screen
+    term: recruiter screen
+    category: interviews
+    definition_es: "La primera llamada con el reclutador: motivación, experiencia, autorización para trabajar, disponibilidad y expectativas salariales."
+    definition_en: The first call with a recruiter to check basic fit.
+    example_en: In the recruiter screen they asked about my visa status and my salary range.
+    analogy: El portero que revisa que estés en la lista antes de dejarte entrar a la fiesta.
+    see_also:
+      - arena-hiring-manager
+      - arena-onsite-loop
+  - slug: arena-onsite-loop
+    term: onsite / final loop
+    category: interviews
+    definition_es: "La ronda final: varias entrevistas seguidas (código, diseño, conductual) con distintas personas, presencial o remota."
+    definition_en: The final round of several back-to-back interviews.
+    example_en: My final loop had four interviews in one afternoon.
+    analogy: "La final de un torneo: varios partidos el mismo día y cada uno cuenta."
+    see_also:
+      - arena-recruiter-screen
+      - arena-system-design
+  - slug: arena-offer-package
+    term: offer package (total compensation)
+    category: offer
+    definition_es: "Todo lo que incluye una oferta: salario base, bono, acciones (RSU), 401(k), seguro médico, vacaciones y otros beneficios."
+    definition_en: Everything included in a job offer, not just base salary.
+    example_en: The base salary was lower, but the total offer package was better.
+    analogy: Comparar planes de celular mirando datos, minutos y llamadas internacionales, no solo el precio mensual.
+    see_also:
+      - arena-counteroffer
+  - slug: arena-counteroffer
+    term: counteroffer
+    category: offer
+    definition_es: Tu respuesta a una oferta pidiendo mejoras concretas (más base, bono de firma, fecha de inicio), con razones.
+    definition_en: Your response to an offer asking for specific improvements.
+    example_en: I made a counteroffer for a higher base, citing the market range.
+    analogy: Cuando compras un auto y respondes 'me interesa, pero con mantenimiento incluido'.
+    see_also:
+      - arena-offer-package
+  - slug: arena-thank-you-note
+    term: thank-you note
+    category: interviews
+    definition_es: Correo corto de agradecimiento después de una entrevista, idealmente en las 24 horas siguientes, mencionando algo concreto de la conversación.
+    definition_en: A short email thanking the interviewer after the interview.
+    example_en: In my thank-you note I mentioned our discussion about on-call.
+    analogy: "Mandar un mensaje de 'gracias por la cena' al día siguiente: pequeño gesto, buena impresión."
+    see_also:
+      - arena-recruiter-screen

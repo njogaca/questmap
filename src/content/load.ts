@@ -104,6 +104,14 @@ function validateReferences(c: ContentBundle) {
             if (!termSlugs.has(String(t))) errors.push(`quest ${q.slug}: término de glosario desconocido "${t}"`);
       }
   for (const f of c.interviews) for (const t of f.templates) unique("interview_template", t.slug);
+  const templateSlugs = new Set(c.interviews.flatMap((f) => f.templates.map((t) => t.slug)));
+  for (const z of c.zones)
+    for (const l of z.levels)
+      for (const q of l.quests) {
+        const tpl = q.payload.template;
+        if (tpl !== undefined && !templateSlugs.has(String(tpl)))
+          errors.push(`quest ${q.slug}: plantilla de entrevista desconocida "${tpl}"`);
+      }
 
   if (errors.length) throw new Error(`Referencias inválidas en content/:\n  - ${errors.join("\n  - ")}`);
 }

@@ -1261,3 +1261,83 @@ resources:
     required: false
     why: Cómo Google limita la carga por cliente y rechaza trabajo de forma controlada.
     verified: true
+  - slug: res-star-method
+    title: The STAR Method Explained (The Muse)
+    type: article
+    url: https://www.themuse.com/advice/star-interview-method
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Explicación clara del método STAR con ejemplos y cómo preparar historias a partir de la oferta.
+    verified: true
+  - slug: res-claude-code-best-practices
+    title: Best practices for Claude Code
+    type: docs
+    url: https://code.claude.com/docs/en/best-practices
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: Cómo darle contexto y una forma de verificar a un asistente de código, y qué reglas imponer en un repo.
+    verified: true
+  - slug: res-copilot-best-practices
+    title: Best practices for using GitHub Copilot
+    type: docs
+    url: https://docs.github.com/en/copilot/get-started/best-practices
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: "Incluye la sección 'Check Copilot's work': entender, revisar y probar cada sugerencia."
+    verified: true
+  - slug: res-owasp-llm-top10
+    title: OWASP Top 10 for Large Language Model Applications
+    type: docs
+    url: https://owasp.org/www-project-top-10-for-large-language-model-applications/
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: Los riesgos de seguridad más comunes al construir o integrar aplicaciones con LLMs.
+    verified: true
+  - slug: res-system-design-primer
+    title: The System Design Primer (GitHub)
+    type: course
+    url: https://github.com/donnemartin/system-design-primer
+    language: en
+    duration_min: 300
+    cost: free
+    required: true
+    why: Incluye 'How to approach a system design interview question' y ejemplos resueltos con trade-offs.
+    verified: true
+  - slug: res-negotiation-haseeb
+    title: Ten Rules for Negotiating a Job Offer (Haseeb Qureshi)
+    type: article
+    url: https://haseebq.com/my-ten-rules-for-negotiating-a-job-offer/
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: "Reglas prácticas: todo por escrito, mantener el entusiasmo, dar razones y valorar más que el dinero."
+    verified: true
+  - slug: res-salary-negotiation-patio11
+    title: "Salary Negotiation: Make More Money, Be More Valued (Patrick McKenzie)"
+    type: article
+    url: https://www.kalzumeus.com/2012/01/23/salary-negotiation/
+    language: en
+    duration_min: 40
+    cost: free
+    required: false
+    why: Un clásico sobre por qué y cómo negociar, con guiones de conversación.
+    verified: true
+  - slug: res-reverse-interview
+    title: "Reverse interview: questions to ask the company (GitHub)"
+    type: article
+    url: https://github.com/viraptor/reverse-interview
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Lista de preguntas para el entrevistador por tema (rol, tecnología, equipo, compañía). Elige las que te importen.
+    verified: true

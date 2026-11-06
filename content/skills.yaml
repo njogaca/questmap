@@ -3,25 +3,10 @@
 # target_xp = XP ponderado esperado cuando estén completas TODAS las quests
 # `required` de TODAS las zonas que entrenan la skill (sin bonos ni optional).
 #
-# Estimación v1 (las zonas 4–10 aún son esqueleto), usando la plantilla típica:
-#   Nivel 1–4 ≈ 2 learn (40) + glossary (15) + lab (50) + quiz (40) = 145 XP
-#   Nivel 5   ≈ 145 + boss (150)                                    = 295 XP
-#   Zona normal = 4 × 145 + 295                                     = 875 XP
-#   Zona 10 (Arena) usa interview (60) en vez de lab: nivel ≈ 195; zona ≈ 4×195 + 345 = 1125 XP
-#   Capstone (Z9) ≈ 9 labs × 50 + interview final 60               = 510 XP
-#   English Track ≈ 30 micro × 10                                   = 300 XP
-#
-# Reparto de cada zona entre sus skills (pesos):
-#   Z1 Java:          java .70, testing .20, git .10
-#   Z2 Event Harbor:  eda .75, distributed_systems .25
-#   Z3 Cassandra:     cassandra .75, distributed_systems .25
-#   Z4 Observability: observability .75, debugging_rca .25
-#   Z5 BigQuery:      bigquery_sql 1.0
-#   Z6 GCP:           microservices_gcp .60, cicd .25, security .15
-#   Z7 Fortress:      security .40, testing .40, debugging_rca .20
-#   Z8 Citadel:       distributed_systems 1.0
-#   Z9 Capstone:      un milestone (50) por skill; eda 100 (2 milestones); english 50 (README) + 60 (defensa)
-#   Z10 Arena:        english .85, ai_tools .15
+# Historia: en la v1 se estimó con una plantilla típica por nivel (las zonas 4–10 eran
+# esqueleto). El 2026-11-05, con todas las zonas publicadas, se reemplazó por el XP
+# real: suma de xp × peso de cada quest required publicada (consulta sobre quests +
+# quest_skills). Si agregas o cambias quests, recalcula con esa misma suma.
 #
 # El seed avisa si la suma real de una skill ya publicada se desvía > 15 % de su target_xp.
 
@@ -30,69 +15,69 @@ skills:
     name: Java / OOP
     description: Lenguaje orientado a objetos (preferiblemente Java)
     core: true
-    target_xp: 790 # REAL publicado con Z1–Z9 completas (2026-11-05): 788
+    target_xp: 850 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 850
   - code: eda
     name: Event-driven / Pub/Sub
     description: Event-driven y colas/streaming (Google Cloud Pub/Sub)
     core: true
-    target_xp: 640 # REAL publicado con Z1–Z9 completas (2026-11-05): 644
+    target_xp: 680 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 680
   - code: cassandra
     name: Apache Cassandra
     description: NoSQL, Apache Cassandra, alto throughput
     core: true
-    target_xp: 580 # REAL publicado con Z1–Z9 completas (2026-11-05): 584
+    target_xp: 610 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 608
   - code: bigquery_sql
     name: BigQuery y SQL
     description: BigQuery y SQL, datasets grandes
     core: true
-    target_xp: 750 # REAL publicado con Z1–Z9 completas (2026-11-05): 750
+    target_xp: 770 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 774
   - code: observability
     name: Observabilidad
     description: Prometheus + Grafana, métricas y alertas
     core: true
-    target_xp: 570 # REAL publicado con Z1–Z9 completas (2026-11-05): 568
+    target_xp: 590 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 592
   - code: ai_tools
     name: Herramientas de IA
     description: Uso de herramientas de IA (Claude, asistentes LLM) en el desarrollo
     core: false
-    target_xp: 170 # 1125×.15 = 169
+    target_xp: 100 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 100
   - code: microservices_gcp
     name: Microservicios en GCP
     description: Microservicios y cloud (GCP preferido)
     core: true
-    target_xp: 420 # REAL publicado con Z1–Z9 completas (2026-11-05): 417
+    target_xp: 420 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 417
   - code: cicd
     name: CI/CD
     description: CI/CD y pipelines de despliegue
     core: false
-    target_xp: 210 # REAL publicado con Z1–Z9 completas (2026-11-05): 212
+    target_xp: 210 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 212
   - code: git
     name: Git
     description: Control de versiones
     core: false
-    target_xp: 30 # REAL publicado con Z1–Z9 completas (2026-11-05): 30
+    target_xp: 30 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 30
   - code: debugging_rca
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
-    target_xp: 270 # REAL publicado con Z1–Z9 completas (2026-11-05): 267
+    target_xp: 270 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 267
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
-    target_xp: 510 # REAL publicado con Z1–Z9 completas (2026-11-05): 513
+    target_xp: 510 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 513
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance
     core: false
-    target_xp: 450 # REAL publicado con Z1–Z9 completas (2026-11-05): 448
+    target_xp: 460 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 464
   - code: english
     name: Inglés técnico
     description: Comunicación y entrevistas en inglés
     core: true
-    target_xp: 1310 # 1125×.85 = 956 + English Track 300 + capstone 50 (README); la defensa (60) va repartida
+    target_xp: 1600 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 1601
   - code: distributed_systems
     name: Sistemas distribuidos
     description: Teoría de sistemas distribuidos (base para todo lo anterior)
     core: false
-    target_xp: 1100 # REAL publicado con Z1–Z9 completas (2026-11-05): 1100
+    target_xp: 1180 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 1184

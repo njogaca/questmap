@@ -5,7 +5,7 @@ emoji: "🎯"
 unlocked_from_start: true
 map: { x: 150, y: 100 }
 prerequisites: []
-skills: [ english, ai_tools ]
+skills: [ english, ai_tools, java, eda, cassandra, observability, bigquery_sql, microservices_gcp, security, testing, distributed_systems ]
 story: >
   Sector 10. La arena donde todo se pone a prueba en inglés. Cada combate es una entrevista; cada victoria te acerca a la oferta. El primer combate es el que todos los entrevistadores abren: "Tell me about yourself".
 
@@ -165,123 +165,1000 @@ levels:
         payload:
           prompt_en: "Tell me about yourself."
           rubric: [ correctness, depth, clarity, tradeoffs ]
-
-  # ================================================================ NIVELES 2–5 (esqueleto)
   - slug: arena-2-apprentice
     number: 2
-    status: outline
-    title: "Apprentice — Preguntas conductuales con STAR"
+    title: Apprentice — Preguntas conductuales con STAR
+    story: El primer rival no te pregunta qué sabes, sino qué hiciste. Cada respuesta debe ser una historia corta, concreta y con final.
     quests:
-      - slug: arena-2-apprentice-learn-star
+      - slug: arena-2-learn-star
         type: learn
         title: El método STAR
         required: true
+        estimated_min: 30
         skills:
-          english: 0.8
-          ai_tools: 0.2
-      - slug: arena-2-apprentice-open-star
-        type: open_answer
-        title: Responde una pregunta conductual con STAR
+          english: 1
+        resources:
+          - ref: res-star-method
+        payload:
+          note_prompt: Elige una historia real de tu trabajo con MQ/IIB (un incidente, una mejora o un conflicto) y escribe una línea para cada parte de STAR. Puede ser en español.
+          summary_md: |
+            Las preguntas conductuales empiezan con "Tell me about a time…" o "Give me an example of…". Buscan evidencia de cómo trabajas, no teoría.
+
+            **STAR** (1,5–2 minutos en total):
+            - **Situation** (10 %): el contexto mínimo. "At the bank, our payment integration processed about 2 million messages a day."
+            - **Task** (10 %): TU responsabilidad o el objetivo. "I was responsible for…"
+            - **Action** (60 %): lo que TÚ hiciste, paso a paso. Usa "I", no "we". Aquí se gana la entrevista.
+            - **Result** (20 %): el resultado con números y lo que aprendiste. "We cut incident time from 3 hours to 20 minutes."
+
+            Errores típicos:
+            - Contexto eterno y acción de una frase.
+            - "We did…" todo el tiempo: el entrevistador no sabe qué hiciste tú.
+            - Terminar sin resultado o sin aprendizaje.
+            - Inventar: las preguntas de seguimiento ("What would you do differently?") lo delatan.
+
+            Si el resultado fue malo, está bien: cuéntalo y di qué aprendiste y qué cambiaste después.
+      - slug: arena-2-learn-story-bank
+        type: learn
+        title: "Tu banco de historias: 8 historias para 30 preguntas"
         required: true
+        estimated_min: 45
         skills:
-          english: 0.8
-          ai_tools: 0.2
-      - slug: arena-2-apprentice-interview-behavioral
+          english: 1
+        resources:
+          - ref: res-star-method
+        payload:
+          note_prompt: "Haz tu tabla: 8 historias (título corto) y, para cada una, qué temas cubre (incidente, conflicto, aprendizaje rápido, error, mejora, mentoría, ambigüedad, prioridades)."
+          summary_md: |
+            No necesitas una historia por pregunta: con **6–8 historias bien preparadas** cubres casi todo, porque cada una sirve para varios temas.
+
+            Temas que más preguntan para un puesto backend:
+            1. Un incidente crítico en producción (presión, RCA, qué cambiaste).
+            2. Un desacuerdo técnico con tu equipo o tu jefe.
+            3. Aprender una tecnología rápido (¡tu transición a Java, Pub/Sub y GCP es perfecta aquí!).
+            4. Un error tuyo y cómo lo comunicaste.
+            5. Mejorar la confiabilidad o el rendimiento, con números.
+            6. Requisitos poco claros.
+            7. Ayudar a un compañero a crecer.
+            8. Priorizar varias urgencias.
+
+            Para cada historia anota: los números (volumen, tiempos, porcentaje de mejora), tu acción concreta y una frase de aprendizaje. Practícalas en voz alta hasta que salgan en menos de 2 minutos sin leer.
+
+            Conecta las historias con la oferta: confiabilidad, mensajería, debugging, trabajo remoto y aprendizaje continuo.
+      - slug: arena-2-glossary
+        type: glossary
+        title: Vocabulario de entrevistas conductuales
+        required: true
+        estimated_min: 10
+        skills:
+          english: 1
+        payload:
+          terms:
+            - arena-star
+            - arena-story-bank
+            - arena-ownership
+            - arena-follow-up-question
+            - arena-impact-numbers
+            - arena-filler-words
+      - slug: arena-2-write-star
+        type: micro
+        title: Escribe tu primera historia STAR
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        payload:
+          kind: writing
+          instructions: "Escribe en inglés tu historia del incidente crítico (120–180 palabras) con las 4 partes marcadas: Situation, Task, Action, Result. Usa 'I' en la parte de Action y al menos un número en Result."
+      - slug: arena-2-speak-star
+        type: micro
+        title: Cuenta tu historia STAR en voz alta
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        payload:
+          kind: speaking
+          instructions: "Sin leer, cuenta la misma historia en menos de 2 minutos con Win + H y pega la transcripción. Revisa: ¿cuántas veces dijiste 'we'? ¿Cuántos 'um' o 'eh'? ¿Llegaste al resultado?"
+      - slug: arena-2-quiz
+        type: quiz
+        title: Quiz — STAR y respuestas conductuales
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        questions:
+          - slug: a2-q1
+            type: order
+            prompt: "Ordena las partes del método STAR:"
+            options:
+              - Situation
+              - Task
+              - Action
+              - Result
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+            explanation: Contexto breve → tu responsabilidad → lo que hiciste → el resultado con números.
+            skill: english
+            difficulty: 1
+          - slug: a2-q2
+            type: mcq
+            prompt: ¿En qué parte de STAR deberías pasar MÁS tiempo?
+            options:
+              - Situation
+              - Task
+              - Action
+              - Result
+            answer: 2
+            explanation: La acción es donde el entrevistador ve cómo piensas y trabajas. Alrededor del 60 % de la respuesta.
+            skill: english
+            difficulty: 1
+          - slug: a2-q3
+            type: mcq
+            prompt: ¿Qué frase es mejor en la parte de Action?
+            options:
+              - We fixed the issue.
+              - The team decided to restart everything.
+              - I analyzed the queue depth, found the poison message and moved it to a backout queue.
+              - It got fixed eventually.
+            answer: 2
+            explanation: Concreta, en primera persona y con pasos técnicos verificables.
+            skill: english
+            difficulty: 1
+          - slug: a2-q4
+            type: mcq
+            prompt: ¿Cuál es el mejor Result?
+            options:
+              - It went well.
+              - Everyone was happy.
+              - We reduced the average recovery time from three hours to twenty minutes, and the runbook is still used today.
+              - I don't remember the numbers.
+            answer: 2
+            explanation: Números y un efecto duradero. Si no tienes el número exacto, da un orden de magnitud honesto ('about…').
+            skill: english
+            difficulty: 1
+          - slug: a2-q5
+            type: tf
+            prompt: Si la historia terminó mal, es mejor no contarla en una entrevista.
+            answer: false
+            explanation: Las preguntas sobre errores son comunes. Lo que evalúan es cómo lo manejaste y qué aprendiste.
+            skill: english
+            difficulty: 1
+          - slug: a2-q6
+            type: fill
+            prompt: "Completa: 'I was ______ for the integration between the core banking system and the payment gateway.'"
+            answer:
+              - responsible
+              - in charge
+            explanation: "'I was responsible for…' o 'I was in charge of…' son las fórmulas para la parte de Task. Ojo: 'responsible OF' es un error común."
+            skill: english
+            difficulty: 1
+          - slug: a2-q7
+            type: mcq
+            prompt: "El entrevistador pregunta: 'What would you do differently?'. ¿Cuál es la mejor respuesta?"
+            options:
+              - Nothing, it was perfect.
+              - I would have added monitoring on queue depth earlier, so we could detect the problem before customers noticed.
+              - I would ask my manager.
+              - I don't know.
+            answer: 1
+            explanation: Muestra autocrítica concreta y aprendizaje técnico.
+            skill: english
+            difficulty: 2
+          - slug: a2-q8
+            type: mcq
+            prompt: ¿Qué frase es correcta en inglés?
+            options:
+              - I made a mistake and I told it to my manager.
+              - I made a mistake, and I immediately told my manager about it.
+              - I did a mistake and I said to my manager.
+              - I committed an error to my manager.
+            answer: 1
+            explanation: "'Make a mistake' (no 'do'), y 'tell someone about something' (no 'say to someone')."
+            skill: english
+            difficulty: 2
+          - slug: a2-q9
+            type: mcq
+            prompt: Necesitas unos segundos para pensar una historia. ¿Qué dices?
+            options:
+              - (silencio total de 30 segundos)
+              - That's a good question — let me think of the best example for a second.
+              - I have no examples.
+              - Can we skip this one?
+            answer: 1
+            explanation: Pedir un momento es normal y profesional. Mejor eso que contar la primera historia que se te ocurra.
+            skill: english
+            difficulty: 1
+      - slug: arena-2-open-star
+        type: open_answer
+        title: Claude evalúa tu respuesta STAR
+        required: true
+        estimated_min: 25
+        skills:
+          english: 1
+        payload:
+          prompt_en: Tell me about a time you had to debug a critical production issue under pressure. What was the root cause and what did you change afterwards?
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+      - slug: arena-2-interview-behavioral
         type: interview
         title: Mini-entrevista conductual
         required: true
+        estimated_min: 30
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 1
         payload:
           mode: behavioral
+          template: behavioral-core
   - slug: arena-3-journeyman
     number: 3
-    status: outline
-    title: "Journeyman — Screens técnicos por zona"
+    title: Journeyman — Screens técnicos por zona y uso responsable de IA
+    story: "En la segunda ronda, cada rival domina un arte distinto: Java, mensajería, datos, métricas. Y uno de ellos te observa para ver si usas la magia de la IA con criterio o a ciegas."
     quests:
-      - slug: arena-3-journeyman-interview-java
+      - slug: arena-3-learn-technical
+        type: learn
+        title: Cómo responder preguntas técnicas en voz alta
+        required: true
+        estimated_min: 30
+        skills:
+          english: 1
+        payload:
+          note_prompt: Elige una pregunta técnica de cualquier zona y escribe tu respuesta con la estructura definición → ejemplo → trade-off, en inglés y en menos de 100 palabras.
+          summary_md: |
+            En un screen técnico (30–45 min) te hacen 5–8 preguntas cortas. No buscan un discurso, buscan claridad y criterio.
+
+            Estructura de respuesta (30–90 segundos):
+            1. **Definición en una frase.** "Idempotency means that doing an operation twice has the same effect as doing it once."
+            2. **Ejemplo concreto,** de preferencia tuyo. "In my order service, the POST endpoint stores an idempotency key with the order in the same transaction."
+            3. **Trade-off o detalle de producción.** "The cost is an extra table and a lookup, and you need a retention policy for the keys."
+
+            Si no sabes algo:
+            - No inventes. Di lo que sí sabes y razona en voz alta: "I haven't used X in production, but I'd expect it to work like Y because…".
+            - Pregunta para aclarar: "Do you mean at the database level or at the API level?"
+
+            Frases para pensar en voz alta (think aloud):
+            - "Let me think about this out loud."
+            - "There are two cases here…"
+            - "The first thing I'd check is…"
+            - "It depends on… If X, I'd do A; if Y, B."
+      - slug: arena-3-glossary
+        type: glossary
+        title: Vocabulario de screens técnicos y de IA
+        required: true
+        estimated_min: 10
+        skills:
+          english: 0.6
+          ai_tools: 0.4
+        payload:
+          terms:
+            - arena-technical-screen
+            - arena-think-aloud
+            - arena-clarifying-question
+            - ai-hallucination
+            - ai-context
+            - ai-human-review
+            - ai-data-leakage
+      - slug: arena-3-interview-java
         type: interview
         title: "Screen técnico: Java"
         required: true
+        estimated_min: 30
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 0.6
+          java: 0.4
         payload:
           mode: technical_screen
           zone: java-forest
-      - slug: arena-3-journeyman-interview-eda
+      - slug: arena-3-interview-eda
         type: interview
         title: "Screen técnico: Pub/Sub"
         required: true
+        estimated_min: 30
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 0.6
+          eda: 0.4
         payload:
           mode: technical_screen
           zone: event-harbor
-      - slug: arena-3-journeyman-interview-cassandra
+      - slug: arena-3-interview-cassandra
         type: interview
         title: "Screen técnico: Cassandra"
         required: true
+        estimated_min: 30
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 0.6
+          cassandra: 0.4
         payload:
           mode: technical_screen
           zone: cassandra-caverns
-      - slug: arena-3-journeyman-learn-ai
+      - slug: arena-3-interview-observability
+        type: interview
+        title: "Screen técnico: Prometheus y observabilidad"
+        required: true
+        estimated_min: 30
+        skills:
+          english: 0.6
+          observability: 0.4
+        payload:
+          mode: technical_screen
+          zone: observability-observatory
+      - slug: arena-3-interview-sql
+        type: interview
+        title: "Screen técnico: SQL y BigQuery"
+        required: true
+        estimated_min: 30
+        skills:
+          english: 0.6
+          bigquery_sql: 0.4
+        payload:
+          mode: technical_screen
+          zone: bigquery-bay
+      - slug: arena-3-interview-gcp
+        type: interview
+        title: "Screen técnico (extra): GCP y CI/CD"
+        required: false
+        estimated_min: 30
+        skills:
+          english: 0.6
+          microservices_gcp: 0.4
+        payload:
+          mode: technical_screen
+          zone: gcp-peaks
+      - slug: arena-3-interview-security
+        type: interview
+        title: "Screen técnico (extra): seguridad y pruebas"
+        required: false
+        estimated_min: 30
+        skills:
+          english: 0.6
+          security: 0.4
+        payload:
+          mode: technical_screen
+          zone: security-fortress
+      - slug: arena-3-interview-distributed
+        type: interview
+        title: "Screen técnico (extra): sistemas distribuidos"
+        required: false
+        estimated_min: 30
+        skills:
+          english: 0.6
+          distributed_systems: 0.4
+        payload:
+          mode: technical_screen
+          zone: distributed-citadel
+      - slug: arena-3-learn-ai
         type: learn
         title: Uso responsable de asistentes de IA en el desarrollo
         required: true
+        estimated_min: 45
         skills:
           ai_tools: 1
+        resources:
+          - ref: res-claude-code-best-practices
+          - ref: res-copilot-best-practices
+          - ref: res-owasp-llm-top10
+            required: false
+        payload:
+          note_prompt: "Describe en 5 líneas TU proceso para aceptar código generado por IA en order-platform: qué le das como contexto, cómo lo verificas, qué nunca le pegas y cuándo lo descartas."
+          summary_md: |
+            La oferta menciona herramientas de IA. En la entrevista no basta con decir "uso Copilot o Claude": quieren ver **criterio**.
+
+            Lo que hace un ingeniero responsable:
+            - **Da contexto y una forma de verificar:** pruebas que deben pasar, el estilo del repo, las restricciones ("no new dependencies").
+            - **Entiende antes de aceptar:** si no puedes explicar el código, no lo subes.
+            - **Verifica con herramientas, no con fe:** tests, linters, revisión de seguridad, correr el código. La IA puede inventar APIs, versiones o flags (**alucinaciones**).
+            - **Cuida los datos:** nunca pegas secretos, datos de clientes ni código confidencial en una herramienta no aprobada por la empresa.
+            - **Revisa con más cuidado lo crítico:** autenticación, dinero, concurrencia, SQL, manejo de errores.
+            - **Es transparente:** en un code review dices qué parte generó la IA si es relevante.
+
+            Respuesta modelo (adáptala): "I use AI assistants to speed up boilerplate, tests and exploration, but I treat their output like a pull request from a new teammate: I read it, I run the tests, and I check edge cases and security. For example, in my capstone project the assistant generated a Pub/Sub consumer that acknowledged messages before processing them; my idempotency test caught it."
+      - slug: arena-3-open-ai-review
+        type: open_answer
+        title: Revisa código generado por IA
+        required: true
+        estimated_min: 30
+        skills:
+          ai_tools: 0.6
+          java: 0.2
+          english: 0.2
+        payload:
+          prompt_en: |
+            An AI assistant generated this Pub/Sub consumer for the payments service. Review it as if it were a pull request: list every problem you find (correctness, reliability, security, testing), explain the risk of each one, and show how you would fix the most important ones.
+
+            ```java
+            MessageReceiver receiver = (message, consumer) -> {
+                consumer.ack();
+                String json = message.getData().toStringUtf8();
+                log.info("Received payment: " + json);
+                Payment p = new ObjectMapper().readValue(json, Payment.class);
+                jdbc.update("INSERT INTO payments VALUES ('" + p.id() + "', " + p.amount() + ")");
+                paymentGateway.charge(p.cardNumber(), p.amount());
+            };
+            ```
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+      - slug: arena-3-quiz
+        type: quiz
+        title: Quiz — screens técnicos e IA responsable
+        required: true
+        estimated_min: 15
+        skills:
+          english: 0.5
+          ai_tools: 0.5
+        questions:
+          - slug: a3-q1
+            type: order
+            prompt: "Ordena una buena respuesta técnica corta:"
+            options:
+              - One-sentence definition
+              - Concrete example (ideally yours)
+              - Trade-off or production detail
+            answer:
+              - 0
+              - 1
+              - 2
+            explanation: Definición → ejemplo → trade-off. Clara, corta y con criterio.
+            skill: english
+            difficulty: 1
+          - slug: a3-q2
+            type: mcq
+            prompt: Te preguntan por una herramienta que nunca usaste en producción. ¿Qué respondes?
+            options:
+              - Invento una experiencia para no quedar mal.
+              - I haven't used it in production, but I've read about it, and I'd expect it to work like X because… Here's how I'd approach learning it.
+              - No sé.
+              - Cambio de tema.
+            answer: 1
+            explanation: Honestidad + razonamiento. Inventar se descubre con la primera pregunta de seguimiento.
+            skill: english
+            difficulty: 1
+          - slug: a3-q3
+            type: mcq
+            prompt: ¿Qué es una 'alucinación' de un asistente de IA en desarrollo?
+            options:
+              - Un error de compilación
+              - "Cuando genera con seguridad algo falso: una API, un flag o una versión que no existe"
+              - Cuando tarda en responder
+              - Un ataque de seguridad
+            answer: 1
+            explanation: Por eso verificas con la documentación oficial y corriendo el código.
+            skill: ai_tools
+            difficulty: 1
+          - slug: a3-q4
+            type: tf
+            prompt: Está bien pegar en un chatbot público un log de producción con datos de clientes si es para depurar más rápido.
+            answer: false
+            explanation: Es una fuga de datos. Usa solo herramientas aprobadas por la empresa y anonimiza siempre.
+            skill: ai_tools
+            difficulty: 1
+          - slug: a3-q5
+            type: mcq
+            prompt: La IA te generó un método que pasa las pruebas, pero no entiendes cómo funciona. ¿Qué haces?
+            options:
+              - Lo subo, las pruebas pasan
+              - Le pido que lo explique, lo leo, lo simplifico si hace falta y no lo subo hasta poder explicarlo
+              - Lo borro siempre
+              - Le pregunto a otro modelo y subo lo que diga
+            answer: 1
+            explanation: Eres responsable del código que subes, lo hayas escrito tú o no.
+            skill: ai_tools
+            difficulty: 1
+          - slug: a3-q6
+            type: mcq
+            prompt: ¿Cuál es la forma más efectiva de que un asistente de IA genere código correcto en tu proyecto?
+            options:
+              - Un prompt muy corto
+              - Darle contexto (archivos, convenciones, restricciones) y una forma de verificar (pruebas que deben pasar)
+              - Pedirle que no se equivoque
+              - Usar siempre el modelo más grande
+            answer: 1
+            explanation: Contexto + verificación automática es lo que más mejora el resultado.
+            skill: ai_tools
+            difficulty: 2
+          - slug: a3-q7
+            type: mcq
+            prompt: ¿Qué partes del código revisarías con más cuidado si las generó una IA?
+            options:
+              - Los nombres de variables
+              - Autenticación, manejo de dinero, concurrencia, SQL y manejo de errores
+              - Los comentarios
+              - Ninguna, todo igual
+            answer: 1
+            explanation: Ahí un error sutil cuesta caro, y es donde los modelos suelen tomar atajos inseguros.
+            skill: ai_tools
+            difficulty: 2
+          - slug: a3-q8
+            type: fill
+            prompt: "Completa la frase para pensar en voz alta: 'Let me think about this out ______.'"
+            answer:
+              - loud
+            explanation: "'Think out loud' (o 'think aloud'): razonar en voz alta para que el entrevistador vea tu proceso."
+            skill: english
+            difficulty: 1
+          - slug: a3-q9
+            type: mcq
+            prompt: ¿Qué frase es correcta para pedir una aclaración?
+            options:
+              - What you mean?
+              - Do you mean at the API level or at the database level?
+              - Explain me the question.
+              - I no understand.
+            answer: 1
+            explanation: "'Explain me' es un error típico: se dice 'explain to me' o, mejor, una pregunta concreta como esta."
+            skill: english
+            difficulty: 1
   - slug: arena-4-expert
     number: 4
-    status: outline
-    title: "Expert — System design y mini take-home"
+    title: Expert — System design y mini take-home
+    story: El tercer rival te da una pizarra y un reloj de arena. No gana quien dibuja más cajas, sino quien pregunta, decide y explica por qué.
     quests:
-      - slug: arena-4-expert-learn-design
+      - slug: arena-4-learn-design
         type: learn
         title: Cómo abordar una entrevista de system design
         required: true
+        estimated_min: 45
         skills:
-          english: 0.8
-          ai_tools: 0.2
-      - slug: arena-4-expert-interview-design
+          english: 0.6
+          distributed_systems: 0.4
+        resources:
+          - ref: res-system-design-primer
+        payload:
+          note_prompt: Escribe en inglés las 5 preguntas de aclaración que harías para 'Design the order events pipeline for a large retailer' y la respuesta que supondrías para cada una.
+          summary_md: |
+            Ya viste el guion completo en la Distributed Systems Citadel. Aquí lo practicas **hablando**, con el reloj corriendo.
+
+            Cómo se ve una entrevista de 45 minutos:
+            - **0–5 min:** preguntas de aclaración. Escribe los requisitos en la pizarra (o en el editor compartido).
+            - **5–8 min:** estimaciones en voz alta. "3,000 orders per second at peak, about 1 KB each, so roughly 3 MB per second…"
+            - **8–20 min:** diseño de alto nivel. Narra mientras dibujas: "The client calls the orders service, which writes to PostgreSQL and the outbox…"
+            - **20–38 min:** profundiza donde el entrevistador te lleve (o propón tú lo más difícil).
+            - **38–45 min:** fallos, monitoreo, trade-offs, y qué harías con más tiempo.
+
+            Señales que suman:
+            - Preguntas antes de dibujar.
+            - Números, aunque sean aproximados.
+            - Decir "the trade-off is…" en cada decisión importante.
+            - Hablar de qué pasa cuando algo falla.
+            - Escuchar las pistas del entrevistador y ajustar.
+
+            Señales que restan: lanzar nombres de tecnologías sin razones ("Kafka, Kubernetes, microservices…"), quedarte callado mucho tiempo, o defender una decisión cuando el entrevistador te muestra un problema real.
+      - slug: arena-4-learn-takehome
+        type: learn
+        title: "Take-home bajo tiempo: cómo entregar algo bueno en 90 minutos"
+        required: true
+        estimated_min: 30
+        skills:
+          english: 0.5
+          java: 0.3
+          testing: 0.2
+        payload:
+          note_prompt: "Haz tu checklist personal para un take-home de 90 minutos: qué haces en los primeros 10 minutos, qué dejas fuera a propósito y qué va siempre en el README."
+          summary_md: |
+            Un take-home (o una tarea de código en vivo) evalúa cómo trabajas, no solo si funciona.
+
+            Plan para 90 minutos:
+            - **0–10:** lee todo, escribe las dudas y supuestos, decide el alcance mínimo. Si puedes preguntar, pregunta.
+            - **10–60:** el camino feliz funcionando con pruebas. Commits pequeños con buenos mensajes.
+            - **60–80:** errores y casos borde (validación, 404, idempotencia), y una prueba para cada uno.
+            - **80–90:** README: cómo correrlo, decisiones, supuestos, qué harías para producción.
+
+            Reglas:
+            - **Mejor pequeño y sólido que grande y roto.** Lo que no hagas, escríbelo en "What I'd do next".
+            - Pruebas que demuestren el comportamiento importante, no 100 % de cobertura.
+            - Nada de secretos en el repo; configuración por variables de entorno.
+            - Si usas IA, sigue tu proceso de verificación del nivel 3 y menciónalo con honestidad si te preguntan.
+
+            En la entrevista de seguimiento te pedirán cambiar algo en vivo ("add pagination", "what if two requests arrive at the same time?"): por eso tienes que entender cada línea.
+      - slug: arena-4-glossary
+        type: glossary
+        title: Vocabulario de diseño y take-home
+        required: true
+        estimated_min: 10
+        skills:
+          english: 1
+        payload:
+          terms:
+            - arena-system-design
+            - arena-take-home
+            - arena-scope
+            - arena-assumption
+            - ds-back-of-envelope
+            - ds-functional-requirements
+      - slug: arena-4-speak-design
+        type: micro
+        title: Narra un diseño en voz alta (5 minutos)
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        payload:
+          kind: speaking
+          instructions: "Pon un cronómetro de 5 minutos y, con Win + H, explica en inglés el diseño de alto nivel de order-platform (o del pipeline de eventos de órdenes): componentes, camino de una orden y un trade-off. Pega la transcripción y marca dónde te trabaste."
+      - slug: arena-4-quiz
+        type: quiz
+        title: Quiz — system design y take-home
+        required: true
+        estimated_min: 15
+        skills:
+          english: 0.6
+          distributed_systems: 0.4
+        questions:
+          - slug: a4-q1
+            type: mcq
+            prompt: Te dicen 'Design a notification service'. ¿Qué haces primero?
+            options:
+              - Dibujo Kafka y tres microservicios
+              - "Hago preguntas: canales, volumen, latencia aceptable, preferencias del cliente, qué pasa si falla un proveedor"
+              - Elijo la base de datos
+              - Escribo código
+            answer: 1
+            explanation: Los requisitos guían todo lo demás. Sin ellos, cualquier diseño es una adivinanza.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: a4-q2
+            type: mcq
+            prompt: ¿Qué frase muestra mejor criterio en una entrevista de diseño?
+            options:
+              - We should use microservices because they are modern.
+              - I'd start with a single service and split it when the team or the load requires it; the trade-off is…
+              - Kubernetes solves scaling.
+              - Any database works.
+            answer: 1
+            explanation: Decisión + razón + trade-off. Los nombres de tecnologías sin razones restan.
+            skill: english
+            difficulty: 1
+          - slug: a4-q3
+            type: mcq
+            prompt: "El entrevistador dice: 'What happens if this cache goes down?'. ¿Qué te está pidiendo?"
+            options:
+              - Que quites el cache
+              - "Que hables de fallos: qué ves, cómo se degrada el sistema y cómo te recuperas"
+              - Que cambies de tema
+              - Nada, es una pregunta de cortesía
+            answer: 1
+            explanation: Las preguntas de 'what if' son invitaciones a mostrar que piensas en fallos.
+            skill: distributed_systems
+            difficulty: 1
+          - slug: a4-q4
+            type: tf
+            prompt: En un take-home de 90 minutos, es mejor implementar todas las funciones opcionales aunque queden sin pruebas.
+            answer: false
+            explanation: Poco y sólido gana. Lo que falte va en 'What I'd do next' en el README.
+            skill: english
+            difficulty: 1
+          - slug: a4-q5
+            type: mcq
+            prompt: ¿Qué NO debe faltar en el README de un take-home?
+            options:
+              - Tu foto
+              - Cómo correrlo, decisiones, supuestos y qué harías para producción
+              - El historial completo de commits
+              - Un chiste
+            answer: 1
+            explanation: "El revisor tiene poco tiempo: el README guía su lectura y muestra tu criterio."
+            skill: english
+            difficulty: 1
+          - slug: a4-q6
+            type: fill
+            prompt: "Completa: 'Let's do a quick back-of-the-______ estimate.'"
+            answer:
+              - envelope
+            explanation: "'Back-of-the-envelope': un cálculo rápido y aproximado."
+            skill: english
+            difficulty: 1
+          - slug: a4-q7
+            type: mcq
+            prompt: ¿Qué frase es correcta para expresar un supuesto?
+            options:
+              - I will suppose that the traffic is 1,000 per second.
+              - Let's assume about 1,000 requests per second at peak.
+              - I assume you that…
+              - Supposing the traffic of 1,000.
+            answer: 1
+            explanation: "'Let's assume…' o 'I'm assuming…' son las fórmulas naturales. 'Suppose' suena raro en este contexto."
+            skill: english
+            difficulty: 2
+          - slug: a4-q8
+            type: order
+            prompt: "Ordena los primeros pasos de una entrevista de diseño:"
+            options:
+              - Clarifying questions
+              - Back-of-the-envelope estimates
+              - API and data model
+              - High-level design
+              - Deep dive and failure modes
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: "Es un guion flexible: si el entrevistador quiere ir directo a una parte, síguelo."
+            skill: distributed_systems
+            difficulty: 1
+      - slug: arena-4-interview-design
         type: interview
         title: "System design: pipeline de eventos de órdenes"
         required: true
+        estimated_min: 45
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 0.5
+          distributed_systems: 0.3
+          eda: 0.2
         payload:
           mode: system_design
-      - slug: arena-4-expert-interview-takehome
+          template: design-order-events
+      - slug: arena-4-interview-design-inventory
+        type: interview
+        title: "System design (extra): sincronización de inventario"
+        required: false
+        estimated_min: 40
+        skills:
+          english: 0.5
+          distributed_systems: 0.5
+        payload:
+          mode: system_design
+          template: design-inventory-sync
+      - slug: arena-4-interview-takehome
         type: interview
         title: Mini take-home bajo tiempo
         required: true
+        estimated_min: 90
         skills:
-          english: 0.8
-          ai_tools: 0.2
+          english: 0.4
+          java: 0.4
+          testing: 0.2
         payload:
           mode: coding_task
+          template: coding-orders-service
   - slug: arena-5-boss
     number: 5
-    status: outline
-    title: "Boss — Mock Loop completo"
+    title: Boss — Mock Loop completo, negociación y preguntas
+    story: "El campeón de la arena te espera: una hora seguida de técnico, conductual y diseño. Si lo vences, todavía falta lo último, y no es menos importante: negociar tu oferta."
     quests:
-      - slug: arena-5-boss-learn-negotiation
+      - slug: arena-5-learn-process
+        type: learn
+        title: El proceso de contratación en EE. UU., de punta a punta
+        required: true
+        estimated_min: 25
+        skills:
+          english: 1
+        payload:
+          note_prompt: "Escribe tu plan para el día de la entrevista remota: equipo, conexión, ventana con tus notas (sin leerlas), agua, y qué haces en los 10 minutos antes."
+          summary_md: |
+            Un proceso típico para un puesto backend en una empresa grande de EE. UU.:
+            1. **Recruiter screen** (20–30 min): motivación, experiencia, autorización para trabajar, expectativas salariales, disponibilidad.
+            2. **Hiring manager screen** (30–45 min): tu historia, proyectos, cómo trabajas en equipo.
+            3. **Technical screen** (45–60 min): preguntas técnicas o código en vivo.
+            4. **Loop final** (3–5 entrevistas el mismo día o en dos días): código, system design, conductual y, a veces, "culture fit" o valores.
+            5. **Oferta** y negociación.
+
+            Para entrevistas remotas:
+            - Cámara a la altura de los ojos, buena luz y audio con audífonos.
+            - Prueba Zoom/Teams/Meet antes, y comparte pantalla solo lo que quieras mostrar.
+            - Ten agua y una hoja con 3–4 palabras clave (no un guion).
+            - Si se corta la conexión, vuelve a entrar con calma y di "Sorry about that, where were we?".
+
+            Después de cada entrevista: un correo corto de agradecimiento al recruiter en las siguientes 24 horas.
+      - slug: arena-5-learn-negotiation
         type: learn
         title: Negociación y preguntas para el entrevistador
         required: true
+        estimated_min: 45
         skills:
-          english: 0.8
-          ai_tools: 0.2
-      - slug: arena-5-boss-boss-mock-loop
-        type: boss
-        title: "Jefe: Mock Loop completo"
+          english: 1
+        resources:
+          - ref: res-negotiation-haseeb
+          - ref: res-salary-negotiation-patio11
+          - ref: res-reverse-interview
+        payload:
+          note_prompt: Escribe tus 5 preguntas para el entrevistador (al menos una sobre el equipo, una técnica y una sobre cómo se mide el éxito en los primeros 90 días) y la frase con la que responderías '¿cuáles son tus expectativas salariales?'.
+          summary_md: |
+            **Preguntas para el entrevistador** (siempre te dirán "Do you have any questions for me?"). Tener 3–5 buenas preguntas muestra interés real:
+            - "What does success look like in the first 90 days for this role?"
+            - "What are the biggest technical challenges the team is facing this year?"
+            - "How does the team handle on-call and incidents?"
+            - "How do you decide between building new features and paying down technical debt?"
+            - "What do you enjoy most about working on this team?"
+
+            Evita preguntar por vacaciones o salario al ingeniero del panel: eso va con el recruiter.
+
+            **Negociación** (las ideas clave de los recursos):
+            - Investiga el rango de mercado para el puesto y la ciudad antes de la primera llamada (por ejemplo, el rango publicado en la oferta, si lo hay).
+            - Si te piden un número muy temprano, puedes devolver la pregunta con amabilidad: "I'd like to learn more about the role first. Could you share the range budgeted for this position?"
+            - Mantén el entusiasmo por la empresa mientras negocias: no es una pelea.
+            - Da una razón para cada pedido ("Based on my experience running critical messaging systems…").
+            - Mira el paquete completo: salario base, bono, acciones (RSU), 401(k), seguro médico, vacaciones, fecha de inicio.
+            - Pide todo por escrito y toma tu tiempo para decidir.
+
+            Estas son pautas generales de comunicación, no asesoría financiera ni legal: tu decisión depende de tu situación.
+      - slug: arena-5-glossary
+        type: glossary
+        title: Vocabulario del proceso y la oferta
         required: true
+        estimated_min: 10
         skills:
-          english: 0.8
+          english: 1
+        payload:
+          terms:
+            - arena-hiring-manager
+            - arena-recruiter-screen
+            - arena-onsite-loop
+            - arena-offer-package
+            - arena-counteroffer
+            - arena-thank-you-note
+      - slug: arena-5-write-questions
+        type: micro
+        title: Escribe tus preguntas para el entrevistador
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        payload:
+          kind: writing
+          instructions: Escribe en inglés 5 preguntas para el panel de Home Depot (equipo, retos técnicos, on-call, cómo se mide el éxito, crecimiento) y una frase de cierre de 2–3 oraciones que resuma por qué eres un buen candidato.
+      - slug: arena-5-speak-salary
+        type: micro
+        title: Practica la pregunta del salario en voz alta
+        required: true
+        estimated_min: 10
+        skills:
+          english: 1
+        payload:
+          kind: speaking
+          instructions: "Imagina que el recruiter pregunta 'What are your salary expectations?'. Responde en voz alta con Win + H (20–30 s): agradece, muestra entusiasmo, pide el rango del puesto o da un rango investigado con una razón. Pega la transcripción."
+      - slug: arena-5-quiz
+        type: quiz
+        title: Quiz — proceso, preguntas y negociación
+        required: true
+        estimated_min: 15
+        skills:
+          english: 1
+        questions:
+          - slug: a5-q1
+            type: order
+            prompt: "Ordena las etapas típicas de un proceso de contratación:"
+            options:
+              - Recruiter screen
+              - Hiring manager screen
+              - Technical screen
+              - Final loop
+              - Offer
+            answer:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+            explanation: Puede variar por empresa, pero este es el orden más común.
+            skill: english
+            difficulty: 1
+          - slug: a5-q2
+            type: mcq
+            prompt: "El entrevistador pregunta: 'Do you have any questions for me?'. ¿Qué es lo peor que puedes decir?"
+            options:
+              - What does success look like in the first 90 days?
+              - No, I think you covered everything.
+              - How does the team handle on-call?
+              - What are the biggest technical challenges this year?
+            answer: 1
+            explanation: No tener preguntas suena a falta de interés. Lleva siempre 3–5 preparadas.
+            skill: english
+            difficulty: 1
+          - slug: a5-q3
+            type: mcq
+            prompt: En la primera llamada, el recruiter te pide un número exacto de salario. ¿Qué respuesta es más estratégica?
+            options:
+              - Whatever you think is fair.
+              - I'm very excited about the role. Could you share the range budgeted for this position? I'm sure we can find something that works.
+              - I need double what I make now.
+              - I'd rather not talk about money.
+            answer: 1
+            explanation: Entusiasmo + pedir el rango. Si insisten, da un rango investigado, no un número suelto.
+            skill: english
+            difficulty: 2
+          - slug: a5-q4
+            type: tf
+            prompt: Al negociar una oferta conviene mostrarte frío y poco interesado para tener más poder.
+            answer: false
+            explanation: "Al contrario: el entusiasmo genuino hace que quieran cerrar contigo. Negociar no es pelear."
+            skill: english
+            difficulty: 1
+          - slug: a5-q5
+            type: mcq
+            prompt: ¿Qué es un 'offer package'?
+            options:
+              - Solo el salario base
+              - "Todo lo que incluye la oferta: base, bono, acciones, 401(k), seguro, vacaciones y fecha de inicio"
+              - El contrato de confidencialidad
+              - La caja de bienvenida
+            answer: 1
+            explanation: Compara paquetes completos, no solo el número del salario.
+            skill: english
+            difficulty: 1
+          - slug: a5-q6
+            type: fill
+            prompt: "Completa: 'Thank you for your ______ today. I enjoyed learning about the team.'"
+            answer:
+              - time
+            explanation: "La fórmula clásica del correo de agradecimiento: 'Thank you for your time today.'"
+            skill: english
+            difficulty: 1
+          - slug: a5-q7
+            type: mcq
+            prompt: Se cae tu conexión en medio de la entrevista. Al volver, ¿qué dices?
+            options:
+              - Nada, sigo como si nada
+              - Sorry about that, my connection dropped. Where were we?
+              - Your internet is bad.
+              - Can we reschedule everything?
+            answer: 1
+            explanation: Pasa a menudo en entrevistas remotas. Lo que evalúan es la calma.
+            skill: english
+            difficulty: 1
+          - slug: a5-q8
+            type: mcq
+            prompt: ¿Qué frase es correcta para justificar un pedido en la negociación?
+            options:
+              - I deserve more because I want it.
+              - Based on my eight years running critical messaging systems and the market range for this role, I was hoping for a base closer to X.
+              - Give me more or I leave.
+              - Other people earn more.
+            answer: 1
+            explanation: Razón concreta + referencia de mercado + tono colaborativo ('I was hoping for…').
+            skill: english
+            difficulty: 2
+      - slug: arena-5-interview-mock-loop
+        type: interview
+        title: Mock loop completo (60 min)
+        required: true
+        estimated_min: 60
+        skills:
+          english: 0.6
+          distributed_systems: 0.2
           ai_tools: 0.2
+        payload:
+          mode: mock_loop
+      - slug: arena-5-boss-mock-loop
+        type: boss
+        title: "Jefe: el loop final con tu expediente"
+        required: true
+        estimated_min: 120
+        skills:
+          english: 0.7
+          ai_tools: 0.1
+          distributed_systems: 0.2
+        payload:
+          task: |
+            **Final loop for: Software Engineer, Backend & Distributed Systems (remote).**
+
+            Arma tu **expediente de candidato** (un solo documento) y pégalo aquí como entregable:
+            1. Tu "Tell me about yourself" final (versión 3 o más), en inglés.
+            2. Tu banco de historias: 6–8 títulos con su resultado en una línea (con números).
+            3. La URL de order-platform y el pitch de 2 minutos del Capstone.
+            4. Tus 5 preguntas para el panel.
+            5. Tu respuesta a "What are your salary expectations?".
+            6. Tu respuesta a "How do you use AI tools in your work?".
+
+            Después, el entrevistador hará un loop condensado (unos 45 minutos) que mezcla tu presentación, preguntas conductuales sobre tus historias, preguntas técnicas sobre tu proyecto y un mini diseño. Al final, te pedirá tus preguntas y cerrará como lo haría un hiring manager.
+          rubric:
+            - correctness
+            - depth
+            - clarity
+            - tradeoffs
+          interview_focus:
+            - tell me about yourself and the MQ-to-event-driven bridge story
+            - behavioral answers with STAR and quantified impact
+            - deep dive on the candidate's capstone project
+            - a short system design with trade-offs
+            - responsible use of AI tools
+            - questions for the interviewer and a strong closing
+            - clarity and confidence in English

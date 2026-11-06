@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BlockText } from "../BlockText";
 import { EvaluationFlow } from "../claude/EvaluationFlow";
 
 export function OpenAnswerQuest({
@@ -21,7 +22,9 @@ export function OpenAnswerQuest({
     <div className="space-y-5">
       <div className="rounded-md border-l-2 border-available bg-surface p-4">
         <p className="font-mono text-xs text-available">interviewer asks</p>
-        <p className="mt-1 text-lg leading-relaxed">{promptEn}</p>
+        <div className="mt-1 text-lg leading-relaxed">
+          <BlockText text={promptEn} />
+        </div>
       </div>
       <p className="text-sm text-dim">
         Responde en inglés, como lo harías en la entrevista (5–10 frases). Claude califica exactitud, profundidad, claridad y

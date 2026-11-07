@@ -1,8 +1,76 @@
 # QuestMap
 
-Mapa de logros (estilo Neon Atlas) para prepararte para la oferta de Home Depot — Software Engineer, Backend & Distributed Systems. La especificación completa está en [SPEC.md](SPEC.md).
+Convierte estudiar en un **mapa de videojuego**: una app web local (Docker + Next.js + Postgres) de un solo usuario, donde cada zona del mapa enseña, practica y evalúa lo que necesitas para una meta concreta — una oferta de trabajo o una lista de skills.
 
-## Requisitos
+Piénsalo como un gimnasio en casa: la máquina (la app) es siempre la misma; lo que cambia es el **plan de entrenamiento** que le cargas. Ese plan es un archivo de texto.
+
+En este repo hay **dos cosas**:
+
+| Qué | Dónde | Para qué |
+|---|---|---|
+| **La plantilla genérica** | [`docs/PLANTILLA-QUESTMAP.md`](docs/PLANTILLA-QUESTMAP.md) | El spec reutilizable. Rellenas un brief de ~40 líneas y Claude Code te construye *tu* QuestMap desde cero. |
+| **Este proyecto, como ejemplo** | todo lo demás (`src/`, `content/`, [`SPEC.md`](SPEC.md)) | Una instancia ya construida y funcionando, para ver a qué se parece el resultado antes de hacer el tuyo. |
+
+---
+
+## Parte 1 — La plantilla: cómo hacer tu propio QuestMap
+
+La plantilla es un `SPEC.md` genérico y ya probado. Tiene **una sola sección que rellenas** (el *Brief*): tu meta, tu experiencia previa, cuánto tiempo tienes al día, tu sistema operativo y el estilo visual que quieres. El resto (mecánicas de juego, modelo de datos, Docker, integración con Claude, fases de implementación, criterios de aceptación) es fijo.
+
+### Antes de empezar, instala esto
+
+| Dependencia | Para qué | ¿Obligatoria? | Cómo comprobarla |
+|---|---|---|---|
+| **Docker Desktop** (con WSL2 en Windows) | Corre la app y la base de datos | Sí — y debe estar **abierto** | `docker --version` y `docker compose version` |
+| **Git** | Historial, commits por fase | Sí | `git --version` |
+| **Node.js LTS** (incluye npm) | Comandos de contenido y pruebas desde tu PC | Sí | `node --version` |
+| **Claude Code** | Es quien construye todo | Sí | `claude --version` |
+| API key de Anthropic con créditos | Calificación dentro de la app (Modo B) | No — sin ella todo funciona copiando/pegando | — |
+| Tailscale | Abrir la app desde el celular | Solo si usarás celular | `tailscale status` |
+
+Los **labs** de cada zona pueden pedir algo más (un JDK, una CLI, una cuenta gratuita). Eso depende de tu currículo: Claude Code lo lista en una tabla "Herramientas por zona" al final de la Fase 0, antes de escribir código.
+
+### Los cuatro pasos
+
+1. Crea una carpeta vacía y copia la plantilla dentro **con el nombre `SPEC.md`**:
+
+```powershell
+mkdir mi-questmap; Copy-Item docs\PLANTILLA-QUESTMAP.md mi-questmap\SPEC.md
+```
+
+2. Abre `mi-questmap\SPEC.md` y rellena **solo la sección 0 (Brief)**. Si tu meta es una oferta de trabajo, pega el **texto completo** de la oferta, no solo la URL (las URLs caducan).
+
+3. Abre Claude Code en esa carpeta y pídele:
+
+```
+Lee SPEC.md completo y empieza por la Fase 0. Después de que apruebe el currículo, construye las fases en orden sin preguntarme detalles menores.
+```
+
+4. Hay **un único punto de parada**: al final de la Fase 0, Claude Code te presenta un `CURRICULUM.md` (skills, zonas, prerrequisitos, qué enseña cada nivel) y espera tu aprobación. A partir de ahí construye solo, con un commit por fase.
+
+La app mínima usable sale en las fases 1–4; el contenido de las zonas se escribe después, poco a poco, con `npm run content:new` / `content:apply`.
+
+---
+
+## Parte 2 — Este ejemplo
+
+**Meta:** prepararse para una oferta de *Software Engineer, Backend & Distributed Systems* en Home Depot. El brief relleno y el currículo aprobado están en [`SPEC.md`](SPEC.md).
+
+Lo que salió de ese brief:
+
+- **14 skills** extraídas de la oferta (required, preferred y las implícitas), más el inglés de entrevista como riesgo propio.
+- **11 zonas** en el mapa, con grafo de prerrequisitos: Java Forest, Event Harbor, Cassandra Caverns, Observability Observatory, BigQuery Bay, GCP Peaks, Security Fortress, Distributed Systems Citadel, Capstone Castle, Interview Arena y English Track.
+- **~290 quests** repartidas en los 5 niveles de cada zona: `learn` (lecciones), `glossary`, `lab` (ejercicios en tu máquina), `quiz`, `micro` (sesiones de 15 min), `open_answer`, `interview` y un `boss` por zona.
+- **164 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **129 recursos** de estudio.
+- Tema visual **Neon Atlas**: HUD cyberpunk sobre un mapa de reinos; los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos.
+
+**Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
+
+Si solo quieres ver el resultado, clona, arranca y recorre el mapa — el contenido ya está escrito.
+
+---
+
+## Requisitos para correr este ejemplo
 
 - Windows + Docker Desktop (WSL2) + PowerShell 7.
 - Recomendado: clonar el repo dentro del sistema de archivos de WSL2 (más rápido).
@@ -45,6 +113,26 @@ Crea `backups\questmap_AAAAMMDD_HHmm.sql`. Para restaurarlo (reemplaza todo el p
 Segunda red de seguridad: en **Ajustes → Respaldo** puedes **exportar** tu progreso a JSON (guárdalo en OneDrive o Google Drive) e **importarlo** después. El JSON usa slugs, así que sirve aunque la base se recree desde cero. Ahí también puedes **reiniciar una zona** (con confirmación).
 
 Nunca uses `docker compose down -v`: la `-v` borra el volumen con tu progreso.
+
+## Usar QuestMap en dos PCs
+
+**Git mueve el código y el contenido, no tu progreso.** El repo no contiene nada de lo que has completado: eso vive en la base de datos, dentro del volumen de Docker de cada máquina (y `backups/` está en `.gitignore`). Son dos cosas separadas, como un libro de texto y tu cuaderno de apuntes: `git pull` te trae el libro, no el cuaderno.
+
+Así que si estudias en la PC B, `git push` desde B y `git pull` en A **no** traen ese avance: la PC A seguirá mostrando el progreso que tenía.
+
+Para mover el progreso usa el export/import de **Ajustes → Respaldo**:
+
+1. En la PC donde estudiaste: **Ajustes → Respaldo → Exportar** → guarda el JSON.
+2. Llévalo a la otra PC (OneDrive, Google Drive, una memoria USB).
+3. Allí: **Ajustes → Respaldo → Importar** y elige ese archivo.
+
+El JSON identifica todo por `slug`, así que funciona aunque las dos máquinas tengan la base recreada desde cero o versiones distintas del contenido.
+
+Reglas para no perder nada:
+
+- **Estudia en una PC a la vez** y exporta al terminar. Importar sobrescribe el progreso de la máquina destino: si avanzas en las dos a la vez, el último import gana y pierdes lo de la otra.
+- Si vas a cambiar de máquina, el orden es: exportar en la PC donde estudiaste → `git push` (si tocaste código o contenido) → en la otra PC `git pull` → `docker compose up -d --build` → importar el JSON.
+- Si prefieres que el progreso también viaje por git, exporta el JSON a una carpeta versionada (por ejemplo `progress/`) y haz commit a mano. Es un paso manual deliberado, no automático; recuerda que ese archivo contiene tus respuestas y notas.
 
 ## Claude (calificaciones y entrevistas)
 
@@ -125,3 +213,5 @@ tailscale serve --https=443 off
 ```
 
 Reglas de seguridad: nunca publiques el puerto en `0.0.0.0`, nunca uses port forwarding en el router y nunca uses `tailscale funnel` (eso sí lo expondría a internet). Limitación: la PC debe estar encendida y Docker corriendo.
+
+> Nota: este es un proyecto personal de estudio. "Home Depot" aparece solo como la meta de este ejemplo; el repo no tiene relación con esa empresa ni contiene material suyo.

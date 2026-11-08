@@ -58,10 +58,12 @@ La app mínima usable sale en las fases 1–4; el contenido de las zonas se escr
 
 Lo que salió de ese brief:
 
-- **14 skills** extraídas de la oferta (required, preferred y las implícitas), más el inglés de entrevista como riesgo propio.
-- **11 zonas** en el mapa, con grafo de prerrequisitos: Java Forest, Event Harbor, Cassandra Caverns, Observability Observatory, BigQuery Bay, GCP Peaks, Security Fortress, Distributed Systems Citadel, Capstone Castle, Interview Arena y English Track.
-- **~290 quests** repartidas en los 5 niveles de cada zona: `learn` (lecciones), `glossary`, `lab` (ejercicios en tu máquina), `quiz`, `micro` (sesiones de 15 min), `open_answer`, `interview` y un `boss` por zona.
-- **164 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **129 recursos** de estudio.
+- **15 skills**: 14 extraídas de la oferta (required, preferred y las implícitas) más el inglés de entrevista como riesgo propio, y `linux`, agregada después porque era un hueco propio (ver más abajo).
+- **12 zonas** en el mapa, con grafo de prerrequisitos: Java Forest, Event Harbor, Cassandra Caverns, Observability Observatory, BigQuery Bay, GCP Peaks, Security Fortress, Distributed Systems Citadel, Capstone Castle, Interview Arena, English Track y Terminal Tundra.
+- **318 quests** repartidas en los 5 niveles de cada zona: `learn` (lecciones), `glossary`, `lab` (ejercicios en tu máquina), `quiz`, `micro` (sesiones de 15 min), `open_answer`, `interview` y un `boss` por zona.
+- **369 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **154 recursos** de estudio.
+
+La zona 12, **Terminal Tundra** 🐧, no sale de la oferta: se agregó el 2026-11-07 al notar que todos los labs de las demás zonas entran a un Linux (`docker exec`) que nunca se enseñaba. Enseña terminal, permisos, triage de logs, procesos y señales, el Linux de los contenedores y de GKE, y bash para CI. Arranca desbloqueada, no es prerrequisito de nada y su skill `linux` no es core, para no tapar las recomendaciones de Java y Cassandra.
 - Tema visual **Neon Atlas**: HUD cyberpunk sobre un mapa de reinos; los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos.
 
 **Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
@@ -155,7 +157,7 @@ Todo vive en `content/` (YAML):
 
 | Carpeta | Qué hay |
 |---|---|
-| `skills.yaml` | Las 14 skills con su `target_xp` (y el cálculo comentado) |
+| `skills.yaml` | Las 15 skills con su `target_xp` (y el cálculo comentado) |
 | `resources.yaml` | Recursos de estudio. Solo `verified: true` si la URL se abrió; si no, `url: null` + `how_to_find` |
 | `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss) |
 | `glossary/*.yaml` | Términos con definición en español, en inglés, ejemplo y analogía |

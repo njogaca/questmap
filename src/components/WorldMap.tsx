@@ -52,7 +52,12 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
       <div className="relative overflow-hidden rounded-lg border border-line bg-surface/60">
-        <svg viewBox="0 0 1000 640" className="block h-auto w-full" role="img" aria-label="Mapa del mundo con 10 sectores">
+        <svg
+          viewBox="0 0 1000 640"
+          className="block h-auto w-full"
+          role="img"
+          aria-label={`Mapa del mundo con ${zones.length} sectores`}
+        >
           {/* Caminos (prerrequisitos) */}
           {edges.map((e) => {
             const a = byId.get(e.from);

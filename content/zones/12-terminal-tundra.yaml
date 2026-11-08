@@ -1,0 +1,1154 @@
+slug: terminal-tundra
+title: Terminal Tundra
+order: 12
+emoji: "🐧"
+map: { x: 400, y: 590 }
+unlocked_from_start: true
+prerequisites: []
+skills: [linux, debugging_rca, security, cicd, microservices_gcp]
+story: >
+  Sector 12. Una llanura helada bajo la que corre todo el reino: cada contenedor que
+  levantaste en las otras zonas es una cabaña sobre esta tundra. Hasta ahora les hablabas
+  desde fuera, con PowerShell. Aquí entras: el terminal, los logs, los procesos y los
+  permisos del Linux que ya estabas usando sin verlo.
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: tundra-1-novice
+    number: 1
+    title: "Novice — El terminal, el árbol de archivos y los permisos"
+    story: "Bajas por la primera escotilla. Debajo del hielo hay un árbol de carpetas y unas puertas con candado: antes de depurar nada, hay que saber caminar y saber qué puertas abren."
+    quests:
+      - slug: tundra-1-learn-shell
+        type: learn
+        title: Qué es un shell y dónde tienes Linux ahora mismo
+        required: true
+        estimated_min: 30
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-missing-shell }
+          - { ref: res-linux-wsl-install }
+          - { ref: res-linux-wsl-commands, required: false }
+        payload:
+          note_prompt: "Con tus palabras: ¿qué diferencia hay entre el shell (bash) y el terminal donde lo escribes? Y di dónde tienes Linux disponible hoy en tu PC, sin instalar nada nuevo."
+          summary_md: |
+            Ideas clave:
+            - El **terminal** es la ventana; el **shell** es el programa que lee e interpreta lo que escribes. En Linux el shell habitual es `bash`.
+            - Ya tienes Linux en tu PC por dos caminos: **WSL2** (compruébalo con `wsl -l -v`, viene con Docker Desktop) y **cada contenedor** que levantas.
+            - Todos los labs de Cassandra, Pub/Sub y Prometheus que hiciste te metían dentro de un Linux: `docker exec -it cass1 cqlsh` abre un programa *dentro* de esa máquina.
+            - PowerShell y bash hacen el mismo trabajo con otra gramática: `Get-ChildItem` ↔ `ls`, `Select-String` ↔ `grep`, `$env:VAR` ↔ `$VAR`.
+            - Regla de oro para empezar: todo lo peligroso hazlo en un contenedor desechable (`docker run --rm -it debian:bookworm-slim bash`). Al salir no queda nada.
+
+      - slug: tundra-1-learn-fs
+        type: learn
+        title: El árbol de carpetas, los permisos y quién eres
+        required: true
+        estimated_min: 45
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-tlcl }
+          - { ref: res-linux-man-chmod }
+        payload:
+          note_prompt: "Explica qué significan los permisos `-rw-------` de un archivo y `drwx------` de una carpeta, y por qué un proceso que corre como otro usuario recibiría 'Permission denied' al leerlos."
+          summary_md: |
+            El árbol (lo que necesitas de memoria):
+            - `/etc` configuración · `/var/log` logs · `/tmp` temporal (se borra) · `/usr/bin` programas · `/home/<usuario>` tu carpeta (atajo `~`) · `/proc` información viva del kernel.
+            - Rutas: **absoluta** empieza en `/` y significa lo mismo desde cualquier sitio; **relativa** depende de dónde estás (`pwd` te lo dice).
+
+            Moverse y mirar: `pwd`, `ls -la`, `cd`, `cat`, `less`, `head`, `tail`, `find / -name "*.conf" 2>/dev/null`.
+
+            Permisos — se leen de izquierda a derecha en tres bloques de tres:
+            - `-rw-r--r--` → dueño lee y escribe, grupo lee, los demás leen.
+            - En números cada bloque suma 4 (leer) + 2 (escribir) + 1 (ejecutar): `755` = dueño todo, los demás leer y ejecutar; `644` = dueño leer y escribir, los demás leer; `600` = solo el dueño.
+            - Una carpeta necesita `x` para poder *entrar* en ella, no solo para ejecutarla.
+            - `id -un` dice quién eres; `chmod` cambia permisos y `chown` cambia dueño.
+
+      - slug: tundra-1-glossary
+        type: glossary
+        title: Vocabulario del terminal
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        payload:
+          terms: [lx-shell, lx-bash, lx-prompt, lx-root-dir, lx-path, lx-sudo, lx-permissions, lx-chmod]
+
+      - slug: tundra-1-lab-inside
+        type: lab
+        title: "Lab: entra al Linux que ya tienes corriendo"
+        required: true
+        estimated_min: 60
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-docker-exec }
+        payload:
+          goal: "Entrar al contenedor de Postgres de QuestMap, recorrer su árbol de carpetas, leer los permisos de los datos de la base y comprobar con qué usuario corre cada cosa. Sin instalar nada."
+          steps:
+            - title: Mira qué contenedores tienes vivos
+              body: "Desde PowerShell, en la carpeta del proyecto. Deberías ver questmap-app-1 y questmap-db-1."
+              commands:
+                - "docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}'"
+            - title: Entra al contenedor de la base de datos
+              body: "Esto te abre un bash DENTRO de ese Linux. El prompt cambia: ya no estás en Windows."
+              commands:
+                - "docker exec -it questmap-db-1 bash"
+            - title: Oriéntate
+              body: "Responde para ti: ¿quién eres dentro del contenedor y en qué carpeta apareciste?"
+              commands:
+                - "id -un"
+                - "pwd"
+                - "ls /"
+                - "cat /etc/os-release | head -3"
+            - title: Busca los datos de Postgres y lee sus permisos
+              body: "Fíjate en el dueño y en los permisos. Compáralos con lo que estudiaste."
+              commands:
+                - "ls -ld /var/lib/postgresql/data"
+                - "ls -l /var/lib/postgresql/data/postgresql.conf"
+                - "ls /var/log"
+            - title: Mira quién es el proceso principal
+              body: "/proc/1 es el primer proceso del contenedor. Esto te va a servir en el nivel 4."
+              commands:
+                - "cat /proc/1/comm"
+                - "head -20 /var/lib/postgresql/data/postgresql.conf"
+            - title: Comprueba el candado en la práctica
+              body: "Cambia a un usuario sin privilegios e intenta leer la configuración de la base. Luego sal con `exit` dos veces."
+              commands:
+                - "su postgres -c 'cat /var/lib/postgresql/data/postgresql.conf | head -2'"
+                - "useradd -m curioso && su curioso -c 'cat /var/lib/postgresql/data/postgresql.conf'"
+                - "exit"
+            - title: Lo mismo en el contenedor de la app
+              body: "Esta imagen es Alpine y NO trae bash: tienes que usar sh. Es el primer aviso de que no todas las imágenes traen las mismas herramientas."
+              commands:
+                - "docker exec -it questmap-app-1 sh"
+                - "id -un"
+                - "cat /proc/1/comm"
+                - "exit"
+          expected: "Dentro de questmap-db-1 eres `root` y el directorio de datos es `drwx------` propiedad de `postgres`, con `postgresql.conf` en `-rw-------`: solo su dueño lo lee. Por eso `su curioso -c cat …` falla con 'Permission denied' mientras que como root o como postgres sí se lee. `/proc/1/comm` dice `postgres`. En questmap-app-1 eres `node` (no root) y `bash` no existe: hay que entrar con `sh`."
+          checklist:
+            - "Entré a los dos contenedores y sé con qué usuario corre cada uno"
+            - "Sé leer `drwx------` y `-rw-------` y decir quién puede hacer qué"
+            - "Vi 'Permission denied' con mis propios ojos y entiendo por qué"
+            - "Sé que la imagen de la app no trae bash y por qué eso importa al depurar"
+          hints:
+            - "Si `docker exec` dice que no encuentra el contenedor, corre `docker compose up -d` primero y vuelve a mirar `docker ps`."
+            - "Si te pierdes dentro del contenedor, `pwd` te dice dónde estás y `cd /` te devuelve a la raíz."
+            - "Para salir de un contenedor se escribe `exit` (o Ctrl+D). No cierres la ventana: el contenedor sigue vivo, solo sales de él."
+          evidence_hint: "Pega la salida de `ls -ld /var/lib/postgresql/data`, el error de 'Permission denied' y los dos `cat /proc/1/comm`."
+
+      - slug: tundra-1-quiz
+        type: quiz
+        title: Quiz — Terminal, rutas y permisos
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        questions:
+          - slug: tu1-q1
+            type: mcq
+            prompt: "¿Dónde buscarías la configuración de un servicio en una máquina Linux?"
+            options: ["/tmp", "/etc", "/usr/bin", "/proc"]
+            answer: 1
+            explanation: "`/etc` es la carpeta de configuración del sistema. `/usr/bin` guarda programas, `/tmp` cosas desechables y `/proc` información viva del kernel."
+            skill: linux
+            difficulty: 1
+          - slug: tu1-q2
+            type: mcq
+            prompt: "Los permisos de un archivo son `-rw-r--r--`. ¿Quién puede modificarlo?"
+            options: ["Cualquiera", "Solo su dueño", "El dueño y su grupo", "Nadie, es de solo lectura"]
+            answer: 1
+            explanation: "El primer bloque (`rw-`) es el dueño: lee y escribe. Grupo y resto solo tienen `r--`. En números es 644."
+            skill: linux
+            difficulty: 1
+          - slug: tu1-q3
+            type: fill
+            prompt: "Para que un script sea ejecutable por su dueño y solo legible y ejecutable por los demás usas `chmod ______ script.sh`."
+            answer: ["755", "0755"]
+            explanation: "7 = 4+2+1 (leer, escribir, ejecutar) para el dueño; 5 = 4+1 (leer y ejecutar) para grupo y resto."
+            skill: linux
+            difficulty: 2
+          - slug: tu1-q4
+            type: tf
+            prompt: "Una carpeta necesita permiso de ejecución (`x`) para que puedas entrar en ella con `cd`."
+            answer: true
+            explanation: "En carpetas la `x` no significa 'ejecutar' sino 'atravesar'. Sin ella no puedes entrar ni acceder a lo que hay dentro, aunque tengas `r`."
+            skill: linux
+            difficulty: 3
+          - slug: tu1-q5
+            type: mcq
+            prompt: "¿Qué hace `docker exec -it questmap-db-1 bash`?"
+            options: [
+              "Crea un contenedor nuevo con bash",
+              "Ejecuta bash dentro del contenedor que ya está corriendo",
+              "Instala bash en el contenedor",
+              "Reinicia el contenedor en modo interactivo"
+            ]
+            answer: 1
+            explanation: "`exec` corre un programa dentro de un contenedor vivo; `-it` lo conecta a tu terminal. Para crear uno nuevo sería `docker run`."
+            skill: linux
+            difficulty: 1
+          - slug: tu1-q6
+            type: mcq
+            prompt: "Escribes `miprograma` y el shell responde 'command not found', pero sabes que el archivo existe. ¿Qué es lo más probable?"
+            options: [
+              "La carpeta donde está no figura en el PATH",
+              "El archivo está vacío",
+              "Falta instalar bash",
+              "El archivo tiene permisos 644"
+            ]
+            answer: 0
+            explanation: "El shell solo busca en las carpetas del PATH. Se arregla llamándolo con su ruta (`./miprograma`) o agregando su carpeta al PATH. (Los permisos 644 darían otro error: 'Permission denied'.)"
+            skill: linux
+            difficulty: 2
+          - slug: tu1-q7
+            type: mcq
+            prompt: "¿Cuál es el equivalente en Linux de `Get-ChildItem` de PowerShell?"
+            options: ["cat", "ls", "cd", "grep"]
+            answer: 1
+            explanation: "`ls` lista el contenido de una carpeta; con `-la` muestra también los ocultos y los permisos."
+            skill: linux
+            difficulty: 1
+          - slug: tu1-q8
+            type: order
+            prompt: "Ordena los pasos para mirar la configuración de un servicio dentro de un contenedor que ya corre."
+            options: [
+              "docker ps para ver el nombre del contenedor",
+              "docker exec -it <nombre> bash",
+              "cd /etc y ls para encontrar el archivo",
+              "cat del archivo para leerlo"
+            ]
+            answer: [0, 1, 2, 3]
+            explanation: "Primero averiguas el nombre, luego entras, luego navegas y por último lees. Saltarse el primer paso es la causa número uno de 'No such container'."
+            skill: linux
+            difficulty: 1
+
+  # ================================================================ NIVEL 2
+  - slug: tundra-2-apprentice
+    number: 2
+    title: "Apprentice — Pipes, grep y triage de logs"
+    story: "Te dan un log de mil líneas y tres minutos. En la tundra no se lee un log: se filtra, se cuenta y se ordena."
+    quests:
+      - slug: tundra-2-learn-pipes
+        type: learn
+        title: stdout, stderr, redirección y pipes
+        required: true
+        estimated_min: 30
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-missing-shell-tools }
+          - { ref: res-linux-explainshell }
+        payload:
+          note_prompt: "Explica qué hace `comando > salida.txt 2>&1` y por qué un contenedor debe escribir sus logs en stdout en vez de en un archivo."
+          summary_md: |
+            Tres canales por proceso:
+            - **stdin** (0) lo que entra · **stdout** (1) el resultado normal · **stderr** (2) los errores.
+            - `>` crea o sobrescribe · `>>` agrega al final · `2>` solo errores · `2>&1` manda los errores al mismo sitio que la salida.
+
+            El pipe `|` conecta la salida de uno con la entrada del siguiente. Es la filosofía del terminal: herramientas pequeñas, encadenadas.
+
+            Encadenar por resultado: `a && b` corre `b` solo si `a` salió bien (exit code 0); `a || b` corre `b` solo si `a` falló. En PowerShell tienes los mismos operadores.
+
+            Por qué importa en contenedores: `docker logs` y `kubectl logs` leen **stdout y stderr** del proceso. Si tu app escribe en `/var/log/app.log` dentro del contenedor, nadie lo ve desde fuera y se pierde al reiniciar.
+
+      - slug: tundra-2-learn-text
+        type: learn
+        title: grep, tail -f y las cuatro herramientas que resuelven un log
+        required: true
+        estimated_min: 30
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-man-grep }
+          - { ref: res-linux-man-awk, required: false }
+        payload:
+          note_prompt: "Escribe el comando que, dado un archivo de log, te dé los 5 mensajes de error más frecuentes con su número de repeticiones. Explica qué hace cada eslabón del pipe."
+          summary_md: |
+            El kit mínimo:
+            - `grep ERROR app.log` filtra líneas. Flags que de verdad usarás: `-i` sin distinguir mayúsculas, `-c` cuenta, `-n` número de línea, `-v` lo que NO coincide, `-A3 -B3` contexto alrededor, `-E` expresiones regulares.
+            - `tail -f` sigue el log en vivo; `tail -100` las últimas 100 líneas; `less` para leer uno grande (con `/` buscas y con `q` sales).
+            - `wc -l` cuenta líneas.
+            - `cut -d' ' -f3` o `awk '{print $3}'` se quedan con una columna.
+            - `sort | uniq -c | sort -rn` es **el** idiom del oficio: agrupa iguales, los cuenta y los ordena de más a menos.
+
+            Receta de triage que sirve en cualquier incidente:
+            ```
+            grep -c ERROR app.log                      # ¿cuántos?
+            grep ERROR app.log | tail -5               # ¿los últimos?
+            grep ERROR app.log | cut -d']' -f2 | sort | uniq -c | sort -rn   # ¿qué error manda?
+            grep ERROR app.log | head -1               # ¿cuándo empezó?
+            ```
+
+      - slug: tundra-2-glossary
+        type: glossary
+        title: Vocabulario de salidas y filtros
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        payload:
+          terms: [lx-stdout, lx-stderr, lx-pipe, lx-redirection, lx-exit-code, lx-grep, lx-awk, lx-tail-follow]
+
+      - slug: tundra-2-lab-log-triage
+        type: lab
+        title: "Lab: mil líneas de log y cinco preguntas"
+        required: true
+        estimated_min: 60
+        skills: { linux: 0.7, debugging_rca: 0.3 }
+        payload:
+          goal: "Generar un log sintético de 1000 líneas y contestar cinco preguntas sobre él usando SOLO el terminal: cuántos errores hay, cuál manda, cuándo empezó, qué servicio sufre más y qué pasa si solo cuentas con los ojos."
+          steps:
+            - title: Levanta un contenedor desechable
+              body: "Todo el lab vive aquí; al salir no queda nada en tu PC."
+              commands:
+                - "docker run --rm -it --name tundra debian:bookworm-slim bash"
+            - title: Genera el log (una sola línea, pégala tal cual)
+              body: "No tiene nada de azar: es un log determinista, así podrás comparar tus respuestas con las esperadas."
+              commands:
+                - "seq 1 1000 | awk '{ lvl = ($1 % 7 == 0) ? \"ERROR\" : (($1 % 5 == 0) ? \"WARN\" : \"INFO\"); svc = ($1 % 3 == 0) ? \"orders\" : (($1 % 3 == 1) ? \"payments\" : \"inventory\"); msg = (lvl != \"ERROR\") ? \"request handled\" : (($1 % 21 == 0) ? \"null pointer in OrderMapper\" : \"connection timeout to cassandra\"); printf \"2026-11-07T%02d:%02d:%02dZ %s [%s] %s\\n\", int(($1-1)/120)%24, int(($1-1)/2)%60, ($1*7)%60, lvl, svc, msg }' > /tmp/app.log"
+                - "wc -l /tmp/app.log"
+                - "head -8 /tmp/app.log"
+            - title: "Pregunta 1 — ¿cuántos de cada nivel?"
+              commands:
+                - "grep -c ERROR /tmp/app.log"
+                - "grep -c WARN /tmp/app.log"
+                - "grep -c INFO /tmp/app.log"
+            - title: "Pregunta 2 — ¿qué error manda?"
+              body: "Aquí está el idiom del oficio. Córrelo por partes para ver qué hace cada eslabón."
+              commands:
+                - "grep ERROR /tmp/app.log | cut -d']' -f2 | sort | uniq -c | sort -rn"
+            - title: "Pregunta 3 — ¿cuándo empezó y cuándo fue el último?"
+              commands:
+                - "grep -n ERROR /tmp/app.log | head -1"
+                - "grep -n ERROR /tmp/app.log | tail -1"
+            - title: "Pregunta 4 — ¿qué servicio sufre más y en qué hora hay más errores?"
+              commands:
+                - "grep ERROR /tmp/app.log | awk '{print $3}' | sort | uniq -c | sort -rn"
+                - "grep ERROR /tmp/app.log | cut -c12-13 | sort | uniq -c | sort -rn | head -3"
+            - title: "Pregunta 5 — el contexto de un error"
+              body: "Un número no sirve para un RCA: necesitas ver qué pasaba alrededor."
+              commands:
+                - "grep -B2 -A2 'null pointer' /tmp/app.log | head -15"
+            - title: Guarda el resultado y sal
+              body: "Fíjate en la diferencia entre las dos redirecciones antes de salir."
+              commands:
+                - "grep ERROR /tmp/app.log | cut -d']' -f2 | sort | uniq -c | sort -rn > /tmp/informe.txt"
+                - "cat /tmp/informe.txt"
+                - "grep ERROR /tmp/noexiste.log > /tmp/informe2.txt"
+                - "grep ERROR /tmp/noexiste.log > /tmp/informe2.txt 2>&1; cat /tmp/informe2.txt"
+                - "exit"
+          expected: "1000 líneas: 142 ERROR, 172 WARN y 686 INFO. El error que manda es 'connection timeout to cassandra' con 95 apariciones, contra 47 de 'null pointer in OrderMapper'. El primer ERROR está en la línea 7 (2026-11-07T00:03:49Z) y el último en la 994. Los errores se reparten casi iguales entre los tres servicios (48 payments, 47 orders, 47 inventory), así que el problema no es de un servicio: es de la conexión a Cassandra. En el último paso, la primera redirección deja `informe2.txt` vacío (el error de grep fue a stderr, a tu pantalla) y la segunda sí guarda el mensaje de error dentro del archivo."
+          checklist:
+            - "Sé contestar 'cuántos errores hay' y 'cuál manda' sin abrir el archivo"
+            - "Entiendo qué hace cada eslabón de `cut | sort | uniq -c | sort -rn`"
+            - "Vi la diferencia entre `>` y `> … 2>&1` con un comando que falla"
+            - "Puedo decir, con datos, si el problema es de un servicio o de una dependencia común"
+          hints:
+            - "Si la línea de awk te da error, probablemente tu terminal cambió las comillas al pegar. Pégala en un editor simple primero, o escríbela en varias líneas dentro del contenedor con `nano`."
+            - "`cut -d']' -f2` corta por el corchete y se queda con la segunda parte: el mensaje sin la hora ni el servicio."
+            - "Si `uniq -c` no agrupa nada, te faltó el `sort` antes: `uniq` solo junta líneas iguales que están pegadas."
+          evidence_hint: "Pega tus cinco respuestas con el comando que usaste para cada una, y di en una frase cuál sería tu primera hipótesis del incidente."
+
+      - slug: tundra-2-quiz
+        type: quiz
+        title: Quiz — Pipes y triage de logs
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        questions:
+          - slug: tu2-q1
+            type: mcq
+            prompt: "¿Qué hace `grep -v ERROR app.log`?"
+            options: [
+              "Muestra solo las líneas con ERROR",
+              "Muestra las líneas que NO contienen ERROR",
+              "Cuenta los errores",
+              "Muestra los errores en modo detallado"
+            ]
+            answer: 1
+            explanation: "`-v` invierte el filtro. Es útil para quitar ruido: `grep -v HealthCheck app.log`."
+            skill: linux
+            difficulty: 1
+          - slug: tu2-q2
+            type: mcq
+            prompt: "¿Para qué sirve el `sort` que va ANTES de `uniq -c`?"
+            options: [
+              "Para ordenar el resultado final",
+              "Porque `uniq` solo agrupa líneas iguales que están contiguas",
+              "Para acelerar `uniq`",
+              "No sirve, se puede quitar"
+            ]
+            answer: 1
+            explanation: "`uniq` compara cada línea con la anterior, nada más. Sin ordenar primero, cuenta mal. El `sort -rn` del final es el que ordena por cantidad."
+            skill: linux
+            difficulty: 2
+          - slug: tu2-q3
+            type: tf
+            prompt: "Si un contenedor escribe sus logs en un archivo dentro de sí mismo, `docker logs` igual los muestra."
+            answer: false
+            explanation: "`docker logs` solo lee stdout y stderr del proceso. Lo que va a un archivo interno queda invisible desde fuera y se pierde cuando el contenedor muere."
+            skill: linux
+            difficulty: 2
+          - slug: tu2-q4
+            type: fill
+            prompt: "Para mandar los errores al mismo sitio que la salida normal se escribe `comando > salida.txt ______`."
+            answer: ["2>&1"]
+            explanation: "El 2 es stderr y `&1` significa 'donde está apuntando ahora el canal 1'. El orden importa: si pones `2>&1` antes del `>`, no funciona igual."
+            skill: linux
+            difficulty: 3
+          - slug: tu2-q5
+            type: mcq
+            prompt: "Quieres ver en vivo lo que escribe tu app mientras reproduces un error. ¿Qué usas?"
+            options: ["cat app.log", "tail -f app.log", "head app.log", "wc -l app.log"]
+            answer: 1
+            explanation: "`tail -f` se queda enganchado imprimiendo lo nuevo. El equivalente de fuera es `docker compose logs -f app`."
+            skill: linux
+            difficulty: 1
+          - slug: tu2-q6
+            type: mcq
+            prompt: "En `desplegar.sh && avisar.sh`, ¿cuándo se ejecuta `avisar.sh`?"
+            options: [
+              "Siempre",
+              "Solo si desplegar.sh terminó con código 0",
+              "Solo si desplegar.sh falló",
+              "Nunca, los scripts no se encadenan"
+            ]
+            answer: 1
+            explanation: "`&&` encadena por éxito (exit code 0). Para el caso contrario está `||`. Es la base de los pasos de un pipeline de CI."
+            skill: linux
+            difficulty: 1
+          - slug: tu2-q7
+            type: mcq
+            prompt: "Tienes 142 errores repartidos casi por igual entre tres servicios distintos, y todos dicen 'connection timeout to cassandra'. ¿Cuál es la hipótesis más razonable?"
+            options: [
+              "Un bug en uno de los servicios",
+              "El problema está en la dependencia común (Cassandra o la red hacia ella)",
+              "Los tres servicios se desplegaron mal",
+              "Hace falta más memoria en los tres"
+            ]
+            answer: 1
+            explanation: "Cuando el mismo síntoma aparece en servicios independientes, mira lo que comparten. Es el primer corte de un RCA y lo que un entrevistador quiere oír."
+            skill: debugging_rca
+            difficulty: 2
+          - slug: tu2-q8
+            type: order
+            prompt: "Ordena una receta de triage sobre un log que acabas de recibir."
+            options: [
+              "Contar cuántos errores hay (grep -c)",
+              "Agrupar los mensajes para ver cuál manda (sort | uniq -c | sort -rn)",
+              "Buscar el primer error para saber cuándo empezó",
+              "Leer el contexto alrededor de ese primer error (-B -A)"
+            ]
+            answer: [0, 1, 2, 3]
+            explanation: "De lo general a lo concreto: volumen, patrón, momento de inicio y contexto. Leer el log de arriba abajo es lo último que se hace."
+            skill: debugging_rca
+            difficulty: 2
+
+  # ================================================================ NIVEL 3
+  - slug: tundra-3-adept
+    number: 3
+    title: "Adept — Procesos, señales y recursos"
+    story: "Algo consume toda la CPU, algo murió solo y alguien tiene ocupado el puerto 3000. Tres misterios, diez comandos."
+    quests:
+      - slug: tundra-3-learn-processes
+        type: learn
+        title: Procesos, PID y señales
+        required: true
+        estimated_min: 30
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-man-ps }
+          - { ref: res-linux-man-signal }
+        payload:
+          note_prompt: "Explica la diferencia entre SIGTERM y SIGKILL y qué hace exactamente `docker stop` con tu contenedor."
+          summary_md: |
+            - Un **proceso** es un programa en ejecución, con su PID (su identificador) y su PPID (quién lo lanzó).
+            - `ps aux` los lista todos; `ps -eo pid,pcpu,comm --sort=-pcpu | head` te da los que más CPU usan.
+            - `kill` no mata: **envía señales**. `kill -TERM <pid>` pide terminar (y el programa puede limpiar antes); `kill -KILL <pid>` (o `-9`) lo elimina sin preguntar y sin oportunidad de guardar nada.
+            - `docker stop` manda SIGTERM, espera unos segundos de gracia y, si el proceso no se fue, manda SIGKILL. Un contenedor que termina con **código 137** fue matado (128 + 9).
+            - `&` manda algo al fondo, `jobs` los lista, `fg` lo trae al frente.
+
+      - slug: tundra-3-learn-resources
+        type: learn
+        title: CPU, memoria, disco y puertos — el checklist de 60 segundos
+        required: true
+        estimated_min: 30
+        skills: { linux: 1.0 }
+        resources:
+          - { ref: res-linux-man-top }
+          - { ref: res-linux-man-ss }
+          - { ref: res-linux-gregg-60s }
+        payload:
+          note_prompt: "Tu servicio responde lento. Escribe los cinco comandos que correrías primero y qué descartarías con cada uno."
+          summary_md: |
+            El checklist (orden de Brendan Gregg, resumido):
+            - `uptime` → **load average**: tres números (1, 5 y 15 min). Compáralos con el número de núcleos: con 4 núcleos, 12 de load es cola larga.
+            - `top` o `htop` → quién se come la CPU y la memoria, proceso por proceso.
+            - `free -h` → memoria de verdad disponible (mira la columna *available*, no *free*).
+            - `df -h` → disco lleno. Un disco al 100 % rompe cosas que parecen no tener relación.
+            - `ss -tlnp` → quién escucha en qué puerto. Esta es la respuesta a *'port 3000 is already in use'*.
+            - `dmesg | tail` → mensajes del kernel: ahí aparece el **OOM killer** cuando mata a alguien.
+
+            Dos clásicos que te vas a encontrar:
+            - **Código 137** al morir un contenedor = lo mataron, casi siempre el OOM killer por pasarse de memoria.
+            - **'too many open files'** = tocaste el límite de descriptores (`ulimit -n`), normalmente por conexiones que nadie cierra.
+
+      - slug: tundra-3-glossary
+        type: glossary
+        title: Vocabulario de procesos y recursos
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        payload:
+          terms: [lx-process, lx-pid, lx-load-average, lx-signal, lx-sigterm, lx-oom-killer, lx-file-descriptor, lx-listening-port]
+
+      - slug: tundra-3-lab-60s
+        type: lab
+        title: "Lab: el checklist de 60 segundos y tres misterios"
+        required: true
+        estimated_min: 60
+        skills: { linux: 0.7, debugging_rca: 0.3 }
+        payload:
+          goal: "Provocar y diagnosticar tres fallos clásicos en un contenedor: un proceso que come toda la CPU, un contenedor matado por falta de memoria y un puerto ocupado."
+          steps:
+            - title: Contenedor desechable con herramientas
+              body: "Las imágenes slim no traen ps ni ss: hay que instalarlos. Ese es el primer aprendizaje del lab."
+              commands:
+                - "docker run --rm -it --name tundra debian:bookworm-slim bash"
+                - "ps aux   # falla: 'ps: command not found'"
+                - "apt-get update && apt-get install -y procps iproute2 netcat-openbsd curl"
+            - title: "Misterio 1 — algo se come la CPU"
+              body: "`yes` escribe 'y' infinitas veces: un devorador de CPU perfecto para practicar."
+              commands:
+                - "yes > /dev/null &"
+                - "uptime"
+                - "top -b -n 1 | head -10"
+                - "ps -eo pid,pcpu,comm --sort=-pcpu | head -4"
+            - title: Mátalo con una señal, no a lo bruto
+              commands:
+                - "pgrep -n yes"
+                - "kill -TERM $(pgrep -n yes)"
+                - "pgrep -c yes || echo 'ya no queda ninguno'"
+                - "uptime   # el load average baja despacio: es un promedio"
+            - title: "Misterio 2 — el puerto ocupado"
+              body: "Dejas algo escuchando y lo buscas como lo harías en producción."
+              commands:
+                - "nc -l -p 9999 &"
+                - "ss -tlnp"
+                - "kill $(pgrep -n nc)"
+                - "exit"
+            - title: "Misterio 3 — el contenedor que murió solo"
+              body: "Desde PowerShell. Le damos 64 MB de memoria y corremos algo que pide memoria sin parar."
+              commands:
+                - "docker run --rm -m 64m --memory-swap 64m debian:bookworm-slim tail /dev/zero"
+                - "echo $LASTEXITCODE"
+            - title: Lo mismo en tu Windows
+              body: "Para que no se te olvide el puente entre los dos mundos: estos son los equivalentes del `ss -tlnp` en PowerShell, con QuestMap corriendo."
+              commands:
+                - "Get-NetTCPConnection -LocalPort 3000 -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess"
+                - "Get-Process -Id (Get-NetTCPConnection -LocalPort 3000 -State Listen).OwningProcess"
+          expected: "`ps aux` falla al principio porque la imagen slim no trae procps. Con `yes` en el fondo, `top` lo muestra con ~100 % de CPU y el load average sube hacia 1; al mandarle SIGTERM desaparece, pero el load baja despacio porque es un promedio de los últimos minutos. `ss -tlnp` muestra el `nc` en LISTEN sobre 0.0.0.0:9999 con su PID. El contenedor de 64 MB con `tail /dev/zero` muere y `$LASTEXITCODE` es 137: no fue un bug de la aplicación, lo mató el OOM killer por pasarse de memoria."
+          checklist:
+            - "Corrí el checklist (uptime, top, free, df, ss) y sé qué descarta cada comando"
+            - "Encontré el proceso que comía CPU por su PID y lo paré con una señal"
+            - "Sé quién tiene ocupado un puerto, tanto en Linux como en mi Windows"
+            - "Vi el código 137 y puedo explicar qué significa sin mirar apuntes"
+          hints:
+            - "Si `apt-get update` falla, el contenedor no tiene red: revisa que Docker Desktop esté bien arrancado."
+            - "`pgrep -n yes` devuelve el PID más reciente que se llame 'yes'. Es más corto que buscarlo a mano en `ps aux`."
+            - "En PowerShell la variable del último código de salida es `$LASTEXITCODE`; en bash es `$?`."
+          evidence_hint: "Pega la línea de `top` con el proceso al 100 %, la salida de `ss -tlnp` y el 137 del tercer misterio."
+
+      - slug: tundra-3-quiz
+        type: quiz
+        title: Quiz — Procesos y recursos
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        questions:
+          - slug: tu3-q1
+            type: mcq
+            prompt: "Un contenedor termina con código de salida 137. ¿Qué pasó, casi siempre?"
+            options: [
+              "Un error de compilación",
+              "Lo mataron con SIGKILL, normalmente el OOM killer por falta de memoria",
+              "No encontró su archivo de configuración",
+              "Se cayó la red"
+            ]
+            answer: 1
+            explanation: "137 = 128 + 9, y 9 es SIGKILL. Lo mataron. La causa habitual es el límite de memoria; se confirma con `dmesg | tail` o con el OOMKilled del `docker inspect`."
+            skill: linux
+            difficulty: 2
+          - slug: tu3-q2
+            type: mcq
+            prompt: "Diferencia entre SIGTERM y SIGKILL:"
+            options: [
+              "Ninguna, son sinónimos",
+              "SIGTERM pide terminar y permite limpiar; SIGKILL elimina el proceso de inmediato",
+              "SIGTERM es para contenedores y SIGKILL para procesos normales",
+              "SIGKILL es más lento"
+            ]
+            answer: 1
+            explanation: "SIGTERM se puede atrapar para cerrar conexiones y guardar; SIGKILL no se puede atrapar ni ignorar. Por eso un apagado limpio depende de escuchar SIGTERM."
+            skill: linux
+            difficulty: 1
+          - slug: tu3-q3
+            type: tf
+            prompt: "Un load average de 8 siempre significa que la máquina está sobrecargada."
+            answer: false
+            explanation: "Depende de los núcleos: 8 en una máquina de 16 núcleos va holgado; 8 en una de 2 es una cola enorme. Siempre se compara con `nproc`."
+            skill: linux
+            difficulty: 2
+          - slug: tu3-q4
+            type: fill
+            prompt: "Para ver qué proceso está escuchando en cada puerto TCP se usa `ss -______`."
+            answer: ["tlnp", "-tlnp", "tulnp"]
+            explanation: "t = TCP, l = listening, n = sin resolver nombres (más rápido), p = el proceso dueño. Reemplaza al viejo `netstat -tulpn`."
+            skill: linux
+            difficulty: 2
+          - slug: tu3-q5
+            type: mcq
+            prompt: "Tu servicio empieza a fallar con 'too many open files'. ¿Qué miras primero?"
+            options: [
+              "El espacio en disco",
+              "El límite de descriptores (ulimit -n) y las conexiones que no se cierran",
+              "La versión de Java",
+              "El load average"
+            ]
+            answer: 1
+            explanation: "Cada archivo, socket o conexión abierta consume un descriptor. El síntoma suele ser una fuga: conexiones o streams que nadie cierra."
+            skill: debugging_rca
+            difficulty: 2
+          - slug: tu3-q6
+            type: mcq
+            prompt: "`ps aux` responde 'command not found' dentro de tu contenedor. ¿Qué significa?"
+            options: [
+              "El contenedor está roto",
+              "La imagen es mínima y no incluye esa herramienta",
+              "No tienes permisos",
+              "Hay que reiniciar Docker"
+            ]
+            answer: 1
+            explanation: "Las imágenes slim, alpine o distroless traen lo justo. En producción esto es deliberado: menos herramientas, menos superficie de ataque (y más dependencia de los logs para depurar)."
+            skill: linux
+            difficulty: 1
+          - slug: tu3-q7
+            type: mcq
+            prompt: "¿Qué columna de `free -h` dice cuánta memoria puedes usar de verdad?"
+            options: ["free", "available", "used", "shared"]
+            answer: 1
+            explanation: "Linux usa la RAM libre como caché a propósito, así que *free* parece pequeña. *available* es lo que el sistema puede dar sin empezar a sufrir."
+            skill: linux
+            difficulty: 3
+          - slug: tu3-q8
+            type: mcq
+            prompt: "Te avisan de que una máquina 'va lenta'. ¿Cuál es el primer comando del checklist de 60 segundos?"
+            options: [
+              "uptime, para ver el load average",
+              "Reiniciar el servicio",
+              "journalctl desde el arranque",
+              "Mirar el código de la aplicación"
+            ]
+            answer: 0
+            explanation: "Primero mides, después tocas. `uptime` cuesta un segundo y ya te dice si el problema es de CPU o hay que mirar otra cosa."
+            skill: debugging_rca
+            difficulty: 1
+
+      - slug: tundra-3-micro-flashcards
+        type: micro
+        title: Repaso rápido de procesos y señales
+        required: false
+        estimated_min: 10
+        skills: { linux: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [lx-process, lx-pid, lx-signal, lx-sigterm, lx-oom-killer]
+
+  # ================================================================ NIVEL 4
+  - slug: tundra-4-veteran
+    number: 4
+    title: "Veteran — El Linux de los contenedores y de la nube"
+    story: "Ahora miras tus propias cabañas con otros ojos: quién es PID 1, con qué usuario corren y qué pasa cuando en la nube no hay terminal que abrir."
+    quests:
+      - slug: tundra-4-learn-containers
+        type: learn
+        title: Un contenedor es un proceso Linux (y PID 1 lo cambia todo)
+        required: true
+        estimated_min: 30
+        skills: { linux: 0.7, microservices_gcp: 0.3 }
+        resources:
+          - { ref: res-linux-docker-dockerfile }
+          - { ref: res-linux-docker-exec }
+        payload:
+          note_prompt: "Explica por qué `CMD mi-app` (forma shell) y `CMD [\"mi-app\"]` (forma exec) se comportan distinto al parar el contenedor, y qué es PID 1."
+          summary_md: |
+            - Un contenedor no es una máquina virtual: es **un proceso** (y sus hijos) aislado por el kernel. Por eso arranca en milisegundos y por eso comparte el kernel de tu máquina.
+            - El proceso que arrancas es **PID 1**, y PID 1 tiene un trato especial: las señales que no atiende explícitamente se ignoran. Si PID 1 no escucha SIGTERM, `docker stop` espera y acaba mandando SIGKILL (código 137).
+            - **Forma exec** `CMD ["app", "--flag"]`: tu programa es PID 1 y recibe las señales. **Forma shell** `CMD app --flag`: se ejecuta `/bin/sh -c`, y ese shell suele quedarse como PID 1 y no reenvía nada a tu app.
+            - **Capas**: cada instrucción del Dockerfile crea una capa cacheada. Copia primero lo que cambia poco (`package.json`) y después el código, o romperás la caché en cada build.
+            - **Tamaño**: `debian` (completa) → `slim` → `alpine` → `distroless`. Cuanto más pequeña, menos superficie de ataque… y menos herramientas para depurar dentro.
+            - Tu propia app es un caso de estudio: mira el `CMD` del Dockerfile de QuestMap y luego `docker exec questmap-app-1 cat /proc/1/comm`.
+
+      - slug: tundra-4-learn-hardening
+        type: learn
+        title: Usuario no-root, permisos y secretos en una imagen
+        required: true
+        estimated_min: 30
+        skills: { linux: 0.5, security: 0.5 }
+        resources:
+          - { ref: res-linux-docker-best-practices }
+          - { ref: res-linux-docker-rootless, required: false }
+        payload:
+          note_prompt: "¿Qué gana un atacante si tu contenedor corre como root y logra ejecutar código dentro? Nombra tres cosas que harías en el Dockerfile para limitarlo."
+          summary_md: |
+            - Por defecto un contenedor corre como **root**. Si alguien logra ejecutar código dentro, es root en ese espacio y queda un paso más cerca de tu host.
+            - El antídoto son tres líneas: crear un usuario (`RUN useradd -r -u 10001 app`), copiar con su dueño (`COPY --chown=app:app`) y cambiar de usuario (`USER app`) antes del `ENTRYPOINT`.
+            - Permisos mínimos: `755` para lo ejecutable, `644` para lo que solo se lee, `600` para claves. Y si puedes, sistema de archivos de solo lectura (`read_only: true` en compose).
+            - **Secretos**: una variable de entorno la ve cualquiera que inspeccione el contenedor (`docker inspect`), y un `ARG` queda grabado en la historia de la imagen. Para secretos de verdad, un gestor (Secret Manager en GCP) o un archivo montado.
+            - Recuerda lo que viste en el nivel 1: tu `questmap-app-1` ya hace lo correcto (`USER node`), y el de Postgres mantiene sus datos en `drwx------`.
+
+      - slug: tundra-4-learn-cloud
+        type: learn
+        title: Depurar sin terminal — kubectl, GKE y ssh
+        required: true
+        estimated_min: 30
+        skills: { linux: 0.6, microservices_gcp: 0.4 }
+        resources:
+          - { ref: res-linux-k8s-debug-pod }
+          - { ref: res-linux-kubectl-cheatsheet, required: false }
+          - { ref: res-linux-gke-logs, required: false }
+        payload:
+          note_prompt: "En GKE no puedes 'entrar a la máquina' como en tu laptop. Explica en 3–4 líneas cómo depurarías un pod que se reinicia solo, en orden."
+          summary_md: |
+            - En la nube las máquinas son ganado, no mascotas: se reemplazan. Por eso lo primero no es entrar, es **leer**.
+            - `kubectl logs <pod>` (y `--previous` para el contenedor que murió) → lo que escribió en stdout.
+            - `kubectl describe pod <pod>` → los eventos: `OOMKilled`, `CrashLoopBackOff`, el healthcheck que falla. Aquí está la mitad de las respuestas.
+            - `kubectl exec -it <pod> -- sh` → un comando dentro, si la imagen trae shell. En una distroless no lo tienes: para eso existen los contenedores efímeros de depuración.
+            - En GCP los logs del contenedor acaban en **Cloud Logging**, así que el `grep` del nivel 2 se vuelve una consulta de filtro. La idea es la misma: filtrar, contar, ordenar.
+            - `ssh` con par de claves sigue siendo cómo entras a una VM: clave privada en tu máquina con permisos `600`, pública en el servidor.
+
+      - slug: tundra-4-glossary
+        type: glossary
+        title: Vocabulario de contenedores y nube
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        payload:
+          terms: [lx-pid1, lx-entrypoint, lx-base-image, lx-distroless, lx-non-root, lx-env-var, lx-ssh-key, lx-kubectl-exec]
+
+      - slug: tundra-4-lab-dockerfile
+        type: lab
+        title: "Lab: arregla un Dockerfile roto (y mide la diferencia)"
+        required: true
+        estimated_min: 75
+        skills: { linux: 0.6, security: 0.4 }
+        payload:
+          goal: "Construir a propósito una imagen con los cuatro errores clásicos (root, forma shell, imagen gorda, log a archivo), comprobar cada síntoma con el terminal, arreglarla y medir que el apagado pasa de varios segundos con código 137 a menos de dos segundos con código 0."
+          steps:
+            - title: Carpeta de trabajo
+              body: "Desde PowerShell, FUERA del repo de QuestMap para no mezclar."
+              commands:
+                - "mkdir $HOME\\tundra-lab; cd $HOME\\tundra-lab"
+            - title: El servicio de juguete
+              body: "Un servicio que solo espera. Nota que atrapa SIGTERM para apagarse con elegancia."
+              commands:
+                - "@'"
+                - "#!/bin/sh"
+                - "trap 'echo \"apagando con calma\"; exit 0' TERM"
+                - "echo \"listening\""
+                - "while true; do sleep 1; done"
+                - "'@ | Set-Content -NoNewline serve.sh"
+            - title: El Dockerfile malo
+              body: "Cuatro errores a propósito: imagen completa, root, forma shell en el CMD y nada de permisos explícitos."
+              commands:
+                - "@'"
+                - "FROM debian:bookworm"
+                - "COPY serve.sh /serve.sh"
+                - "RUN chmod 755 /serve.sh"
+                - "CMD /serve.sh"
+                - "'@ | Set-Content Dockerfile.bad"
+                - "docker build -f Dockerfile.bad -t tundra-bad ."
+            - title: Diagnostica los síntomas
+              body: "Antes de arreglar nada, demuestra cada problema con un comando."
+              commands:
+                - "docker run -d --name t-bad tundra-bad"
+                - "docker exec t-bad cat /proc/1/comm        # ¿quién es PID 1?"
+                - "docker exec t-bad id -un                  # ¿con qué usuario corre?"
+                - "docker images tundra-bad --format '{{.Size}}'"
+                - "Measure-Command { docker stop t-bad }     # cuánto tarda en parar"
+                - "docker inspect -f '{{.State.ExitCode}}' t-bad"
+            - title: El Dockerfile bueno
+              body: "Imagen slim, usuario sin privilegios, dueño explícito al copiar y forma exec en el ENTRYPOINT."
+              commands:
+                - "@'"
+                - "FROM debian:bookworm-slim"
+                - "RUN useradd -r -u 10001 app"
+                - "COPY --chown=app:app serve.sh /app/serve.sh"
+                - "RUN chmod 755 /app/serve.sh"
+                - "USER app"
+                - "ENTRYPOINT [\"/app/serve.sh\"]"
+                - "'@ | Set-Content Dockerfile.good"
+                - "docker build -f Dockerfile.good -t tundra-good ."
+            - title: Mide la diferencia
+              commands:
+                - "docker run -d --name t-good tundra-good"
+                - "docker exec t-good cat /proc/1/comm"
+                - "docker exec t-good id -un"
+                - "docker images tundra-good --format '{{.Size}}'"
+                - "Measure-Command { docker stop t-good }"
+                - "docker inspect -f '{{.State.ExitCode}}' t-good"
+                - "docker logs t-good"
+            - title: Mira tu propio Dockerfile con esos ojos
+              body: "Vuelve al repo de QuestMap, abre el Dockerfile y compara su CMD con lo que acabas de aprender. Anota qué hace bien y qué harías distinto."
+              commands:
+                - "cd $HOME\\Documents\\Claude_Learn\\Questmap"
+                - "docker exec questmap-app-1 cat /proc/1/comm"
+                - "docker exec questmap-app-1 id -un"
+            - title: Limpia
+              commands:
+                - "docker rm -f t-bad t-good; docker rmi tundra-bad tundra-good"
+          expected: "En la imagen mala PID 1 es `sh` (tu script queda como hijo y nunca recibe la señal), el usuario es `root` y la imagen pesa unos 120 MB; `docker stop` tarda varios segundos y el contenedor acaba con código 137, es decir matado. En la buena PID 1 es `serve.sh`, el usuario es `app`, la imagen ronda los 80 MB, el apagado tarda ~1 segundo y el código de salida es 0; además `docker logs` muestra el mensaje 'apagando con calma', prueba de que la señal llegó. En tu propia app, `/proc/1/comm` responde `npm start` (porque el CMD es la forma `sh -c …`) y el usuario es `node`: lo del usuario está bien resuelto, lo de PID 1 es exactamente el caso que acabas de medir."
+          checklist:
+            - "Demostré con comandos los cuatro problemas antes de arreglarlos"
+            - "Puedo explicar por qué la forma exec recibe las señales y la shell no"
+            - "La imagen buena corre como usuario no-root y lo comprobé con `id -un`"
+            - "Medí el apagado en los dos casos y sé qué significa el código 137 frente al 0"
+            - "Miré el Dockerfile de QuestMap y sé qué le cambiaría"
+          hints:
+            - "Si `Set-Content` te deja el script con saltos de línea de Windows, el contenedor dirá 'no such file or directory' al arrancar: agrégale `-NoNewline` o conviértelo con `dos2unix` dentro del contenedor."
+            - "`Measure-Command` no imprime la salida del comando, solo el tiempo. Mira el campo TotalSeconds."
+            - "Si el contenedor malo no arranca, revisa que `serve.sh` tenga permisos de ejecución (`chmod 755`)."
+          evidence_hint: "Pega los dos `/proc/1/comm`, los dos `id -un`, los dos tiempos de `docker stop` con su código de salida, y tu Dockerfile bueno."
+
+      - slug: tundra-4-quiz
+        type: quiz
+        title: Quiz — Contenedores, usuarios y nube
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        questions:
+          - slug: tu4-q1
+            type: mcq
+            prompt: "¿Por qué `CMD [\"app\"]` es mejor que `CMD app` para un servicio?"
+            options: [
+              "Porque arranca más rápido",
+              "Porque tu programa queda como PID 1 y recibe SIGTERM directamente",
+              "Porque usa menos memoria",
+              "Porque permite varios comandos"
+            ]
+            answer: 1
+            explanation: "En forma shell se interpone un `/bin/sh -c` que normalmente queda como PID 1 y no reenvía las señales: el apagado deja de ser limpio y acaba en SIGKILL."
+            skill: linux
+            difficulty: 2
+          - slug: tu4-q2
+            type: mcq
+            prompt: "Un contenedor tarda siempre 10 segundos exactos en pararse. ¿Qué sospechas?"
+            options: [
+              "La red está lenta",
+              "Su PID 1 no atiende SIGTERM, así que Docker agota el plazo de gracia y manda SIGKILL",
+              "La imagen es muy grande",
+              "Falta memoria"
+            ]
+            answer: 1
+            explanation: "Ese 'exactamente 10 segundos' es la firma del plazo de gracia agotado. Se arregla con la forma exec, o atrapando la señal (`trap`) en el script de arranque."
+            skill: linux
+            difficulty: 2
+          - slug: tu4-q3
+            type: tf
+            prompt: "Un contenedor que corre como root es root solo dentro del contenedor, así que no supone ningún riesgo."
+            answer: false
+            explanation: "Reduce el riesgo, no lo elimina: junto a una mala configuración o una vulnerabilidad del runtime, ser root dentro es el primer escalón para salir. Por eso `USER` no es opcional en producción."
+            skill: security
+            difficulty: 2
+          - slug: tu4-q4
+            type: order
+            prompt: "Ordena el final de un Dockerfile endurecido."
+            options: [
+              "RUN useradd -r -u 10001 app",
+              "COPY --chown=app:app app.jar /app/app.jar",
+              "USER app",
+              "ENTRYPOINT [\"java\", \"-jar\", \"/app/app.jar\"]"
+            ]
+            answer: [0, 1, 2, 3]
+            explanation: "Creas el usuario, copias con su dueño, cambias de usuario y entonces declaras el arranque. Si pones `USER` antes del COPY, puede fallar por permisos de escritura."
+            skill: security
+            difficulty: 2
+          - slug: tu4-q5
+            type: mcq
+            prompt: "No puedes abrir un shell dentro de un pod en producción porque la imagen es distroless. ¿Qué haces?"
+            options: [
+              "Reconstruir la imagen con bash y desplegar a producción",
+              "Leer `kubectl logs` y `kubectl describe pod`, y si hace falta usar un contenedor efímero de depuración",
+              "Reiniciar el pod hasta que funcione",
+              "Entrar por ssh al nodo"
+            ]
+            answer: 1
+            explanation: "Lo primero son los logs y los eventos; para mirar dentro existen los *ephemeral debug containers*. Meter herramientas en la imagen de producción es ir en contra del motivo por el que es distroless."
+            skill: linux
+            difficulty: 3
+          - slug: tu4-q6
+            type: mcq
+            prompt: "¿Dónde ve un pod reiniciándose en bucle la causa 'OOMKilled'?"
+            options: [
+              "En el código de la aplicación",
+              "En `kubectl describe pod`, entre los eventos y el último estado del contenedor",
+              "En el Dockerfile",
+              "En el navegador"
+            ]
+            answer: 1
+            explanation: "`describe` trae los eventos y el `lastState` con la razón y el código de salida. Es el `dmesg | tail` del mundo Kubernetes."
+            skill: debugging_rca
+            difficulty: 2
+          - slug: tu4-q7
+            type: mcq
+            prompt: "¿Qué permisos debe tener tu clave privada de ssh?"
+            options: ["777", "644", "600", "No importa"]
+            answer: 2
+            explanation: "600: solo su dueño la lee y escribe. Si está más abierta, el cliente de ssh se niega a usarla, y hace bien."
+            skill: security
+            difficulty: 1
+          - slug: tu4-q8
+            type: fill
+            prompt: "La instrucción del Dockerfile que cambia el usuario con el que corre el proceso es ______."
+            answer: ["USER", "user"]
+            explanation: "Va después de instalar y copiar, y antes del ENTRYPOINT. Todo lo que venga detrás se ejecuta con ese usuario."
+            skill: security
+            difficulty: 1
+
+      - slug: tundra-4-open-signals
+        type: open_answer
+        title: "Pregunta abierta: logs a stdout"
+        required: false
+        estimated_min: 20
+        skills: { linux: 0.6, english: 0.4 }
+        payload:
+          prompt_en: "Why should a containerized service write its logs to stdout instead of to a file inside the container? Mention at least two consequences of getting this wrong."
+          rubric: [correctness, depth, clarity, tradeoffs]
+
+  # ================================================================ NIVEL 5
+  - slug: tundra-5-boss
+    number: 5
+    title: "Boss — El servicio que no arranca"
+    story: "Última escotilla. Te entregan un contenedor que no levanta y un terminal. Nadie te va a decir qué le pasa."
+    quests:
+      - slug: tundra-5-learn-scripting
+        type: learn
+        title: Scripts de bash que fallan a tiempo
+        required: true
+        estimated_min: 30
+        skills: { linux: 0.7, cicd: 0.3 }
+        resources:
+          - { ref: res-linux-bash-strict }
+          - { ref: res-linux-shellcheck }
+          - { ref: res-linux-man-bash, required: false }
+        payload:
+          note_prompt: "Explica qué hace cada parte de `set -euo pipefail` y por qué un script de despliegue sin eso es peligroso."
+          summary_md: |
+            Los cinco hábitos que separan un script de juguete de uno que corre en CI:
+            - **Shebang**: `#!/usr/bin/env bash` en la primera línea.
+            - **`set -euo pipefail`**: `-e` corta al primer comando que falla, `-u` corta si usas una variable que no existe (adiós a `rm -rf $CARPETA/` con la variable vacía), `pipefail` hace que un error en medio de un pipe cuente como error.
+            - **Comillas siempre**: `"$ruta"`, no `$ruta`. Un espacio en un nombre de archivo te rompe el script si no las pones.
+            - **Códigos de salida**: `exit 0` si todo fue bien, `exit 1` si no. Es lo único que mira el pipeline para decidir si el paso pasó.
+            - **`trap`** para limpiar: `trap 'rm -f "$tmp"' EXIT` borra lo temporal pase lo que pase.
+
+            Y pásalo por **ShellCheck** antes de confiar en él: es el compilador que bash no tiene.
+
+      - slug: tundra-5-lab-healthcheck
+        type: lab
+        title: "Lab: un script de salud que tu pipeline pueda usar"
+        required: true
+        estimated_min: 60
+        skills: { linux: 0.5, cicd: 0.5 }
+        payload:
+          goal: "Escribir `check.sh` con bash estricto que verifique que QuestMap responde, devolver el código de salida correcto, pasarlo por ShellCheck y dejarlo listo como paso de un pipeline."
+          steps:
+            - title: El script
+              body: "Créalo dentro de un contenedor con bash y curl, o en tu WSL. Fíjate en el `set`, en las comillas y en los dos códigos de salida."
+              commands:
+                - "docker run --rm -it -v ${PWD}:/work -w /work debian:bookworm-slim bash"
+                - "apt-get update && apt-get install -y curl shellcheck"
+                - "cat > check.sh <<'SH'"
+                - "#!/usr/bin/env bash"
+                - "set -euo pipefail"
+                - ""
+                - "URL=\"${1:-http://host.docker.internal:3000}\""
+                - "ESPERADO=\"${2:-200}\""
+                - ""
+                - "codigo=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \"$URL\" || echo '000')"
+                - ""
+                - "if [ \"$codigo\" = \"$ESPERADO\" ]; then"
+                - "  echo \"OK   $URL -> $codigo\""
+                - "  exit 0"
+                - "fi"
+                - "echo \"FAIL $URL -> $codigo (esperaba $ESPERADO)\" >&2"
+                - "exit 1"
+                - "SH"
+                - "chmod 755 check.sh"
+            - title: Pruébalo en los dos casos
+              body: "Primero contra QuestMap (debe pasar), después contra un puerto donde no hay nadie (debe fallar). Mira el código de salida cada vez."
+              commands:
+                - "./check.sh; echo \"exit=$?\""
+                - "./check.sh http://host.docker.internal:9999; echo \"exit=$?\""
+                - "./check.sh > /dev/null; echo \"solo el exit code importa: $?\""
+            - title: Pásalo por el linter
+              body: "ShellCheck te va a señalar cosas aunque el script funcione. Arréglalas: así se revisa un script en un PR."
+              commands:
+                - "shellcheck check.sh && echo 'sin avisos'"
+            - title: Rompe el script a propósito
+              body: "Quita el `set -euo pipefail`, cambia `\"$URL\"` por `$URL` y llámalo con una URL con espacios. Mira cómo falla en silencio. Luego devuélveselo."
+              commands:
+                - "sed -i 's/^set -euo pipefail$/# set -euo pipefail/' check.sh"
+                - "./check.sh 'http://host.docker.internal:3000 extra'; echo \"exit=$?\""
+                - "sed -i 's/^# set -euo pipefail$/set -euo pipefail/' check.sh"
+            - title: Déjalo como healthcheck de verdad
+              body: "Así se vería en un docker-compose. No lo agregues al compose de QuestMap: escríbelo en tus notas."
+              commands:
+                - "exit"
+                - "# healthcheck:"
+                - "#   test: [\"CMD-SHELL\", \"/app/check.sh http://localhost:3000 200\"]"
+                - "#   interval: 10s"
+                - "#   timeout: 5s"
+                - "#   retries: 3"
+          expected: "Contra QuestMap el script imprime `OK … -> 200` y sale con 0; contra el puerto 9999 imprime el FAIL por stderr y sale con 1. Con `> /dev/null` no ves nada y solo queda el código de salida: eso es exactamente lo que lee un pipeline. Sin `set -euo pipefail` y sin comillas, la llamada con espacios no revienta: pasa de largo con un código engañoso, que es el fallo más peligroso de un script de despliegue."
+          checklist:
+            - "`check.sh` empieza con shebang y `set -euo pipefail`"
+            - "Devuelve 0 cuando el servicio responde y 1 cuando no"
+            - "El mensaje de error sale por stderr, no por stdout"
+            - "ShellCheck no deja avisos"
+            - "Vi con mis ojos cómo falla en silencio al quitarle el modo estricto"
+          hints:
+            - "Si `host.docker.internal` no resuelve, prueba con la IP de tu máquina o corre el script directamente en WSL contra `http://127.0.0.1:3000`."
+            - "`curl -w '%{http_code}'` imprime solo el código HTTP; el `|| echo '000'` evita que un fallo de red mate el script antes de que puedas comparar."
+            - "El heredoc `<<'SH'` con comillas simples impide que el shell expanda las variables al escribir el archivo: eso es lo que quieres aquí."
+          evidence_hint: "Pega tu `check.sh` final, las dos ejecuciones con su código de salida y la salida de shellcheck."
+
+      - slug: tundra-5-quiz
+        type: quiz
+        title: Quiz — Scripting y cierre de la tundra
+        required: true
+        estimated_min: 15
+        skills: { linux: 1.0 }
+        questions:
+          - slug: tu5-q1
+            type: mcq
+            prompt: "¿Qué hace `set -u` en un script?"
+            options: [
+              "Hace el script más silencioso",
+              "Aborta si se usa una variable que no está definida",
+              "Actualiza los paquetes",
+              "Permite usar comodines"
+            ]
+            answer: 1
+            explanation: "Es lo que evita el clásico `rm -rf \"$DIR/\"` con `$DIR` vacío. Falla pronto en lugar de hacer algo irreversible."
+            skill: linux
+            difficulty: 2
+          - slug: tu5-q2
+            type: mcq
+            prompt: "Un paso de CI corre tu script y el pipeline queda verde aunque el despliegue falló. ¿Qué es lo más probable?"
+            options: [
+              "El runner está roto",
+              "El script terminó con código 0 aunque un comando interno falló (le falta `set -e` o `pipefail`)",
+              "Falta memoria",
+              "El log se perdió"
+            ]
+            answer: 1
+            explanation: "El pipeline solo mira el código de salida. Sin `-e`, el script sigue después de un error y acaba devolviendo el 0 del último comando."
+            skill: cicd
+            difficulty: 2
+          - slug: tu5-q3
+            type: fill
+            prompt: "La primera línea que dice con qué intérprete correr un script se llama ______ y se escribe `#!/usr/bin/env bash`."
+            answer: ["shebang"]
+            explanation: "Sin ella el sistema decide por su cuenta y puede ejecutarlo con `sh`, donde parte de la sintaxis de bash no existe."
+            skill: linux
+            difficulty: 1
+          - slug: tu5-q4
+            type: tf
+            prompt: "`echo \"error\" >&2` manda el mensaje a stderr."
+            answer: true
+            explanation: "Así los mensajes de error no contaminan la salida que otro comando puede estar leyendo por un pipe. Es buena educación de script."
+            skill: linux
+            difficulty: 2
+          - slug: tu5-q5
+            type: mcq
+            prompt: "¿Por qué se escribe `\"$ruta\"` y no `$ruta`?"
+            options: [
+              "Por estilo",
+              "Porque sin comillas un valor con espacios se parte en varios argumentos",
+              "Porque es más rápido",
+              "Porque bash lo exige"
+            ]
+            answer: 1
+            explanation: "Sin comillas, `mi archivo.txt` llega como dos argumentos. Es el aviso que más repite ShellCheck (SC2086) y la causa de muchos scripts que fallan solo a veces."
+            skill: linux
+            difficulty: 2
+          - slug: tu5-q6
+            type: mcq
+            prompt: "Un contenedor no arranca. ¿Cuál es el primer comando?"
+            options: [
+              "Reconstruir la imagen",
+              "`docker logs <contenedor>` y `docker inspect` para ver el código de salida",
+              "Reiniciar Docker Desktop",
+              "Cambiar la imagen base"
+            ]
+            answer: 1
+            explanation: "Primero lee. El código de salida ya acota: 137 lo mataron, 1 la app falló al arrancar, 126/127 un problema de permisos o de comando no encontrado."
+            skill: debugging_rca
+            difficulty: 1
+          - slug: tu5-q7
+            type: mcq
+            prompt: "Un contenedor sale con código 127. ¿Qué significa?"
+            options: [
+              "Se quedó sin memoria",
+              "No encontró el comando que intentaba ejecutar",
+              "Terminó bien",
+              "El healthcheck falló"
+            ]
+            answer: 1
+            explanation: "127 es 'command not found' (126 es 'no se pudo ejecutar', típicamente permisos). Suele ser un ENTRYPOINT mal escrito o un script sin `chmod +x`."
+            skill: linux
+            difficulty: 3
+          - slug: tu5-q8
+            type: mcq
+            prompt: "¿Para qué sirve `trap 'rm -f \"$tmp\"' EXIT` en un script?"
+            options: [
+              "Para capturar errores de sintaxis",
+              "Para ejecutar la limpieza al salir, pase lo que pase",
+              "Para reintentar el comando",
+              "Para ignorar las señales"
+            ]
+            answer: 1
+            explanation: "`trap` engancha código a una señal o a la salida del script. Es la forma de no dejar archivos temporales ni procesos huérfanos cuando algo falla."
+            skill: linux
+            difficulty: 3
+
+      - slug: tundra-5-boss-fight
+        type: boss
+        title: "Jefe: el servicio que no arranca"
+        required: true
+        estimated_min: 90
+        skills: { linux: 0.7, debugging_rca: 0.1, english: 0.2 }
+        payload:
+          task: "Te dan un servicio en contenedor que no funciona y solo un terminal. Diagnostica y arregla estos cuatro fallos, uno por uno, dejando por escrito el comando que usaste para identificar cada cual: (1) el contenedor sale de inmediato con código 127; (2) arreglado eso, sale con 137 a los pocos segundos de arrancar; (3) arreglado eso, arranca pero `docker logs` no muestra nada aunque la app sí escribe un archivo de log dentro; (4) arreglado eso, el contenedor tarda 10 segundos exactos en pararse y termina con 137. Entrega: para cada fallo, el síntoma, el comando con el que lo confirmaste, la causa y el arreglo concreto en el Dockerfile o en el compose. Después defiende el diagnóstico en inglés como si fuera una entrevista: te preguntarán por qué 137, qué es PID 1 y por qué los logs van a stdout."
+          rubric: [correctness, depth, clarity, tradeoffs]
+          interview_focus: [
+            "exit codes 126, 127 and 137",
+            "PID 1 and signal handling in containers",
+            "logs to stdout vs files inside the container",
+            "memory limits and the OOM killer",
+            "least privilege: non-root user and file permissions"
+          ]
+
+      - slug: tundra-5-micro-review
+        type: micro
+        title: Repaso del terminal en 10 minutos
+        required: false
+        estimated_min: 10
+        skills: { linux: 1.0 }
+        payload:
+          kind: flashcards
+          terms: [lx-man, lx-home, lx-shebang, lx-set-euo, lx-journalctl, lx-cron]
+
+      - slug: tundra-5-interview
+        type: interview
+        title: "Mini-entrevista: Linux screen"
+        required: false
+        estimated_min: 30
+        skills: { linux: 0.6, english: 0.4 }
+        payload:
+          mode: technical_screen
+          zone: terminal-tundra

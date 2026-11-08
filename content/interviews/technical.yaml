@@ -172,3 +172,27 @@ templates:
         - "How would you implement a transaction that spans the orders, payments and inventory services?"
         - "What is a retry storm, and how do backoff, jitter and retry budgets prevent it?"
         - "What is split-brain, and how do fencing tokens protect against it?"
+
+  - slug: technical-terminal-tundra
+    mode: technical_screen
+    title: "Technical screen: Linux & containers"
+    zone: terminal-tundra
+    payload:
+      pick: 6
+      duration_min: 30
+      questions:
+        - "A service is running slow on a Linux box you have never seen before. Walk me through the first five commands you would run and what each one rules out."
+        - "What does a load average of 12 tell you? What else do you need to know before calling it a problem?"
+        - "A container exits with code 137. What happened, and how would you confirm it?"
+        - "Explain the difference between SIGTERM and SIGKILL. What does `docker stop` actually do?"
+        - "What is PID 1 in a container, and why does it matter for a graceful shutdown?"
+        - "Why does the exec form of ENTRYPOINT behave differently from the shell form?"
+        - "Why should a containerized service log to stdout instead of to a file?"
+        - "How would you find out which process is listening on port 8080, and which process is using the most CPU?"
+        - "Your app starts failing with 'too many open files'. What is happening and how do you fix it?"
+        - "Read me these permissions: -rw------- on a file and drwxr-xr-x on a directory. Who can do what?"
+        - "Why do we run containers as a non-root user? What does an attacker gain if we do not?"
+        - "You cannot exec into a pod because the image is distroless. How do you debug it?"
+        - "Given a log file with a million lines, how would you find the five most frequent error messages?"
+        - "What does `set -euo pipefail` do, and why does a CI script need it?"
+        - "Where do you look first when a Kubernetes pod is in CrashLoopBackOff?"

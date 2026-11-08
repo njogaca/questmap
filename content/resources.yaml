@@ -1341,3 +1341,280 @@ resources:
     required: true
     why: Lista de preguntas para el entrevistador por tema (rol, tecnología, equipo, compañía). Elige las que te importen.
     verified: true
+
+  # ------------------------------------------------------- Linux / terminal
+  # URLs comprobadas el 2026-11-07 (HTTP 200).
+  - slug: res-linux-tlcl
+    title: "The Linux Command Line — William Shotts (libro gratis)"
+    type: book
+    url: https://linuxcommand.org/tlcl.php
+    language: en
+    duration_min: 1200
+    cost: free
+    required: true
+    why: La referencia gratuita de la línea de comandos. Lee las partes 1 y 2; el resto como consulta.
+    verified: true
+
+  - slug: res-linux-missing-shell
+    title: "MIT Missing Semester — The Shell"
+    type: course
+    url: https://missing.csail.mit.edu/2020/course-shell/
+    language: en
+    duration_min: 60
+    cost: free
+    required: true
+    why: "La clase que nadie te da: qué es el shell y cómo se encadenan los comandos. Tiene video y ejercicios."
+    verified: true
+
+  - slug: res-linux-missing-shell-tools
+    title: "MIT Missing Semester — Shell Tools and Scripting"
+    type: course
+    url: https://missing.csail.mit.edu/2020/shell-tools/
+    language: en
+    duration_min: 60
+    cost: free
+    required: true
+    why: Pipes, redirección, comodines y los primeros scripts, con ejercicios resueltos.
+    verified: true
+
+  - slug: res-linux-wsl-install
+    title: "Microsoft Learn — Install WSL"
+    type: docs
+    url: https://learn.microsoft.com/en-us/windows/wsl/install
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo tener un Linux real dentro de Windows (ya lo tienes si instalaste Docker Desktop).
+    verified: true
+
+  - slug: res-linux-wsl-commands
+    title: "Microsoft Learn — Basic commands for WSL"
+    type: docs
+    url: https://learn.microsoft.com/en-us/windows/wsl/basic-commands
+    language: en
+    duration_min: 15
+    cost: free
+    required: false
+    why: Manejar las distros desde PowerShell (wsl -l -v, wsl --shutdown) y pasar archivos entre los dos mundos.
+    verified: true
+
+  - slug: res-linux-explainshell
+    title: "explainshell — desarma cualquier comando"
+    type: lab
+    url: https://explainshell.com/
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: Pegas un comando largo y te explica cada flag. Úsalo cada vez que copies un comando que no entiendes.
+    verified: true
+
+  - slug: res-linux-man-chmod
+    title: "man 1 chmod — permisos"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/chmod.1.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: La tabla de permisos numéricos (755, 644) y qué significa cada dígito.
+    verified: true
+
+  - slug: res-linux-man-grep
+    title: "man 1 grep"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/grep.1.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: "Los flags que de verdad usarás en un log: -i, -v, -c, -n, -A, -B, -E."
+    verified: true
+
+  - slug: res-linux-man-awk
+    title: "man 1 awk"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/awk.1p.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: "Para quedarte con una columna de un log. Con {print $5} ya resuelves el 90 % de los casos."
+    verified: true
+
+  - slug: res-linux-man-ps
+    title: "man 1 ps — procesos"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/ps.1.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: "Qué columnas trae ps aux y cómo leer PID, PPID y %MEM."
+    verified: true
+
+  - slug: res-linux-man-top
+    title: "man 1 top"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/top.1.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Cómo interpretar load average, CPU por proceso y la memoria libre de verdad.
+    verified: true
+
+  - slug: res-linux-man-signal
+    title: "man 7 signal — señales"
+    type: docs
+    url: https://man7.org/linux/man-pages/man7/signal.7.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: La diferencia entre SIGTERM (te pido que termines) y SIGKILL (te mato), clave en contenedores.
+    verified: true
+
+  - slug: res-linux-man-ss
+    title: "man 8 ss — sockets y puertos"
+    type: docs
+    url: https://man7.org/linux/man-pages/man8/ss.8.html
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: "ss -tlnp te dice quién tiene ocupado el puerto 3000. Reemplaza al viejo netstat."
+    verified: true
+
+  - slug: res-linux-man-bash
+    title: "man 1 bash"
+    type: docs
+    url: https://man7.org/linux/man-pages/man1/bash.1.html
+    language: en
+    duration_min: 60
+    cost: free
+    required: false
+    why: "Referencia completa de bash. No se lee de corrido: se busca con Ctrl+F."
+    verified: true
+
+  - slug: res-linux-journalctl
+    title: "journalctl — logs de systemd"
+    type: docs
+    url: https://www.freedesktop.org/software/systemd/man/latest/journalctl.html
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: En una VM de Linux los logs de los servicios se leen así, no con cat de un archivo.
+    verified: true
+
+  - slug: res-linux-gregg-60s
+    title: "Linux Performance Analysis in 60 Seconds — Brendan Gregg (PDF)"
+    type: article
+    url: https://www.brendangregg.com/Articles/Netflix_Linux_Perf_Analysis_60s.pdf
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: El checklist de 10 comandos que corre un SRE al entrar a una máquina lenta. Oro puro para una entrevista.
+    verified: true
+
+  - slug: res-linux-docker-exec
+    title: "Docker docs — docker container exec"
+    type: docs
+    url: https://docs.docker.com/reference/cli/docker/container/exec/
+    language: en
+    duration_min: 10
+    cost: free
+    required: true
+    why: La puerta de entrada al Linux que ya estás usando en los labs de Cassandra y Prometheus.
+    verified: true
+
+  - slug: res-linux-docker-dockerfile
+    title: "Docker docs — Dockerfile reference (ENTRYPOINT, CMD, USER)"
+    type: docs
+    url: https://docs.docker.com/reference/dockerfile/
+    language: en
+    duration_min: 45
+    cost: free
+    required: true
+    why: Por qué la forma exec recibe las señales y la forma shell no. Explica los apagados de 10 segundos.
+    verified: true
+
+  - slug: res-linux-docker-best-practices
+    title: "Docker docs — Building best practices"
+    type: docs
+    url: https://docs.docker.com/build/building/best-practices/
+    language: en
+    duration_min: 40
+    cost: free
+    required: true
+    why: Imagen pequeña, capas en orden y usuario no-root. Es lo que revisa un reviewer en el PR.
+    verified: true
+
+  - slug: res-linux-docker-rootless
+    title: "Docker docs — Rootless mode"
+    type: docs
+    url: https://docs.docker.com/engine/security/rootless/
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Para entender el argumento de seguridad de no correr como root, incluso en el demonio.
+    verified: true
+
+  - slug: res-linux-k8s-debug-pod
+    title: "Kubernetes — Debug Running Pods"
+    type: docs
+    url: https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/
+    language: en
+    duration_min: 30
+    cost: free
+    required: true
+    why: "kubectl logs, kubectl exec y contenedores efímeros: cómo se depura cuando no hay terminal que abrir."
+    verified: true
+
+  - slug: res-linux-kubectl-cheatsheet
+    title: "Kubernetes — kubectl Quick Reference"
+    type: docs
+    url: https://kubernetes.io/docs/reference/kubectl/quick-reference/
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Chuleta de los comandos que usarás en GKE. Ten a mano logs, exec, describe y top.
+    verified: true
+
+  - slug: res-linux-gke-logs
+    title: "GKE — View GKE logs"
+    type: docs
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/view-logs
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: En GCP los logs del contenedor terminan en Cloud Logging. Conecta esta zona con GCP Peaks.
+    verified: true
+
+  - slug: res-linux-bash-strict
+    title: "Unofficial Bash Strict Mode (set -euo pipefail)"
+    type: article
+    url: http://redsymbol.net/articles/unofficial-bash-strict-mode/
+    language: en
+    duration_min: 20
+    cost: free
+    required: true
+    why: Las tres opciones que convierten un script silencioso y peligroso en uno que falla a tiempo.
+    verified: true
+
+  - slug: res-linux-shellcheck
+    title: "ShellCheck — linter de scripts de shell"
+    type: lab
+    url: https://www.shellcheck.net/
+    language: en
+    duration_min: 15
+    cost: free
+    required: true
+    why: Pegas tu script y te marca las comillas que faltan. Es el equivalente a un compilador para bash.
+    verified: true

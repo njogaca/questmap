@@ -1,4 +1,4 @@
-# Las 14 skills de la oferta (sección 1 del SPEC).
+# Las 14 skills de la oferta (sección 1 del SPEC) + `linux`, agregada después (ver el final).
 #
 # target_xp = XP ponderado esperado cuando estén completas TODAS las quests
 # `required` de TODAS las zonas que entrenan la skill (sin bonos ni optional).
@@ -45,12 +45,12 @@ skills:
     name: Microservicios en GCP
     description: Microservicios y cloud (GCP preferido)
     core: true
-    target_xp: 420 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 417
+    target_xp: 430 # Z1–Z12 (2026-11-07): 431 · antes Z1–Z11: 420
   - code: cicd
     name: CI/CD
     description: CI/CD y pipelines de despliegue
     core: false
-    target_xp: 210 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 212
+    target_xp: 240 # Z1–Z12 (2026-11-07): 243 · antes Z1–Z11: 210
   - code: git
     name: Git
     description: Control de versiones
@@ -60,12 +60,12 @@ skills:
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
-    target_xp: 270 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 267
+    target_xp: 310 # Z1–Z12 (2026-11-07): 312 · antes Z1–Z11: 270
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
-    target_xp: 510 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 513
+    target_xp: 540 # Z1–Z12 (2026-11-07): 543 · antes Z1–Z11: 510
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance
@@ -75,9 +75,17 @@ skills:
     name: Inglés técnico
     description: Comunicación y entrevistas en inglés
     core: true
-    target_xp: 1600 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 1601
+    target_xp: 1630 # Z1–Z12 (2026-11-07): 1631 · antes Z1–Z11: 1600
   - code: distributed_systems
     name: Sistemas distribuidos
     description: Teoría de sistemas distribuidos (base para todo lo anterior)
     core: false
     target_xp: 1180 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 1184
+  # Skill 15, agregada el 2026-11-07 con la Zona 12 (Terminal Tundra). No sale de la oferta:
+  # es un hueco propio — todos los labs de las otras zonas entran a un Linux (docker exec)
+  # que nunca se enseñaba. No es core para que no tape las recomendaciones de Java y Cassandra.
+  - code: linux
+    name: Linux / línea de comandos
+    description: Terminal, logs, procesos y permisos en Linux (dentro de contenedores y en GCP)
+    core: false
+    target_xp: 710 # REAL con la Zona 12 publicada (2026-11-07): 710

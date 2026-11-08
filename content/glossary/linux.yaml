@@ -1,0 +1,348 @@
+zone: terminal-tundra
+terms:
+  # ---------------------------------------------------------------- Nivel 1
+  - slug: lx-shell
+    term: shell
+    category: basics
+    definition_es: "El programa que lee lo que escribes en el terminal, lo ejecuta y te devuelve el resultado. En Linux el más común es bash."
+    definition_en: "The program that reads your commands, runs them and prints the result."
+    example_en: "Open a shell inside the container and check the config file."
+    analogy: "El mesero del restaurante: no cocina, pero toma tu pedido, lo lleva a la cocina y te trae el plato."
+    see_also: [lx-bash, lx-prompt]
+
+  - slug: lx-bash
+    term: bash
+    category: basics
+    definition_es: "El shell por defecto de casi todo Linux. Es a la vez intérprete de comandos y lenguaje de scripting."
+    definition_en: "The default shell on most Linux systems, and also a scripting language."
+    example_en: "The deploy step is a bash script that runs the migrations."
+    analogy: "Como PowerShell en Windows: el mismo trabajo, otro idioma y otras costumbres."
+    see_also: [lx-shell, lx-shebang]
+
+  - slug: lx-prompt
+    term: prompt
+    category: basics
+    definition_es: "La línea que el shell te muestra para pedirte un comando. Suele decir usuario, máquina y carpeta actual. Si termina en # eres root; si termina en $ eres un usuario normal."
+    definition_en: "The line the shell shows when it is waiting for a command."
+    example_en: "The prompt ends with a hash, so you are running as root."
+    analogy: "El cursor parpadeando en una caja de búsqueda: el sistema esperando que hables."
+    see_also: [lx-shell, lx-sudo]
+
+  - slug: lx-root-dir
+    term: root directory (/)
+    category: filesystem
+    definition_es: "La raíz del sistema de archivos. Todo cuelga de ahí: /etc la configuración, /var/log los logs, /tmp lo temporal, /usr/bin los programas, /home las carpetas de los usuarios."
+    definition_en: "The top of the filesystem; every other path hangs from it."
+    example_en: "The application logs are under /var/log."
+    analogy: "El vestíbulo de un edificio: desde ahí salen todos los pasillos, y cada pasillo tiene su función."
+    see_also: [lx-path, lx-home]
+
+  - slug: lx-path
+    term: PATH
+    category: basics
+    definition_es: "Variable de entorno con la lista de carpetas donde el shell busca un programa cuando escribes su nombre. Si un comando 'no se encuentra', normalmente es que su carpeta no está en el PATH."
+    definition_en: "The list of directories the shell searches when you type a command name."
+    example_en: "The binary is not on the PATH, so use the full path instead."
+    analogy: "La agenda de teléfonos: si el número no está anotado ahí, para ti esa persona no existe aunque exista."
+    see_also: [lx-env-var]
+
+  - slug: lx-sudo
+    term: sudo
+    category: basics
+    definition_es: "Ejecuta un solo comando con permisos de administrador (root). Se usa para lo que toca el sistema: instalar paquetes, escribir en /etc, parar servicios."
+    definition_en: "Runs a single command with administrator (root) privileges."
+    example_en: "You need sudo to install that package."
+    analogy: "Pedir prestada la llave maestra del edificio para abrir una puerta, y devolverla al salir."
+    see_also: [lx-permissions, lx-non-root]
+
+  - slug: lx-permissions
+    term: file permissions (rwx)
+    category: filesystem
+    definition_es: "Cada archivo tiene tres permisos (leer, escribir, ejecutar) para tres audiencias: su dueño, su grupo y los demás. Por eso un mismo archivo se abre para uno y da 'Permission denied' para otro."
+    definition_en: "Read, write and execute permissions, set separately for the owner, the group and everyone else."
+    example_en: "The script failed because it does not have execute permission."
+    analogy: "Las llaves de una casa compartida: el dueño abre todo, los roommates solo algunas puertas, el visitante ninguna."
+    see_also: [lx-chmod, lx-non-root]
+
+  - slug: lx-chmod
+    term: chmod
+    category: filesystem
+    definition_es: "Comando que cambia los permisos de un archivo. En forma numérica cada dígito es una audiencia y suma 4 (leer) + 2 (escribir) + 1 (ejecutar): 755 es dueño todo y los demás leer y ejecutar; 644 es dueño leer y escribir, los demás solo leer."
+    definition_en: "The command that changes a file's permissions."
+    example_en: "Run chmod 755 on the script so it can be executed."
+    analogy: "Reprogramar qué abre cada tarjeta del hotel, sin cambiar la cerradura."
+    see_also: [lx-permissions]
+
+  # ---------------------------------------------------------------- Nivel 2
+  - slug: lx-stdout
+    term: stdout
+    category: text
+    definition_es: "La salida normal de un programa (salida estándar). Es lo que ves cuando todo va bien, y lo que un contenedor debe escribir para que `docker logs` lo recoja."
+    definition_en: "A program's normal output stream."
+    example_en: "Containers should log to stdout, not to a file."
+    analogy: "La bandeja de salida del escritorio: ahí va el trabajo terminado."
+    see_also: [lx-stderr, lx-redirection]
+
+  - slug: lx-stderr
+    term: stderr
+    category: text
+    definition_es: "El canal separado por donde salen los errores (salida de error estándar). Está aparte para que puedas guardar los errores sin mezclarlos con el resultado."
+    definition_en: "The separate stream a program uses for error messages."
+    example_en: "The warning went to stderr, so it did not end up in the output file."
+    analogy: "Dos buzones en la puerta: uno para el correo normal y otro solo para las multas."
+    see_also: [lx-stdout, lx-redirection]
+
+  - slug: lx-pipe
+    term: pipe (|)
+    category: text
+    definition_es: "Conecta la salida de un comando con la entrada del siguiente, sin archivos intermedios. Es la idea central del terminal: herramientas pequeñas encadenadas."
+    definition_en: "Sends one command's output straight into the next command's input."
+    example_en: "Pipe the log into grep to keep only the errors."
+    analogy: "Una línea de montaje: cada estación recibe lo que salió de la anterior y le hace una sola cosa."
+    see_also: [lx-grep, lx-redirection]
+
+  - slug: lx-redirection
+    term: redirection (>, >>, 2>&1)
+    category: text
+    definition_es: "Mandar la salida a un archivo en vez de a la pantalla: > crea o sobrescribe, >> agrega al final, y 2>&1 manda los errores al mismo sitio que la salida normal."
+    definition_en: "Sending a command's output to a file instead of the screen."
+    example_en: "Redirect both stdout and stderr to the same file with 2>&1."
+    analogy: "Cambiar el destino de una carta antes de enviarla: misma carta, otro buzón."
+    see_also: [lx-stdout, lx-stderr]
+
+  - slug: lx-exit-code
+    term: exit code
+    category: basics
+    definition_es: "El número que un programa devuelve al terminar: 0 significa que todo salió bien y cualquier otro número es un fallo. Es lo que mira un pipeline de CI para decidir si el paso pasó."
+    definition_en: "The number a program returns when it finishes; 0 means success."
+    example_en: "The job failed because the script returned a non-zero exit code."
+    analogy: "El pulgar arriba o abajo al final de una tarea: no explica nada, pero decide si sigues o paras."
+    see_also: [lx-set-euo]
+
+  - slug: lx-grep
+    term: grep
+    category: text
+    definition_es: "Filtra líneas que contienen un patrón. Los flags que más usarás: -i ignora mayúsculas, -v invierte (lo que NO coincide), -c cuenta, -n da el número de línea, -A y -B muestran líneas de contexto después y antes."
+    definition_en: "Filters the lines of a file or stream that match a pattern."
+    example_en: "Grep the log for timeout errors with three lines of context."
+    analogy: "El Ctrl+F del terminal, pero que te devuelve todas las coincidencias en una lista en vez de llevarte a una."
+    see_also: [lx-pipe, lx-awk]
+
+  - slug: lx-awk
+    term: awk
+    category: text
+    definition_es: "Procesa texto por columnas: $1 es la primera palabra de la línea, $2 la segunda, etc. Para un log, es la forma rápida de quedarte solo con la hora o solo con el código de respuesta."
+    definition_en: "A text tool that works column by column."
+    example_en: "Use awk to print the fifth field of every line."
+    analogy: "Un resaltador que solo marca la tercera columna de una tabla impresa."
+    see_also: [lx-grep, lx-pipe]
+
+  - slug: lx-tail-follow
+    term: tail -f
+    category: text
+    definition_es: "Muestra el final de un archivo y se queda enganchado imprimiendo lo nuevo a medida que aparece. Es la forma de ver un log en vivo mientras reproduces el error."
+    definition_en: "Prints the end of a file and keeps printing new lines as they arrive."
+    example_en: "Tail the log while I reproduce the bug."
+    analogy: "Quedarte mirando la banda del aeropuerto: no te vas, ves aparecer cada maleta nueva."
+    see_also: [lx-stdout]
+
+  # ---------------------------------------------------------------- Nivel 3
+  - slug: lx-process
+    term: process
+    category: processes
+    definition_es: "Un programa en ejecución, con su propia memoria y sus propios archivos abiertos. Un contenedor, visto desde el sistema, es solo un proceso (o unos pocos) aislado."
+    definition_en: "A running program, with its own memory and open files."
+    example_en: "The service runs as a single process inside the container."
+    analogy: "La diferencia entre la receta y el plato que se está cocinando ahora en la estufa."
+    see_also: [lx-pid, lx-pid1]
+
+  - slug: lx-pid
+    term: PID
+    category: processes
+    definition_es: "El número que identifica a un proceso mientras vive. Lo necesitas para mirarlo (`ps`), medirlo o matarlo (`kill`)."
+    definition_en: "The number that identifies a running process."
+    example_en: "Find the PID first, then send it a TERM signal."
+    analogy: "El número de turno en la panadería: solo sirve mientras estás en la fila, y al salir se reutiliza."
+    see_also: [lx-process, lx-signal]
+
+  - slug: lx-load-average
+    term: load average
+    category: resources
+    definition_es: "Tres números (1, 5 y 15 minutos) con el promedio de procesos que quieren CPU. La regla práctica: compáralos con el número de núcleos. Con 4 núcleos, un load de 4 es la capacidad justa; 12 es cola larga."
+    definition_en: "The average number of processes waiting for CPU over 1, 5 and 15 minutes."
+    example_en: "Load average is twelve on a four-core box, so we are CPU bound."
+    analogy: "La cola en la caja del supermercado: si hay 4 cajas y 12 carritos esperando, no es que las cajas sean lentas, es que no alcanzan."
+    see_also: [lx-process]
+
+  - slug: lx-signal
+    term: signal
+    category: processes
+    definition_es: "Un mensaje corto que el sistema envía a un proceso para que haga algo: terminar, recargar su configuración, pararse. `kill` no mata: envía señales."
+    definition_en: "A short message the system sends to a process, for example asking it to stop."
+    example_en: "The container got a TERM signal and shut down cleanly."
+    analogy: "Tocar el hombro de alguien que tiene audífonos: le avisas, pero él decide cómo reacciona."
+    see_also: [lx-sigterm, lx-pid]
+
+  - slug: lx-sigterm
+    term: SIGTERM vs SIGKILL
+    category: processes
+    definition_es: "SIGTERM (15) pide al proceso que termine y le deja cerrar conexiones y guardar; SIGKILL (9) lo elimina de inmediato sin darle oportunidad. `docker stop` manda SIGTERM, espera 10 segundos y entonces manda SIGKILL."
+    definition_en: "SIGTERM asks a process to stop; SIGKILL removes it immediately."
+    example_en: "If the app ignores SIGTERM, Docker kills it after the grace period."
+    analogy: "Pedirle a alguien que salga de la sala y darle tiempo de recoger sus cosas, o sacarlo cargado en el acto."
+    see_also: [lx-signal, lx-pid1]
+
+  - slug: lx-oom-killer
+    term: OOM killer
+    category: resources
+    definition_es: "Cuando el sistema se queda sin memoria, el kernel elige un proceso y lo mata para salvar al resto. Tu contenedor que 'murió solo' con código 137 casi siempre fue esto."
+    definition_en: "The kernel mechanism that kills a process when the system runs out of memory."
+    example_en: "Exit code 137 means the container was OOM killed."
+    analogy: "El ascensor que pasa de largo cuando va lleno: alguien se queda fuera para que el resto llegue."
+    see_also: [lx-process]
+
+  - slug: lx-file-descriptor
+    term: file descriptor
+    category: resources
+    definition_es: "El número con el que un proceso se refiere a cada cosa que tiene abierta: un archivo, un socket, una conexión. Hay un límite por proceso (`ulimit -n`), y 'too many open files' significa que lo tocaste, casi siempre por conexiones que nadie cierra."
+    definition_en: "A number a process uses to refer to each file or socket it has open."
+    example_en: "We hit the file descriptor limit because connections were never closed."
+    analogy: "Las fichas del guardarropa: tienes un número limitado, y si nadie recoge su abrigo, dejas de aceptar gente."
+    see_also: [lx-listening-port]
+
+  - slug: lx-listening-port
+    term: listening port
+    category: resources
+    definition_es: "Un puerto donde un proceso espera conexiones. `ss -tlnp` lista los que están a la escucha y qué proceso los tiene, que es la respuesta a 'port 3000 is already in use'."
+    definition_en: "A port where a process is waiting for incoming connections."
+    example_en: "Check which process is listening on port 3000."
+    analogy: "Una extensión telefónica: el número existe solo si alguien está sentado esperando la llamada."
+    see_also: [lx-file-descriptor]
+
+  # ---------------------------------------------------------------- Nivel 4
+  - slug: lx-pid1
+    term: PID 1
+    category: containers
+    definition_es: "El primer proceso del sistema, y dentro de un contenedor el que tú arrancas. Tiene una responsabilidad especial: si ignora las señales, nada lo para con elegancia, y los procesos huérfanos se quedan colgando."
+    definition_en: "The first process of the system; inside a container it is the one you start."
+    example_en: "Our entrypoint script runs as PID 1 and swallows the TERM signal."
+    analogy: "El portero de la discoteca: si él no escucha el aviso de cierre, nadie se va a su hora."
+    see_also: [lx-entrypoint, lx-sigterm]
+
+  - slug: lx-entrypoint
+    term: ENTRYPOINT (exec vs shell form)
+    category: containers
+    definition_es: "La instrucción del Dockerfile que dice qué se ejecuta al arrancar. En forma exec (lista JSON) tu programa es PID 1 y recibe las señales; en forma shell queda debajo de un /bin/sh que se come el SIGTERM, y por eso el contenedor tarda 10 segundos en parar."
+    definition_en: "The Dockerfile instruction that defines what runs when the container starts."
+    example_en: "Use the exec form so the app receives signals directly."
+    analogy: "Hablar con el gerente o hablar con el intermediario: el mensaje llega distinto según a quién se lo des."
+    see_also: [lx-pid1, lx-sigterm]
+
+  - slug: lx-base-image
+    term: base image
+    category: containers
+    definition_es: "La imagen de la que parte tu Dockerfile (`FROM`). Define qué Linux llevas dentro: una completa como debian trae terminal y herramientas; una slim o alpine trae mucho menos y pesa mucho menos."
+    definition_en: "The image your Dockerfile starts from, which decides what Linux you carry inside."
+    example_en: "We moved to a slim base image and the build dropped 400 megabytes."
+    analogy: "Mudarte con todos los muebles de la casa anterior o solo con una maleta: cuanto menos cargas, más rápido llegas."
+    see_also: [lx-distroless, lx-non-root]
+
+  - slug: lx-distroless
+    term: distroless image
+    category: containers
+    definition_es: "Imagen que solo lleva tu aplicación y sus librerías: no trae shell, ni gestor de paquetes, ni utilidades. Es más segura y pequeña, pero no puedes abrir un terminal dentro para depurar."
+    definition_en: "An image that contains only your app and its libraries, with no shell."
+    example_en: "You cannot exec into a distroless container, so rely on logs."
+    analogy: "Una caja fuerte sin puerta de servicio: nadie entra a husmear, pero tú tampoco."
+    see_also: [lx-base-image, lx-kubectl-exec]
+
+  - slug: lx-non-root
+    term: non-root user
+    category: containers
+    definition_es: "Correr el proceso del contenedor como un usuario sin privilegios (instrucción `USER`) en vez de root. Si alguien logra ejecutar código dentro, hereda esos permisos limitados."
+    definition_en: "Running the container's process as an unprivileged user instead of root."
+    example_en: "The image runs as a non-root user with a read-only filesystem."
+    analogy: "Darle al repartidor la llave del casillero, no la del edificio entero."
+    see_also: [lx-permissions, lx-sudo]
+
+  - slug: lx-env-var
+    term: environment variable
+    category: containers
+    definition_es: "Valor con nombre que el proceso lee de su entorno. Es la forma estándar de configurar un contenedor, pero un secreto en variable de entorno queda visible para cualquiera que inspeccione el proceso."
+    definition_en: "A named value a process reads from its environment, used to configure containers."
+    example_en: "The database URL comes from an environment variable."
+    analogy: "La nota pegada en la nevera: cualquiera en la casa la lee, así que no escribas ahí tu PIN."
+    see_also: [lx-path]
+
+  - slug: lx-ssh-key
+    term: SSH key pair
+    category: cloud
+    definition_es: "Dos archivos: una clave privada que nunca sale de tu máquina y una pública que pones en el servidor. El servidor te reconoce sin contraseña. La privada se protege con permisos 600."
+    definition_en: "A private key you keep and a public key you install on the server."
+    example_en: "Add your public key to the server and keep the private one local."
+    analogy: "Un candado que repartes abierto y una llave única que nunca prestas."
+    see_also: [lx-permissions]
+
+  - slug: lx-kubectl-exec
+    term: kubectl exec / logs
+    category: cloud
+    definition_es: "La forma de depurar en Kubernetes: `kubectl logs` lee lo que el contenedor escribió en stdout y `kubectl exec` te abre un comando dentro del pod. Es el equivalente de `docker logs` y `docker exec` en la nube."
+    definition_en: "The Kubernetes way to read a container's logs and run a command inside a pod."
+    example_en: "Tail the pod logs before you exec into it."
+    analogy: "Llamar por teléfono a la sucursal en vez de ir en carro: no te mueves, pero escuchas lo que pasa."
+    see_also: [lx-distroless, lx-stdout]
+
+  # ------------------------------------------------- Extras (repaso nivel 5)
+  - slug: lx-man
+    term: man page
+    category: basics
+    definition_es: "El manual que trae cada comando instalado (`man grep`). Se navega con las flechas, se busca con / y se sale con q. Es la respuesta correcta a 'no me acuerdo del flag'."
+    definition_en: "The built-in manual page for a command."
+    example_en: "Check the man page for the exact flag."
+    analogy: "El manual de la lavadora guardado dentro de la lavadora: siempre está, aunque nadie lo abra."
+    see_also: [lx-shell]
+
+  - slug: lx-home
+    term: home directory (~)
+    category: filesystem
+    definition_es: "La carpeta personal del usuario, abreviada con ~. Ahí viven su configuración y sus archivos, y suele ser el único sitio donde puede escribir sin permisos especiales."
+    definition_en: "The user's personal directory, written as a tilde."
+    example_en: "Put the config file in your home directory."
+    analogy: "Tu cuarto en una casa compartida: el único espacio donde mueves los muebles sin pedir permiso."
+    see_also: [lx-root-dir, lx-permissions]
+
+  - slug: lx-shebang
+    term: shebang (#!)
+    category: scripting
+    definition_es: "La primera línea de un script que dice con qué programa ejecutarlo, por ejemplo #!/usr/bin/env bash. Sin ella, el sistema adivina, y a veces adivina mal."
+    definition_en: "The first line of a script that says which interpreter should run it."
+    example_en: "Add a shebang so the script always runs with bash."
+    analogy: "La etiqueta del idioma en un documento: le dice al lector en qué idioma leerlo antes de empezar."
+    see_also: [lx-bash, lx-set-euo]
+
+  - slug: lx-set-euo
+    term: set -euo pipefail
+    category: scripting
+    definition_es: "Las tres opciones que hacen que un script falle a tiempo: -e corta al primer error, -u corta si usas una variable que no existe, y pipefail hace que un error en medio de un pipe cuente como error."
+    definition_en: "Shell options that make a script fail fast instead of continuing silently."
+    example_en: "Start every script with set -euo pipefail."
+    analogy: "El detector de humo de la cocina: preferible que suene en el primer humo que enterarte cuando ya se quemó la cena."
+    see_also: [lx-exit-code, lx-shebang]
+
+  - slug: lx-journalctl
+    term: journalctl
+    category: processes
+    definition_es: "El lector de los logs de systemd en una máquina Linux. Con -u filtras por servicio, con -f lo sigues en vivo y con --since limitas el rango de tiempo."
+    definition_en: "The tool that reads systemd's logs on a Linux machine."
+    example_en: "Check journalctl for the service since the last restart."
+    analogy: "El libro de incidencias de la portería: todo lo que pasó, ordenado por hora, sin importar quién lo causó."
+    see_also: [lx-tail-follow]
+
+  - slug: lx-cron
+    term: cron
+    category: processes
+    definition_es: "El programador de tareas de Linux: ejecuta un comando en un horario fijo según cinco campos (minuto, hora, día del mes, mes, día de la semana)."
+    definition_en: "The Linux scheduler that runs commands on a fixed timetable."
+    example_en: "A cron job rotates the logs every night."
+    analogy: "El despertador de la casa: no sabe qué vas a hacer, solo que a esa hora hay que sonar."
+    see_also: [lx-process]

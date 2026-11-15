@@ -38,6 +38,34 @@ async function main() {
 
   try {
     await db.transaction(async (tx) => {
+      /* ---------- tracks (rutas de estudio) ---------- */
+      const trackIds = new Map<string, number>();
+      for (const t of content.tracks) {
+        const values = {
+          slug: t.slug,
+          title: t.title,
+          emoji: t.emoji ?? null,
+          description: t.description ?? null,
+          palette: t.palette ?? null,
+          order: t.order,
+          status: t.status,
+        };
+        const [row] = await tx
+          .insert(s.tracks)
+          .values(values)
+          .onConflictDoUpdate({ target: s.tracks.slug, set: values })
+          .returning({ id: s.tracks.id });
+        trackIds.set(t.slug, row.id);
+      }
+      stats.tracks = trackIds.size;
+
+      /**
+       * `track` ausente en el YAML = no tocar lo que ya hay en la base (así el backfill de la
+       * migración 0004 sobrevive). `track: null` = transversal explícito. Un slug = esa ruta.
+       */
+      const trackCol = (t: string | null | undefined) =>
+        t === undefined ? {} : { trackId: t === null ? null : trackIds.get(t)! };
+
       /* ---------- skills ---------- */
       const skillIds = new Map<string, number>();
       for (const [i, sk] of content.skills.entries()) {
@@ -49,6 +77,7 @@ async function main() {
           targetXp: sk.target_xp,
           order: i,
           status: "published" as const,
+          ...trackCol(sk.track),
         };
         const [row] = await tx
           .insert(s.skills)
@@ -99,6 +128,7 @@ async function main() {
           mapX: z.map ? Math.round(z.map.x) : null,
           mapY: z.map ? Math.round(z.map.y) : null,
           status: z.status,
+          ...trackCol(z.track),
         };
         const [row] = await tx
           .insert(s.zones)

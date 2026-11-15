@@ -1,8 +1,9 @@
 import "server-only";
 import { cache } from "react";
-import { asc, ne } from "drizzle-orm";
+import { and, asc, eq, isNull, ne, or } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
 import { computeProgress, type LevelOut, type NodeState, type QuestState, type ZoneOut } from "./progress";
+import { getActiveTrackId } from "./track";
 
 export type WorldZone = {
   id: number;
@@ -44,13 +45,27 @@ export type WorldQuest = {
   skills: { code: string; weight: number }[];
 };
 
-/** Carga todo el mundo (contenido + progreso) y calcula estados. El volumen es pequeño. */
-/** Carga el mundo completo. Cacheado por petición: el HUD del layout y la página comparten una sola consulta. */
+/**
+ * Carga el mundo de UNA ruta: sus zonas más las transversales (`track_id` NULL), con el progreso
+ * y los estados ya calculados. Cacheado por petición, así que el HUD del layout y la página
+ * comparten una sola consulta.
+ *
+ * Sin argumento usa la ruta activa del perfil, que es lo que quieren todas las páginas. El
+ * argumento explícito existe para mirar otra ruta sin activarla (el selector de `/rutas`).
+ */
 export const loadWorld = cache(loadWorldUncached);
 
-async function loadWorldUncached() {
-  const [zones, levels, quests, prereqs, progress, questSkills, skills] = await Promise.all([
-    db.select().from(s.zones).where(ne(s.zones.status, "archived")).orderBy(asc(s.zones.order)),
+async function loadWorldUncached(explicitTrackId?: number) {
+  const trackId = explicitTrackId ?? (await getActiveTrackId());
+  // Sin ninguna ruta creada se carga el mundo entero, como antes de existir las rutas.
+  const inTrack = trackId === null ? undefined : or(eq(s.zones.trackId, trackId), isNull(s.zones.trackId));
+
+  const [zones, allLevels, allQuests, allPrereqs, progress, questSkills, skills] = await Promise.all([
+    db
+      .select()
+      .from(s.zones)
+      .where(and(ne(s.zones.status, "archived"), inTrack))
+      .orderBy(asc(s.zones.order)),
     db.select().from(s.levels).where(ne(s.levels.status, "archived")).orderBy(asc(s.levels.number)),
     db.select().from(s.quests).where(ne(s.quests.status, "archived")).orderBy(asc(s.quests.order)),
     db.select().from(s.zonePrerequisites),
@@ -58,6 +73,16 @@ async function loadWorldUncached() {
     db.select().from(s.questSkills),
     db.select({ id: s.skills.id, code: s.skills.code, name: s.skills.name }).from(s.skills),
   ]);
+
+  // Niveles y quests cuelgan de las zonas, así que el recorte se hereda en memoria: el volumen
+  // es pequeño y evita tres joins. Un prerrequisito solo cuenta si sus DOS extremos están en la
+  // ruta; si apunta a una zona de otra ruta se descarta, y la zona queda libre en lugar de
+  // bloqueada para siempre por algo que aquí no existe.
+  const zoneIds = new Set(zones.map((z) => z.id));
+  const levels = allLevels.filter((l) => zoneIds.has(l.zoneId));
+  const levelIds = new Set(levels.map((l) => l.id));
+  const quests = allQuests.filter((q) => levelIds.has(q.levelId));
+  const prereqs = allPrereqs.filter((p) => zoneIds.has(p.zoneId) && zoneIds.has(p.requiresZoneId));
 
   const computed = computeProgress({ zones, levels, quests, prereqs, progress });
   const zoneById = new Map(zones.map((z) => [z.id, z]));

@@ -1,16 +1,21 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { db, schema as s } from "@/db/client";
 import { GlossaryBrowser } from "@/components/GlossaryBrowser";
 import { btnPrimary } from "@/components/ui";
-import { dueCount } from "@/lib/glossary";
+import { activeTrackTerms, dueCount } from "@/lib/glossary";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Glosario" };
 
 export default async function GlossaryPage() {
   const [terms, srs, zones, due] = await Promise.all([
-    db.select().from(s.glossaryTerms).where(eq(s.glossaryTerms.status, "published")).orderBy(asc(s.glossaryTerms.term)),
+    // Mismo recorte que la micro-quest diaria: el glosario que ves es el de tu ruta.
+    db
+      .select()
+      .from(s.glossaryTerms)
+      .where(and(eq(s.glossaryTerms.status, "published"), await activeTrackTerms()))
+      .orderBy(asc(s.glossaryTerms.term)),
     db.select().from(s.glossarySrs),
     db.select({ slug: s.zones.slug, title: s.zones.title }).from(s.zones),
     dueCount(),

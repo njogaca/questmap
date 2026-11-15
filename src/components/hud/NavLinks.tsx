@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/", label: "Inicio", match: ["/"] },
+  { href: "/rutas", label: "Rutas", match: ["/rutas"] },
   { href: "/mapa", label: "Mapa", match: ["/mapa", "/zone", "/level", "/quest"] },
   { href: "/arena", label: "Arena", match: ["/arena"] },
   { href: "/glosario", label: "Glosario", match: ["/glosario"] },

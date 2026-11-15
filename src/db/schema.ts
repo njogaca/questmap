@@ -30,6 +30,27 @@ export const questType = pgEnum("quest_type", [
   "micro",
 ]);
 
+/**
+ * Una ruta de estudio: un mundo propio (sus zonas, sus skills, su XP y su readiness).
+ * `palette` es el id de paleta que se aplica al activarla; el usuario puede sobrescribirla en Ajustes.
+ */
+export const tracks = pgTable("tracks", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  emoji: text("emoji"),
+  description: text("description"),
+  palette: text("palette"),
+  order: integer("order").notNull().default(0),
+  status: contentStatus("status").notNull().default("published"),
+});
+
+/**
+ * REGLA DE RUTAS, válida para toda la base: `track_id` NULL significa TRANSVERSAL,
+ * es decir que la fila vale para todas las rutas (inglés, entrevistas, Linux).
+ * Se modela con NULL y no con un booleano `shared` para que no exista el estado
+ * contradictorio "compartida pero además pertenece a la ruta 5".
+ */
 export const skills = pgTable("skills", {
   id: serial("id").primaryKey(),
   code: text("code").notNull().unique(),
@@ -38,6 +59,7 @@ export const skills = pgTable("skills", {
   core: boolean("core").notNull().default(false),
   targetXp: integer("target_xp").notNull(),
   order: integer("order").notNull().default(0),
+  trackId: integer("track_id").references(() => tracks.id),
   status: contentStatus("status").notNull().default("published"),
 });
 
@@ -52,6 +74,8 @@ export const zones = pgTable("zones", {
   unlockedFromStart: boolean("unlocked_from_start").notNull().default(false),
   mapX: integer("map_x"),
   mapY: integer("map_y"),
+  /** NULL = zona transversal: aparece en el mapa de todas las rutas. Ver la regla en `skills`. */
+  trackId: integer("track_id").references(() => tracks.id),
   status: contentStatus("status").notNull().default("published"),
 });
 
@@ -225,9 +249,22 @@ export const questProgressStatus = pgEnum("quest_progress_status", [
 /** Una sola fila (id = 1). La racha se deriva de study_log; aquí solo hay caché. */
 export const profile = pgTable("profile", {
   id: integer("id").primaryKey().default(1),
+  /** XP acumulado de por vida, sumando todas las rutas. El XP por ruta vive en `track_progress`. */
   xpTotal: integer("xp_total").notNull().default(0),
   streakCurrentCache: integer("streak_current_cache").notNull().default(0),
   streakBestCache: integer("streak_best_cache").notNull().default(0),
+  /** Ruta que estoy cursando hoy. La racha NO se parte por ruta: estudiaste ese día y punto. */
+  activeTrackId: integer("active_track_id").references(() => tracks.id),
+  ...timestamps,
+});
+
+/** Puntuaciones por ruta: cada ruta lleva su propio XP y su propio rango. */
+export const trackProgress = pgTable("track_progress", {
+  trackId: integer("track_id")
+    .primaryKey()
+    .references(() => tracks.id),
+  xpTotal: integer("xp_total").notNull().default(0),
+  lastActiveAt: timestamp("last_active_at", { withTimezone: true }),
   ...timestamps,
 });
 
@@ -377,9 +414,11 @@ export const xpEvents = pgTable(
     reason: text("reason").notNull(),
     amount: integer("amount").notNull(),
     questId: integer("quest_id").references(() => quests.id),
+    /** NULL = XP transversal (repaso de glosario, inglés): no se atribuye a ninguna ruta. */
+    trackId: integer("track_id").references(() => tracks.id),
     ...timestamps,
   },
-  (t) => [index("xp_events_quest_idx").on(t.questId)],
+  (t) => [index("xp_events_quest_idx").on(t.questId), index("xp_events_track_idx").on(t.trackId)],
 );
 
 export const userBadges = pgTable("user_badges", {
@@ -399,6 +438,8 @@ export const studyLog = pgTable(
     minutes: integer("minutes").notNull(),
     activity: text("activity").notNull(),
     questId: integer("quest_id").references(() => quests.id),
+    /** NULL = minutos transversales. La racha se deriva de `date`, así que NO depende de la ruta. */
+    trackId: integer("track_id").references(() => tracks.id),
     ...timestamps,
   },
   (t) => [index("study_log_date_idx").on(t.date)],

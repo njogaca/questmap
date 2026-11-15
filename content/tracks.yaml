@@ -1,0 +1,27 @@
+# Rutas de estudio. Cada una es un mundo propio: sus zonas, sus skills, su XP y su readiness.
+#
+# Una zona o una skill con `track: null` es TRANSVERSAL y aparece en todas las rutas
+# (inglés, entrevistas, Linux). Si el YAML de una zona no trae `track`, el seed no toca
+# la ruta que ya tenga asignada en la base.
+#
+# `palette` es la paleta que se aplica al activar la ruta. Es un valor por defecto:
+# siempre puedes cambiarla a mano en Ajustes → Efectos.
+
+tracks:
+  - slug: backend-gcp
+    title: Backend & GCP
+    emoji: "🗺️"
+    palette: ctos
+    order: 1
+    description: >
+      La ruta original: Java, event-driven, Cassandra, BigQuery y nube hasta estar
+      listo para aplicar a backend.
+
+  - slug: cybersecurity
+    title: Cyber Range
+    emoji: "🛡️"
+    palette: fsociety
+    order: 2
+    description: >
+      De cero a analista de seguridad: redes y sistemas, un SOC donde triar alertas de
+      verdad, detección con ATT&CK, ofensiva con OWASP y respuesta a incidentes.

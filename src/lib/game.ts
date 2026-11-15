@@ -33,13 +33,42 @@ export function assertUnlocked(state: string) {
   if (state === "locked") throw new Error("Esta quest está bloqueada.");
 }
 
+/**
+ * Ruta a la que pertenece una quest, vía su zona. Devuelve null para las quests de zonas
+ * transversales (Arena, English, Terminal Tundra) y para el XP que no nace de una quest:
+ * ese esfuerzo no se le atribuye a ninguna ruta en particular.
+ */
+async function trackOfQuest(tx: Exec, questId: number | null): Promise<number | null> {
+  if (questId === null) return null;
+  const [row] = await tx
+    .select({ trackId: s.zones.trackId })
+    .from(s.quests)
+    .innerJoin(s.levels, eq(s.levels.id, s.quests.levelId))
+    .innerJoin(s.zones, eq(s.zones.id, s.levels.zoneId))
+    .where(eq(s.quests.id, questId));
+  return row?.trackId ?? null;
+}
+
 async function addXp(tx: Exec, amount: number, reason: string, questId: number | null = null) {
   if (amount <= 0) return;
-  await tx.insert(s.xpEvents).values({ amount, reason, questId });
+  const trackId = await trackOfQuest(tx, questId);
+  await tx.insert(s.xpEvents).values({ amount, reason, questId, trackId });
+  // XP de por vida: suma todo, incluido lo transversal.
   await tx
     .insert(s.profile)
     .values({ id: 1, xpTotal: amount })
     .onConflictDoUpdate({ target: s.profile.id, set: { xpTotal: sql`${s.profile.xpTotal} + ${amount}` } });
+  // XP de la ruta: solo lo que se ganó dentro de ella.
+  if (trackId !== null) {
+    const now = new Date();
+    await tx
+      .insert(s.trackProgress)
+      .values({ trackId, xpTotal: amount, lastActiveAt: now })
+      .onConflictDoUpdate({
+        target: s.trackProgress.trackId,
+        set: { xpTotal: sql`${s.trackProgress.xpTotal} + ${amount}`, lastActiveAt: now },
+      });
+  }
 }
 
 async function awardBadge(tx: Exec, slug: string): Promise<string | null> {
@@ -58,7 +87,10 @@ export async function getXpTotal(tx: Exec = db): Promise<number> {
 export async function logStudy(minutes: number, activity: string, questId: number | null = null, tx: Exec = db) {
   const m = Math.max(0, Math.round(minutes));
   if (m === 0) return [] as string[];
-  await tx.insert(s.studyLog).values({ date: localDate(), minutes: m, activity, questId });
+  // La racha NO se parte por ruta: se deriva de `date`. El `track_id` solo sirve para poder
+  // responder después cuántos minutos le diste a cada ruta.
+  const trackId = await trackOfQuest(tx, questId);
+  await tx.insert(s.studyLog).values({ date: localDate(), minutes: m, activity, questId, trackId });
   return refreshStreak(tx);
 }
 

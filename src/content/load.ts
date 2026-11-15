@@ -7,15 +7,18 @@ import {
   interviewsFileSchema,
   resourcesFileSchema,
   skillsFileSchema,
+  tracksFileSchema,
   zoneSchema,
   type GlossaryFile,
   type InterviewsFile,
   type ResourceInput,
   type SkillInput,
+  type TrackInput,
   type ZoneInput,
 } from "./schema";
 
 export type ContentBundle = {
+  tracks: TrackInput[];
   skills: SkillInput[];
   resources: ResourceInput[];
   zones: ZoneInput[];
@@ -45,6 +48,8 @@ function yamlFiles(dir: string): string[] {
 
 /** Lee y valida todo `content/`. Lanza un error legible si algo no cumple el esquema. */
 export function loadContent(root = path.join(process.cwd(), "content")): ContentBundle {
+  const tracksFile = path.join(root, "tracks.yaml");
+  const tracks = existsSync(tracksFile) ? readYaml(tracksFile, tracksFileSchema).tracks : [];
   const skills = readYaml(path.join(root, "skills.yaml"), skillsFileSchema).skills;
   const resourcesFile = path.join(root, "resources.yaml");
   const resources = existsSync(resourcesFile) ? readYaml(resourcesFile, resourcesFileSchema).resources : [];
@@ -52,12 +57,13 @@ export function loadContent(root = path.join(process.cwd(), "content")): Content
   const glossary = yamlFiles(path.join(root, "glossary")).map((f) => readYaml(f, glossaryFileSchema));
   const interviews = yamlFiles(path.join(root, "interviews")).map((f) => readYaml(f, interviewsFileSchema));
 
-  validateReferences({ skills, resources, zones, glossary, interviews });
-  return { skills, resources, zones, glossary, interviews };
+  validateReferences({ tracks, skills, resources, zones, glossary, interviews });
+  return { tracks, skills, resources, zones, glossary, interviews };
 }
 
 function validateReferences(c: ContentBundle) {
   const errors: string[] = [];
+  const trackSlugs = new Set(c.tracks.map((t) => t.slug));
   const skillCodes = new Set(c.skills.map((s) => s.code));
   const resourceSlugs = new Set(c.resources.map((r) => r.slug));
   const zoneSlugs = new Set(c.zones.map((z) => z.slug));
@@ -68,9 +74,15 @@ function validateReferences(c: ContentBundle) {
     else seen.set(s, kind);
   };
 
+  for (const t of c.tracks) unique("track", t.slug);
   for (const r of c.resources) unique("resource", r.slug);
+  for (const sk of c.skills)
+    if (typeof sk.track === "string" && !trackSlugs.has(sk.track))
+      errors.push(`skill ${sk.code}: ruta desconocida "${sk.track}"`);
   for (const z of c.zones) {
     unique("zone", z.slug);
+    if (typeof z.track === "string" && !trackSlugs.has(z.track))
+      errors.push(`zona ${z.slug}: ruta desconocida "${z.track}"`);
     for (const p of z.prerequisites)
       if (!zoneSlugs.has(p.zone)) errors.push(`zona ${z.slug}: prerrequisito desconocido "${p.zone}"`);
     for (const s of z.skills) if (!skillCodes.has(s)) errors.push(`zona ${z.slug}: skill desconocida "${s}"`);

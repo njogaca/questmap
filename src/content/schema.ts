@@ -42,12 +42,33 @@ const slug = z
 
 const status = z.enum(["published", "outline"]).default("published");
 
+/**
+ * `track` en una skill o una zona:
+ *   - ausente  → el seed NO toca la ruta que ya tenga en la base (así el backfill sobrevive)
+ *   - null     → transversal explícito: vale para todas las rutas
+ *   - "<slug>" → pertenece a esa ruta
+ */
+const trackRef = z.string().nullable().optional();
+
+export const trackSchema = z.object({
+  slug,
+  title: z.string().min(1),
+  emoji: z.string().optional(),
+  description: z.string().optional(),
+  /** Paleta que se aplica al activar la ruta; el usuario puede sobrescribirla en Ajustes. */
+  palette: z.enum(["ctos", "neon", "dedsec", "fsociety", "frostpunk", "cyberpunk", "animus"]).optional(),
+  order: z.number().int().positive(),
+  status,
+});
+export const tracksFileSchema = z.object({ tracks: z.array(trackSchema).min(1) });
+
 export const skillSchema = z.object({
   code: z.string().regex(/^[a-z_]+$/),
   name: z.string().min(1),
   description: z.string().optional(),
   core: z.boolean().default(false),
   target_xp: z.number().int().positive(),
+  track: trackRef,
 });
 export const skillsFileSchema = z.object({ skills: z.array(skillSchema).min(1) });
 
@@ -122,6 +143,7 @@ export const zoneSchema = z.object({
   map: z.object({ x: z.number().min(0).max(1000), y: z.number().min(0).max(640) }).optional(),
   prerequisites: z.array(z.object({ zone: slug, level: z.number().int().min(1).max(5) })).default([]),
   skills: z.array(z.string()).default([]),
+  track: trackRef,
   levels: z.array(levelSchema).max(5),
 });
 
@@ -150,6 +172,7 @@ export const interviewTemplateSchema = z.object({
 });
 export const interviewsFileSchema = z.object({ templates: z.array(interviewTemplateSchema) });
 
+export type TrackInput = z.infer<typeof trackSchema>;
 export type SkillInput = z.infer<typeof skillSchema>;
 export type ResourceInput = z.infer<typeof resourceSchema>;
 export type ZoneInput = z.infer<typeof zoneSchema>;

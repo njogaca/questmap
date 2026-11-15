@@ -28,14 +28,14 @@ const SHORT: Record<string, string> = {
 };
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-lg border border-line bg-surface p-4 ${className}`}>{children}</section>;
+  return <section className={`hud-panel p-4 ${className}`}>{children}</section>;
 }
 
 function QuestLink({ rec, label }: { rec: Recommendation; label?: string }) {
   return (
     <Link
       href={`/quest/${rec.slug}`}
-      className="block rounded-md border border-line bg-surface-2 p-3 transition-colors hover:border-available"
+      className="hud-item block p-3"
     >
       {label && <p className="font-mono text-xs text-available">{label}</p>}
       <p className="mt-0.5">{rec.title}</p>
@@ -65,11 +65,12 @@ export default async function Dashboard() {
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
         {/* ---------- Daily Quest ---------- */}
         <Card className="lg:col-span-2">
-          <h2 className="text-lg font-semibold">Misiones de hoy</h2>
+          <p className="hud-label">01 // daily quest</p>
+          <h2 className="mt-1 text-lg font-semibold">Misiones de hoy</h2>
           <div className="mt-3 grid gap-2">
             <Link
               href="/glosario/repaso"
-              className="block rounded-md border border-line bg-surface-2 p-3 transition-colors hover:border-available"
+              className="hud-item block p-3"
             >
               <p className="font-mono text-xs text-available">1 · micro de glosario · ~5 min</p>
               <p className="mt-0.5">
@@ -109,13 +110,13 @@ export default async function Dashboard() {
         </Card>
 
         {/* ---------- Perfil ---------- */}
-        <Card>
-          <p className="font-mono text-xs text-dim">rango</p>
+        <Card className="hud-corners">
+          <p className="hud-label">operador</p>
           <p className="font-title text-2xl text-available">{d.rank.name}</p>
           <p className="font-mono text-sm">{d.xpTotal.toLocaleString("es")} XP</p>
           {d.rank.nextName && (
             <div className="mt-2">
-              <div className="h-1.5 w-full bg-surface-2">
+              <div className="hud-bar h-2 w-full overflow-hidden">
                 <div className="h-full bg-available" style={{ width: `${d.rank.percentToNext}%` }} />
               </div>
               <p className="mt-1 font-mono text-xs text-dim">
@@ -149,9 +150,10 @@ export default async function Dashboard() {
       </div>
 
       {/* ---------- Job Readiness ---------- */}
-      <h2 className="mt-8 text-2xl font-bold">Job Readiness</h2>
+      <p className="hud-label mt-8">02 // job readiness</p>
+      <h2 className="mt-1 text-2xl font-bold">Job Readiness</h2>
       <div
-        className={`mt-3 rounded-lg border p-4 ${d.readiness.readyToApply ? "border-done bg-done/10" : "border-line bg-surface"}`}
+        className={`hud-panel mt-3 p-4 ${d.readiness.readyToApply ? "hud-panel-done" : ""}`}
       >
         {d.readiness.readyToApply ? (
           <p className="font-title text-xl text-done">Estás listo para aplicar: todas las skills core están ≥ {READY_THRESHOLD} %.</p>
@@ -224,7 +226,7 @@ export default async function Dashboard() {
                     {sk.readiness} % · cob. {sk.coverage === null ? "—" : `${sk.coverage} %`}
                   </span>
                 </div>
-                <div className="relative mt-1 h-2 w-full bg-surface-2">
+                <div className="hud-bar relative mt-1 h-2 w-full">
                   <div
                     className="absolute inset-y-0 left-0 border border-dim/60"
                     style={{ width: `${sk.coverage ?? 0}%` }}

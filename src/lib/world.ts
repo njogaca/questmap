@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { asc, ne } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
 import { computeProgress, type LevelOut, type NodeState, type QuestState, type ZoneOut } from "./progress";
@@ -44,7 +45,10 @@ export type WorldQuest = {
 };
 
 /** Carga todo el mundo (contenido + progreso) y calcula estados. El volumen es pequeño. */
-export async function loadWorld() {
+/** Carga el mundo completo. Cacheado por petición: el HUD del layout y la página comparten una sola consulta. */
+export const loadWorld = cache(loadWorldUncached);
+
+async function loadWorldUncached() {
   const [zones, levels, quests, prereqs, progress, questSkills, skills] = await Promise.all([
     db.select().from(s.zones).where(ne(s.zones.status, "archived")).orderBy(asc(s.zones.order)),
     db.select().from(s.levels).where(ne(s.levels.status, "archived")).orderBy(asc(s.levels.number)),

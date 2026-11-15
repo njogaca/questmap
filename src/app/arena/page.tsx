@@ -10,6 +10,7 @@ import { topImprovements } from "@/lib/claude/top3";
 import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Interview Arena" };
 
 const MODE_INFO: Record<string, { title: string; desc: string }> = {
   behavioral: { title: "Behavioral (STAR)", desc: "5 preguntas conductuales al azar. Responde con Situation, Task, Action, Result y un número al final." },
@@ -67,7 +68,7 @@ export default async function ArenaPage() {
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {(["behavioral", "technical_screen", "system_design", "coding_task"] as const).map((mode) => (
-          <section key={mode} className="rounded-lg border border-line bg-surface p-4">
+          <section key={mode} className="hud-panel p-4">
             <h2 className="text-lg font-semibold">{MODE_INFO[mode].title}</h2>
             <p className="mt-1 text-sm text-dim">{MODE_INFO[mode].desc}</p>
             <div className="mt-3 grid gap-2">
@@ -77,7 +78,7 @@ export default async function ArenaPage() {
             </div>
           </section>
         ))}
-        <section className={`rounded-lg border p-4 md:col-span-2 ${mockUnlocked ? "border-progress bg-surface" : "border-dashed border-line bg-surface/50"}`}>
+        <section className={`hud-panel p-4 md:col-span-2 ${mockUnlocked ? "hud-panel-progress hud-corners" : "opacity-70"}`}>
           <h2 className="text-lg font-semibold">Mock loop completo</h2>
           <p className="mt-1 text-sm text-dim">
             45–60 min: técnico + conductual + diseño, en secuencia. {mockUnlocked ? "" : "Se desbloquea al vencer a los jefes de Java Forest, Event Harbor y Cassandra Caverns."}
@@ -89,13 +90,13 @@ export default async function ArenaPage() {
       </div>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_320px]">
-        <section className="rounded-lg border border-line bg-surface p-4">
+        <section className="hud-panel p-4">
           <h2 className="text-lg font-semibold">Progreso por criterio</h2>
           <div className="mt-3">
             <ProgressChart points={points} />
           </div>
         </section>
-        <section className="rounded-lg border border-line bg-surface p-4">
+        <section className="hud-panel p-4">
           <h2 className="text-lg font-semibold">Top 3 a mejorar</h2>
           {latest?.g.success ? (
             <>
@@ -122,7 +123,7 @@ export default async function ArenaPage() {
               <li key={x.id}>
                 <Link
                   href={`/arena/session/${x.id}`}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm hover:border-available"
+                  className="hud-item flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
                 >
                   <span>
                     <span className="font-mono text-xs text-dim">#{x.id} · </span>

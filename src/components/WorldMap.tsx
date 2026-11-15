@@ -8,6 +8,7 @@ import type { NodeState } from "@/lib/progress";
 import { DecryptText } from "./effects/DecryptText";
 import { ProgressBar, StateBadge } from "./StateBadge";
 import { STATE_COLOR } from "./state";
+import { btnPrimary } from "./ui";
 
 export type MapZone = {
   id: number;
@@ -26,13 +27,38 @@ export type MapZone = {
 export type MapEdge = { from: number; to: number; level: number; met: boolean };
 
 const R = 46;
-
+const pad2 = (n: number) => String(n).padStart(2, "0");
 
 function hexPoints(cx: number, cy: number, r: number) {
   return Array.from({ length: 6 }, (_, i) => {
     const a = (Math.PI / 3) * i - Math.PI / 6;
     return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`;
   }).join(" ");
+}
+
+/** Panal de fondo (patrón SVG): hexágonos de lado `a` con la punta hacia arriba. */
+const HEX_A = 18;
+const HEX_W = Math.sqrt(3) * HEX_A;
+const HEX_H = 3 * HEX_A;
+function hexTile(cx: number, cy: number) {
+  const a = HEX_A;
+  const w = HEX_W / 2;
+  return `M${cx},${cy - a} L${cx + w},${cy - a / 2} L${cx + w},${cy + a / 2} L${cx},${cy + a} L${cx - w},${cy + a / 2} L${cx - w},${cy - a / 2} Z`;
+}
+const HEX_PATTERN = [hexTile(HEX_W / 2, HEX_A), hexTile(0, 2.5 * HEX_A), hexTile(HEX_W, 2.5 * HEX_A)].join(" ");
+
+/** Retícula de selección: cuatro esquinas en L alrededor del nodo. */
+function reticlePath(cx: number, cy: number, half: number, arm: number) {
+  const l = cx - half;
+  const r = cx + half;
+  const t = cy - half;
+  const b = cy + half;
+  return [
+    `M${l},${t + arm} V${t} H${l + arm}`,
+    `M${r - arm},${t} H${r} V${t + arm}`,
+    `M${r},${b - arm} V${b} H${r - arm}`,
+    `M${l + arm},${b} H${l} V${b - arm}`,
+  ].join(" ");
 }
 
 export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] }) {
@@ -42,6 +68,8 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
   );
   const byId = new Map(zones.map((z) => [z.id, z]));
   const selected = selectedId != null ? byId.get(selectedId) : undefined;
+  const compromised = zones.filter((z) => z.state === "completed").length;
+  const active = zones.filter((z) => z.state === "in_progress").length;
 
   const onNodeClick = (z: MapZone) => {
     // En el celular: el primer toque selecciona, el segundo entra. En desktop el hover ya seleccionó.
@@ -51,13 +79,44 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-      <div className="relative overflow-hidden rounded-lg border border-line bg-surface/60">
+      <div className="hud-crosshair relative overflow-hidden border border-line bg-surface/60">
+        {/* Lecturas HUD sobre el mapa */}
+        <div className="pointer-events-none absolute inset-x-3 top-2 z-10 flex justify-between gap-4 font-mono text-[11px] uppercase tracking-widest text-dim">
+          <p>
+            <span className="qm-blink text-available">▮</span> sector scan · {zones.length} nodos · {compromised} comprometidos · {active} en curso
+          </p>
+          {selected ? (
+            <p>
+              <span className="text-available">target // {pad2(selected.order)}</span> · x{Math.round(selected.x)} y{Math.round(selected.y)}
+            </p>
+          ) : (
+            <p>sin objetivo</p>
+          )}
+        </div>
+
         <svg
           viewBox="0 0 1000 640"
           className="block h-auto w-full"
           role="img"
           aria-label={`Mapa del mundo con ${zones.length} sectores`}
         >
+          <defs>
+            <pattern id="qm-hex" width={HEX_W} height={HEX_H} patternUnits="userSpaceOnUse">
+              <path d={HEX_PATTERN} fill="none" stroke="var(--na-available)" strokeWidth={0.6} opacity={0.12} />
+            </pattern>
+            <radialGradient id="qm-vignette" cx="50%" cy="50%" r="70%">
+              <stop offset="60%" stopColor="var(--na-bg)" stopOpacity={0} />
+              <stop offset="100%" stopColor="var(--na-bg)" stopOpacity={0.85} />
+            </radialGradient>
+          </defs>
+          <rect width="1000" height="640" fill="url(#qm-hex)" />
+          <rect width="1000" height="640" fill="url(#qm-vignette)" pointerEvents="none" />
+          {/* Ejes de referencia */}
+          <g stroke="var(--na-border)" strokeWidth={1} strokeDasharray="2 6" opacity={0.7}>
+            <line x1={500} y1={0} x2={500} y2={640} />
+            <line x1={0} y1={320} x2={1000} y2={320} />
+          </g>
+
           {/* Caminos (prerrequisitos) */}
           {edges.map((e) => {
             const a = byId.get(e.from);
@@ -74,11 +133,27 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
                   x2={b.x}
                   y2={b.y}
                   stroke={color}
-                  strokeWidth={2}
+                  strokeWidth={e.met ? 1.5 : 2}
                   strokeDasharray={e.met ? undefined : "6 8"}
-                  opacity={e.met ? 0.8 : 0.3}
+                  opacity={e.met ? 0.45 : 0.3}
                 />
-                <text x={mx} y={my - 6} textAnchor="middle" fontSize={16} fill={color} opacity={e.met ? 1 : 0.6} className="font-mono">
+                {e.met && (
+                  // Flujo de datos sobre los caminos abiertos
+                  <line
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    stroke={color}
+                    strokeWidth={2.5}
+                    strokeDasharray="6 22"
+                    strokeLinecap="round"
+                    opacity={0.9}
+                    className="qm-flow"
+                  />
+                )}
+                <rect x={mx - 17} y={my - 20} width={34} height={18} fill="var(--na-bg)" stroke={color} strokeWidth={1} opacity={e.met ? 0.9 : 0.5} />
+                <text x={mx} y={my - 7} textAnchor="middle" fontSize={13} fill={color} opacity={e.met ? 1 : 0.7} className="font-mono">
                   N{e.level}
                 </text>
               </g>
@@ -105,14 +180,23 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
                 }}
               >
                 {isSel && (
-                  <polygon
-                    points={hexPoints(z.x, z.y, R + 10)}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth={1.5}
-                    opacity={0.6}
-                    className="qm-pulse"
-                  />
+                  <>
+                    {/* Retícula de objetivo: anillo giratorio + esquinas */}
+                    <polygon
+                      points={hexPoints(z.x, z.y, R + 12)}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth={1.5}
+                      strokeDasharray="16 10"
+                      opacity={0.8}
+                      className="qm-spin"
+                    />
+                    <circle cx={z.x} cy={z.y} r={R + 24} fill="none" stroke={color} strokeWidth={1} strokeDasharray="2 10" opacity={0.5} className="qm-spin-rev" />
+                    <path d={reticlePath(z.x, z.y, R + 34, 12)} fill="none" stroke={color} strokeWidth={2} opacity={0.9} />
+                  </>
+                )}
+                {z.state === "in_progress" && !isSel && (
+                  <polygon points={hexPoints(z.x, z.y, R + 8)} fill="none" stroke={color} strokeWidth={1} opacity={0.5} className="qm-pulse" />
                 )}
                 <polygon
                   points={hexPoints(z.x, z.y, R)}
@@ -123,6 +207,8 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
                   strokeDasharray={z.state === "outline" ? "5 5" : undefined}
                   className="transition-all duration-200"
                 />
+                {/* Marcas internas tipo radar */}
+                <polygon points={hexPoints(z.x, z.y, R - 7)} fill="none" stroke={color} strokeWidth={0.75} opacity={dim ? 0.25 : 0.45} />
                 <text x={z.x} y={z.y + 10} textAnchor="middle" fontSize={30} opacity={dim ? 0.45 : 1}>
                   {z.emoji}
                 </text>
@@ -130,12 +216,12 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
                   x={z.x}
                   y={z.y + R + 26}
                   textAnchor="middle"
-                  fontSize={20}
+                  fontSize={19}
                   fill={dim ? "var(--na-text-dim)" : "var(--na-text)"}
                   className="font-title"
-                  style={{ letterSpacing: "0.05em" }}
+                  style={{ letterSpacing: "0.08em" }}
                 >
-                  {String(z.order).padStart(2, "0")} ·{" "}
+                  {pad2(z.order)} ·{" "}
                   {z.state === "locked"
                     ? encrypt(z.title.split(" ")[0].toUpperCase(), decryptRatio(z.prereqs))
                     : z.title.split(" ")[0].toUpperCase()}
@@ -154,7 +240,7 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
       </div>
 
       {/* Panel de info del sector seleccionado */}
-      <aside className="rounded-lg border border-line bg-surface p-4" aria-live="polite">
+      <aside className="hud-panel hud-corners p-4" aria-live="polite">
         {selected ? (
           <ZonePanel zone={selected} />
         ) : (
@@ -168,7 +254,7 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
 function ZonePanel({ zone }: { zone: MapZone }) {
   return (
     <div>
-      <p className="font-mono text-xs text-dim">sector {String(zone.order).padStart(2, "0")}</p>
+      <p className="hud-label">target // sector {pad2(zone.order)}</p>
       <h2 className="mt-1 text-2xl font-semibold">
         <span className="mr-2">{zone.emoji}</span>
         {zone.state === "locked" ? (
@@ -198,7 +284,7 @@ function ZonePanel({ zone }: { zone: MapZone }) {
         <p className="font-mono text-xs text-dim">skills</p>
         <ul className="mt-1 flex flex-wrap gap-1.5">
           {zone.skills.map((s) => (
-            <li key={s.code} className="rounded bg-surface-2 px-2 py-0.5 text-xs">
+            <li key={s.code} className="border border-line bg-surface-2 px-2 py-0.5 font-mono text-[11px]">
               {s.name}
             </li>
           ))}
@@ -216,10 +302,7 @@ function ZonePanel({ zone }: { zone: MapZone }) {
           </ul>
         </div>
       )}
-      <Link
-        href={`/zone/${zone.slug}`}
-        className="mt-5 inline-block rounded border border-available px-4 py-2 font-mono text-sm text-available transition-colors hover:bg-available hover:text-bg"
-      >
+      <Link href={`/zone/${zone.slug}`} className={`${btnPrimary} mt-5`}>
         &gt; entrar al sector
       </Link>
     </div>
@@ -234,15 +317,15 @@ function Legend() {
     ["locked", "bloqueado"],
   ];
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1 border-t border-line px-3 py-2 font-mono text-xs text-dim">
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 border-t border-line px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-dim">
       {items.map(([s, label]) => (
         <li key={s} className="flex items-center gap-1.5">
-          <span className="inline-block h-2 w-2 rounded-full" style={{ background: STATE_COLOR[s] }} />
+          <span className="inline-block h-2 w-2 rotate-45" style={{ background: STATE_COLOR[s] }} />
           {label}
         </li>
       ))}
       <li className="flex items-center gap-1.5">
-        <span className="inline-block h-2 w-2 rounded-full border border-dashed border-locked" />
+        <span className="inline-block h-2 w-2 rotate-45 border border-dashed border-locked" />
         próximamente
       </li>
     </ul>

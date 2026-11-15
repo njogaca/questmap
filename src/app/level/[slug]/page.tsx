@@ -7,6 +7,13 @@ import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const world = await loadWorld();
+  const level = world.levels.find((l) => l.slug === slug);
+  return { title: level ? `Nivel ${level.number} · ${level.title}` : "Nodo no encontrado" };
+}
+
 const TABS = [
   { key: "aprender", label: "Aprender", types: ["learn"] },
   { key: "glosario", label: "Glosario", types: ["glossary", "micro"] },
@@ -89,9 +96,7 @@ export default async function LevelPage({
             <li key={q.id}>
               <Link
                 href={`/quest/${q.slug}`}
-                className={`flex items-center justify-between gap-3 rounded-md border border-line bg-surface p-3 transition-colors ${
-                  locked ? "opacity-60" : "hover:border-available"
-                }`}
+                className={`hud-item flex items-center justify-between gap-3 p-3 ${locked ? "opacity-60" : ""}`}
               >
                 <div className="min-w-0">
                   <p className="font-mono text-xs text-dim">

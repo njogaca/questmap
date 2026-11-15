@@ -62,7 +62,7 @@ export function Flashcards({ cards, onFinish }: { cards: Card[]; onFinish: (grad
       <button
         type="button"
         onClick={() => setFlipped((f) => !f)}
-        className="block min-h-56 w-full rounded-lg border border-line bg-surface p-5 text-left transition-colors hover:border-available"
+        className="hud-item block min-h-56 w-full p-5 text-left"
         aria-label={flipped ? "Ocultar respuesta" : "Mostrar respuesta"}
       >
         <p className="font-mono text-2xl text-available">{card.term}</p>

@@ -5,6 +5,7 @@ import { decryptRatio, encrypt } from "@/lib/encrypt";
 import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Mapa" };
 
 export default async function MapPage() {
   const world = await loadWorld();
@@ -52,7 +53,7 @@ export default async function MapPage() {
             <li key={z.id}>
               <Link
                 href={`/zone/${z.slug}`}
-                className="block rounded-md border border-line bg-surface p-3 transition-colors hover:border-available"
+                className="hud-item block p-3"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate">

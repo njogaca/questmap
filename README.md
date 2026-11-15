@@ -64,7 +64,7 @@ Lo que salió de ese brief:
 - **369 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **154 recursos** de estudio.
 
 La zona 12, **Terminal Tundra** 🐧, no sale de la oferta: se agregó el 2026-11-07 al notar que todos los labs de las demás zonas entran a un Linux (`docker exec`) que nunca se enseñaba. Enseña terminal, permisos, triage de logs, procesos y señales, el Linux de los contenedores y de GKE, y bash para CI. Arranca desbloqueada, no es prerrequisito de nada y su skill `linux` no es core, para no tapar las recomendaciones de Java y Cassandra.
-- Tema visual **Neon Atlas**: HUD cyberpunk sobre un mapa de reinos; los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos.
+- Tema visual **Neon Atlas / ctOS** (inspirado en Watch Dogs): paneles angulares con esquinas cortadas y marcas de "profiler", barra HUD con rango, XP, racha y reloj, mapa con retícula de objetivo y flujo de datos en los caminos abiertos, pantalla de arranque una vez al día y una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre. Los sectores bloqueados se ven como "datos cifrados" (también en la terminal) y se descifran al cumplir sus requisitos. Las animaciones y el efecto CRT se apagan en **Ajustes → Efectos**.
 
 **Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
 

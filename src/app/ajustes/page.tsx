@@ -5,6 +5,7 @@ import { EffectsSettings } from "@/components/effects/EffectsSettings";
 import { apiConfig, usageToday } from "@/lib/claude/client";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Ajustes" };
 
 async function getStatus() {
   try {
@@ -71,7 +72,7 @@ export default async function Ajustes() {
       <h1 className="mt-2 text-3xl font-bold text-ink">Ajustes</h1>
       <p className="mt-2 text-dim">Claude, estado del sistema y contenido cargado.</p>
 
-      <section className="mt-8 rounded-lg border border-line bg-surface p-5">
+      <section className="hud-panel mt-8 p-5">
         <h2 className="text-xl font-semibold">Claude</h2>
         {api.configured ? (
           <p className="mt-3 font-mono text-sm text-done">● Modo B activo · modelo {api.model}</p>
@@ -115,7 +116,7 @@ MAX_API_CALLS_PER_DAY=50`}</pre>
         </div>
       </section>
 
-      <section className="mt-6 rounded-lg border border-line bg-surface p-5">
+      <section className="hud-panel mt-6 p-5">
         <h2 className="text-xl font-semibold">Respaldo</h2>
         <p className="mt-2 text-sm text-dim">
           Red de seguridad principal: respaldo completo de la base de datos con PowerShell (desde la carpeta del repo).
@@ -127,14 +128,14 @@ MAX_API_CALLS_PER_DAY=50`}</pre>
         </div>
       </section>
 
-      <section className="mt-6 rounded-lg border border-line bg-surface p-5">
+      <section className="hud-panel mt-6 p-5">
         <h2 className="text-xl font-semibold">Efectos</h2>
         <div className="mt-3">
           <EffectsSettings />
         </div>
       </section>
 
-      <section className="mt-8 rounded-lg border border-line bg-surface p-5">
+      <section className="hud-panel mt-8 p-5">
         <h2 className="text-xl font-semibold">Estado del sistema</h2>
         {status.ok ? (
           <>
@@ -162,7 +163,7 @@ MAX_API_CALLS_PER_DAY=50`}</pre>
       </section>
 
       {status.ok && (
-        <section className="mt-6 rounded-lg border border-line bg-surface p-5">
+        <section className="hud-panel mt-6 p-5">
           <h2 className="text-xl font-semibold">Skills de la oferta</h2>
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
             {status.skills.map((sk) => (

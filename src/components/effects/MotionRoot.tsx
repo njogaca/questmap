@@ -3,11 +3,12 @@
 import { useEffect } from "react";
 import { useEffectsPrefs } from "./prefs";
 
-/** Refleja la preferencia de animaciones en <html data-motion="on|off"> para que el CSS la use. */
+/** Refleja las preferencias en <html data-motion data-crt> para que el CSS las use. */
 export function MotionRoot() {
-  const { motion } = useEffectsPrefs();
+  const { motion, crt } = useEffectsPrefs();
   useEffect(() => {
     document.documentElement.dataset.motion = motion ? "on" : "off";
-  }, [motion]);
+    document.documentElement.dataset.crt = crt ? "on" : "off";
+  }, [motion, crt]);
   return null;
 }

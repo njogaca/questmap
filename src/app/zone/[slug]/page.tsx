@@ -7,6 +7,13 @@ import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const world = await loadWorld();
+  const zone = world.zones.find((z) => z.slug === slug);
+  return { title: !zone ? "Nodo no encontrado" : zone.progress.state === "locked" ? "Sector cifrado" : zone.title };
+}
+
 const RANK = ["", "Novice", "Apprentice", "Journeyman", "Expert", "Pro / Boss"];
 
 export default async function ZonePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -47,7 +54,7 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
       </div>
 
       {!zone.progress.unlocked && zone.prereqs.length > 0 && (
-        <div className="mt-5 rounded-md border border-locked bg-surface p-4 text-sm">
+        <div className="hud-panel mt-5 p-4 text-sm">
           <p className="font-mono text-xs text-dim">acceso denegado · requiere</p>
           <ul className="mt-2 space-y-1">
             {zone.prereqs.map((p) => (
@@ -73,7 +80,6 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
         {levels.map((l) => {
           const st = l.progress.state;
           const color = STATE_COLOR[st];
-          const clickable = true;
           const body = (
             <>
               <span
@@ -98,16 +104,9 @@ export default async function ZonePage({ params }: { params: Promise<{ slug: str
           );
           return (
             <li key={l.id} className="relative">
-              {clickable ? (
-                <Link
-                  href={`/level/${l.slug}`}
-                  className={`block rounded-md border bg-surface p-4 transition-colors hover:border-available ${st === "outline" ? "border-dashed border-line opacity-70" : "border-line"}`}
-                >
-                  {body}
-                </Link>
-              ) : (
-                <div className="rounded-md border border-dashed border-line bg-surface/50 p-4 opacity-70">{body}</div>
-              )}
+              <Link href={`/level/${l.slug}`} className={`hud-item block p-4 ${st === "outline" ? "border-dashed opacity-70" : ""}`}>
+                {body}
+              </Link>
             </li>
           );
         })}

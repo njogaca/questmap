@@ -17,6 +17,13 @@ import { loadWorld } from "@/lib/world";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const world = await loadWorld();
+  const quest = world.quests.find((q) => q.slug === slug);
+  return { title: quest?.title ?? "Nodo no encontrado" };
+}
+
 async function cardsFor(termSlugs: string[] | undefined, zoneSlug: string, limit = 50): Promise<Card[]> {
   const where = termSlugs?.length
     ? and(inArray(s.glossaryTerms.slug, termSlugs), eq(s.glossaryTerms.status, "published"))

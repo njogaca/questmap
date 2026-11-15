@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-/** Preferencias de efectos por navegador (localStorage). Sonido: apagado por defecto. */
-export type EffectsPrefs = { sound: boolean; motion: boolean };
+/** Preferencias de efectos por navegador (localStorage). Sonido: apagado por defecto; CRT: encendido. */
+export type EffectsPrefs = { sound: boolean; motion: boolean; crt: boolean };
 
 const KEY = "qm.effects";
 const EVENT = "qm-effects-change";
@@ -17,12 +17,12 @@ function systemReducedMotion() {
 }
 
 export function readPrefs(): EffectsPrefs {
-  const fallback = { sound: false, motion: typeof window === "undefined" ? true : !systemReducedMotion() };
+  const fallback = { sound: false, motion: typeof window === "undefined" ? true : !systemReducedMotion(), crt: true };
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return fallback;
     const p = JSON.parse(raw) as Partial<EffectsPrefs>;
-    return { sound: p.sound === true, motion: p.motion ?? fallback.motion };
+    return { sound: p.sound === true, motion: p.motion ?? fallback.motion, crt: p.crt ?? true };
   } catch {
     return fallback;
   }
@@ -38,7 +38,7 @@ export function writePrefs(p: EffectsPrefs) {
 }
 
 export function useEffectsPrefs(): EffectsPrefs {
-  const [prefs, setPrefs] = useState<EffectsPrefs>({ sound: false, motion: true });
+  const [prefs, setPrefs] = useState<EffectsPrefs>({ sound: false, motion: true, crt: true });
   useEffect(() => {
     const update = () => setPrefs(readPrefs());
     update();

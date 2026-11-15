@@ -14,7 +14,16 @@ export function EffectsSettings() {
           checked={prefs.motion}
           onChange={(e) => writePrefs({ ...readPrefs(), motion: e.target.checked })}
         />
-        Animaciones (glitch al ganar XP, línea de escaneo, texto que se descifra)
+        Animaciones (glitch al ganar XP, línea de escaneo, texto que se descifra, pantalla de arranque diaria)
+      </label>
+      <label className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          className="h-4 w-4 accent-[var(--na-available)]"
+          checked={prefs.crt}
+          onChange={(e) => writePrefs({ ...readPrefs(), crt: e.target.checked })}
+        />
+        Pantalla CRT (líneas horizontales sutiles y viñeta; apágala si te cansa la vista)
       </label>
       <label className="flex items-center gap-3">
         <input

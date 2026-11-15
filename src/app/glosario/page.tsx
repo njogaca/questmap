@@ -6,6 +6,7 @@ import { btnPrimary } from "@/components/ui";
 import { dueCount } from "@/lib/glossary";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Glosario" };
 
 export default async function GlossaryPage() {
   const [terms, srs, zones, due] = await Promise.all([
@@ -25,7 +26,7 @@ export default async function GlossaryPage() {
         Términos en inglés como aparecen en entrevistas, con definición en español simple, un ejemplo y una analogía para recordarlos.
       </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-line bg-surface p-4">
+      <div className="hud-panel hud-corners mt-4 flex flex-wrap items-center gap-3 p-4">
         <div className="flex-1">
           <p className="font-title text-2xl text-available">{due}</p>
           <p className="text-sm text-dim">tarjetas para repasar hoy</p>

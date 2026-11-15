@@ -4,12 +4,18 @@ Convierte estudiar en un **mapa de videojuego**: una app web local (Docker + Nex
 
 Piénsalo como un gimnasio en casa: la máquina (la app) es siempre la misma; lo que cambia es el **plan de entrenamiento** que le cargas. Ese plan es un archivo de texto.
 
+![La portada de QuestMap: las misiones de hoy, el perfil con rango y racha, y el Job Readiness por skill](docs/img/dashboard.jpg)
+
 En este repo hay **dos cosas**:
 
 | Qué | Dónde | Para qué |
 |---|---|---|
 | **La plantilla genérica** | [`docs/PLANTILLA-QUESTMAP.md`](docs/PLANTILLA-QUESTMAP.md) | El spec reutilizable. Rellenas un brief de ~40 líneas y Claude Code te construye *tu* QuestMap desde cero. |
 | **Este proyecto, como ejemplo** | todo lo demás (`src/`, `content/`, [`SPEC.md`](SPEC.md)) | Una instancia ya construida y funcionando, para ver a qué se parece el resultado antes de hacer el tuyo. |
+
+> **¿Vas a modificar el código, tú o una IA?** Lee primero [`AGENTS.md`](AGENTS.md): requisitos
+> técnicos, el ciclo de build (`docker compose up -d` **no** recompila) y las convenciones del repo
+> que es fácil reinventar mal. [`CLAUDE.md`](CLAUDE.md) apunta ahí.
 
 ---
 
@@ -56,15 +62,16 @@ La app mínima usable sale en las fases 1–4; el contenido de las zonas se escr
 
 **Meta:** prepararse para una oferta de *Software Engineer, Backend & Distributed Systems* en Home Depot. El brief relleno y el currículo aprobado están en [`SPEC.md`](SPEC.md).
 
-Lo que salió de ese brief:
+Lo que salió de ese brief, más lo que se ha añadido después:
 
-- **15 skills**: 14 extraídas de la oferta (required, preferred y las implícitas) más el inglés de entrevista como riesgo propio, y `linux`, agregada después porque era un hueco propio (ver más abajo).
-- **12 zonas** en el mapa, con grafo de prerrequisitos: Java Forest, Event Harbor, Cassandra Caverns, Observability Observatory, BigQuery Bay, GCP Peaks, Security Fortress, Distributed Systems Citadel, Capstone Castle, Interview Arena, English Track y Terminal Tundra.
-- **318 quests** repartidas en los 5 niveles de cada zona: `learn` (lecciones), `glossary`, `lab` (ejercicios en tu máquina), `quiz`, `micro` (sesiones de 15 min), `open_answer`, `interview` y un `boss` por zona.
-- **369 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **154 recursos** de estudio.
+- **2 rutas de estudio**: *Backend & GCP* (la original, salida de la oferta) y *Cyber Range*, una ruta de ciberseguridad desde cero. Cada una lleva su propio XP, su propio rango y su propio "¿estoy listo para aplicar?". Ver [Rutas de estudio](#rutas-de-estudio).
+- **22 skills**: las 15 de Backend & GCP más 7 de ciberseguridad. Tres son **transversales** (`english`, `linux`, `ai_tools`) y cuentan en todas las rutas.
+- **18 zonas** en el mapa, con grafo de prerrequisitos. Nueve de backend (Java Forest, Event Harbor, Cassandra Caverns, Observability Observatory, BigQuery Bay, GCP Peaks, Security Fortress, Distributed Systems Citadel, Capstone Castle), seis de ciberseguridad (Bastion Gate, Blue Harbor, Threat Ridge, Red Hollow, Incident Keep, Cloud Bastion) y tres **transversales** que aparecen en ambas rutas: Interview Arena, English Track y Terminal Tundra.
+- **354 quests** repartidas en los niveles de cada zona: `learn` (lecciones), `glossary`, `lab` (ejercicios en tu máquina), `quiz`, `micro` (sesiones de 15 min), `open_answer`, `interview` y un `boss` que cierra las zonas que ya están completas.
+- **384 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **162 recursos** de estudio.
 
 La zona 12, **Terminal Tundra** 🐧, no sale de la oferta: se agregó el 2026-11-07 al notar que todos los labs de las demás zonas entran a un Linux (`docker exec`) que nunca se enseñaba. Enseña terminal, permisos, triage de logs, procesos y señales, el Linux de los contenedores y de GKE, y bash para CI. Arranca desbloqueada, no es prerrequisito de nada y su skill `linux` no es core, para no tapar las recomendaciones de Java y Cassandra.
-- Tema visual **Neon Atlas / ctOS** (inspirado en Watch Dogs): paneles angulares con esquinas cortadas y marcas de "profiler", barra HUD con rango, XP, racha y reloj, mapa con retícula de objetivo y flujo de datos en los caminos abiertos, pantalla de arranque una vez al día y una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre. Los sectores bloqueados se ven como "datos cifrados" (también en la terminal) y se descifran al cumplir sus requisitos. En **Ajustes → Efectos** eliges la **interfaz** (*HUD* estilo Watch Dogs, o *Terminal* estilo Mr. Robot: todo en fuente mono, el mapa como un escaneo `nmap`, barras ASCII, arranque por `ssh` y una barra de comandos fija que entiende `cd java`, `ls` o `cd ..`) y la **paleta**, independiente de la interfaz: **ctOS** (azul acero y ámbar, la predeterminada), **Neon Atlas** (cian y magenta), **DedSec** (amarillo ácido y rosa), **fsociety** (gris y blanco con un solo rojo) o **Frostpunk** (naranja de brasa contra acero helado). Ahí también apagas las animaciones o el efecto CRT.
+- Tema visual **Neon Atlas / ctOS** (inspirado en Watch Dogs): paneles angulares con esquinas cortadas y marcas de "profiler", barra HUD con rango, XP, racha y reloj, mapa con retícula de objetivo y flujo de datos en los caminos abiertos, pantalla de arranque una vez al día y una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre. Los sectores bloqueados se ven como "datos cifrados" (también en la terminal) y se descifran al cumplir sus requisitos. En **Ajustes → Efectos** eliges la **interfaz** (*HUD* estilo Watch Dogs, o *Terminal* estilo Mr. Robot: todo en fuente mono, el mapa como un escaneo `nmap`, barras ASCII, arranque por `ssh` y una barra de comandos fija que entiende `cd java`, `ls` o `cd ..`) y la **paleta**, independiente de la interfaz: **ctOS** (azul acero y ámbar, la predeterminada), **Neon Atlas** (cian y magenta), **DedSec** (amarillo ácido y rosa), **fsociety** (gris y blanco con un solo rojo), **Frostpunk** (naranja de brasa contra acero helado), **Cyberpunk** (amarillo señal y cian sobre negro con tinte sangre) o **Animus** (Assassin's Creed: la sala blanca, la única paleta clara). Ahí también apagas las animaciones o el efecto CRT. Cada ruta trae una paleta por defecto que se aplica al activarla, pero lo que elijas a mano en Ajustes manda.
 
 **Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
 
@@ -87,6 +94,110 @@ docker compose up -d --build
 Abre http://127.0.0.1:3000. Al arrancar, la app corre las migraciones y el seed automáticamente.
 
 Revisa en `.env` que `TZ` sea tu zona horaria (`America/New_York` para Atlanta): de ella depende qué cuenta como "hoy" en la racha.
+
+---
+
+## Cómo se usa el sistema
+
+### El día a día: la portada
+
+Abre `/` y tienes **las misiones de hoy**, con un contador `hechas / totales`:
+
+1. **Micro de glosario** (~5 min) — repasa las tarjetas vencidas del SRS. Si no hay vencidas, te ofrece términos nuevos.
+2. **Micro de inglés** (~15 min) — una quest corta del English Track o del Arena.
+
+Cuando cumples una, queda tachada con su enlace vivo por si quieres seguir, y el contador avanza. Debajo, separado por una línea, está **"continuar donde ibas"**: la siguiente quest abierta del mapa. No es una misión diaria — es el puntero a tu campaña, para que no tengas que ir a buscarlo.
+
+A la derecha ves tu rango, el XP, la racha y los minutos de hoy, y más abajo el **Job Readiness**: una barra por skill con dos métricas que nunca se mezclan — *cobertura* (cuánto del contenido publicado llevas) y *readiness real* (cuánto del objetivo de la skill, donde lo que está en `outline` cuenta 0).
+
+### El mapa
+
+![El mapa del reino: hexágonos por zona, los bloqueados con el nombre cifrado, y el panel de sector a la derecha](docs/img/mapa.jpg)
+
+`/mapa` es el grafo de zonas de tu ruta activa. Cada hexágono es un sector; los que no has desbloqueado aparecen **cifrados** y se descifran al cumplir sus prerrequisitos. Clic en una zona para ver sus niveles, y en un nivel para ver sus quests.
+
+Una zona se abre cuando completas el nivel que exige su prerrequisito. Completar quests `required` sube de nivel; las opcionales dan XP pero no bloquean.
+
+### Tipos de quest
+
+| Tipo | Qué haces |
+|---|---|
+| `learn` | Lees el resumen y escribes una nota con tus palabras |
+| `glossary` | Repasas un grupo de términos y entran al SRS |
+| `lab` | Haces un ejercicio en tu máquina y pegas la evidencia |
+| `quiz` | Preguntas de opción múltiple, verdadero/falso u ordenar |
+| `open_answer` | Escribes una respuesta larga que Claude califica con una rúbrica |
+| `interview` | Simulación de entrevista en el Arena |
+| `micro` | Sesión corta de 10–15 min, pensada para huecos del día |
+| `boss` | El examen de la zona |
+
+### Glosario y repaso espaciado
+
+`/glosario` lista los términos **de tu ruta activa** (los transversales siempre entran). `/glosario/repaso` es la sesión de tarjetas: cada respuesta ajusta el intervalo con un algoritmo de repetición espaciada, así que las que fallas vuelven pronto y las que dominas se espacian. Es el mecanismo que más retención te da del sistema; la micro diaria existe para que no lo saltes.
+
+### Arena
+
+`/arena` son simulaciones de entrevista: conductuales, técnicas por zona, system design y take-home. Escribes o dictas tu respuesta y recibes una evaluación con rúbrica.
+
+### Racha y minutos
+
+La racha cuenta **días con minutos registrados**, según la zona horaria de `.env`. Es **una sola para todo el sistema**: no se parte por ruta, porque estudiaste ese día y da igual de qué. Puedes registrar minutos a mano desde la portada.
+
+### Ajustes
+
+`/ajustes` tiene tres cosas: **Respaldo** (exportar/importar progreso, reiniciar una zona), **Efectos** (interfaz HUD o Terminal, paleta, animaciones, CRT, sonidos) y el estado de la API de Claude.
+
+### Interfaces y paletas
+
+Son dos cosas **independientes**: la *interfaz* cambia la estructura y el *tema* cambia solo los colores. Cualquier paleta funciona con cualquier interfaz.
+
+La interfaz **Terminal** convierte todo en una shell: fuente mono, encabezados como comentarios de Markdown, el mapa como un escaneo `nmap`, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
+
+![La interfaz Terminal: la misma portada con fuente mono, pestañas tipo tmux y barra de comandos fija](docs/img/tema-terminal.jpg)
+
+De las siete paletas, **Animus** (Assassin's Creed) es la única clara: la sala blanca con su retícula azul, azul Animus para lo que puedes revivir, oro para la memoria en curso y rojo de desincronización.
+
+![La paleta Animus: fondo blanco con retícula azul, paneles blancos y acentos azul y oro](docs/img/tema-animus.jpg)
+
+En el mapa es donde más se nota el cambio de aire:
+
+![El mapa con la paleta Animus: hexágonos azules sobre blanco, como el corredor de memorias](docs/img/tema-animus-mapa.jpg)
+
+---
+
+## Rutas de estudio
+
+Una **ruta** es un mundo propio: sus zonas, sus skills, su XP y su readiness. Sirve para estudiar
+temas distintos sin que se mezclen — si hoy avanzas backend y mañana ciberseguridad, cada una lleva
+su cuenta aparte.
+
+![El selector de rutas: Backend & GCP como ruta activa y Cyber Range con su botón para cambiar](docs/img/rutas.jpg)
+
+Entra a `/rutas` y verás una tarjeta por ruta con su XP, su rango y su avance. El botón **"cambiar a
+esta ruta →"** la activa:
+
+- El mapa, la portada, el readiness y el glosario pasan a ser los de esa ruta.
+- Se aplica su paleta por defecto (Cyber Range entra en *fsociety*), que puedes cambiar luego en Ajustes.
+- **No se borra nada.** Cambiar de ruta solo mueve un puntero: el progreso de la otra se queda intacto y vuelve tal cual al regresar.
+
+### Zonas transversales
+
+Interview Arena, English Track y Terminal Tundra **no pertenecen a ninguna ruta**: aparecen en todas
+y su progreso es compartido. Avanzar inglés mientras cursas ciberseguridad también cuenta para
+backend. Lo mismo con las skills `english`, `linux` y `ai_tools`.
+
+Es deliberado: el inglés de entrevista y el Linux de base te sirven en cualquier camino, y duplicarlos
+habría partido tu baraja de glosario en tres.
+
+### Crear una ruta nueva
+
+1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `palette` y `order`.
+2. Añade sus skills a `content/skills.yaml` con `track: <slug>`.
+3. Crea sus zonas en `content/zones/` con `track: <slug>`. Publica las primeras y deja el resto en `status: outline`.
+4. `docker compose up -d --build` y revisa el log del seed.
+
+El campo `track` en una zona o skill admite tres valores: **ausente** (el seed no toca lo que ya haya),
+**`null`** (transversal) o un **slug** de ruta.
 
 ## Comandos útiles
 
@@ -157,9 +268,10 @@ Todo vive en `content/` (YAML):
 
 | Carpeta | Qué hay |
 |---|---|
-| `skills.yaml` | Las 15 skills con su `target_xp` (y el cálculo comentado) |
+| `tracks.yaml` | Las rutas de estudio: `slug`, título, emoji, paleta por defecto y orden |
+| `skills.yaml` | Las 22 skills con su `target_xp` (y el cálculo comentado) y su `track` |
 | `resources.yaml` | Recursos de estudio. Solo `verified: true` si la URL se abrió; si no, `url: null` + `how_to_find` |
-| `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss) |
+| `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss). El campo `track` decide a qué ruta pertenece |
 | `glossary/*.yaml` | Términos con definición en español, en inglés, ejemplo y analogía |
 | `interviews/*.yaml` | Plantillas del Interview Arena (conductuales, técnicas por zona, system design, take-home) |
 

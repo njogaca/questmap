@@ -158,7 +158,13 @@ fijo que se te haya colado, porque el resto de paletas son oscuras y lo disimula
 |---|---|---|
 | Lectura | `max-w-3xl` | quest, zone, level, glosario, ajustes |
 | Tablero | `max-w-7xl` | inicio, arena, rutas |
-| Completo | `w-full .qm-wide` | mapa (en la interfaz Terminal se limita a 72rem) |
+| Mapa | `max-w-6xl` | mapa |
+
+El mapa tiene su propio nivel **y no va a pantalla completa**, aunque sea tentador. Su SVG tiene un
+`viewBox` fijo de 1000×640, así que más ancho no da más lienzo: da zoom. Los hexágonos y las
+etiquetas crecen y las zonas no se separan. A pantalla completa llegó a 1540 px (1.54×) y se veía
+inflado; con `max-w-6xl` el mapa queda en ~800 px y al panel de sector le tocan sus 300 px justos.
+Para tener más lienzo de verdad hay que ampliar el viewBox y recolocar las zonas.
 
 Si cambias el nivel tablero, cambia también `max-w-7xl` en `src/components/hud/HudNav.tsx` o la
 cabecera deja de alinearse con el contenido, que se nota mucho más que el ancho en sí.
@@ -247,9 +253,7 @@ valores por defecto, no imposiciones — el usuario puede sobrescribirlos en Aju
 manda.
 
 La interfaz `terminal` dibuja el mapa como una tabla de texto (escaneo `nmap`), no como hexágonos.
-Por eso el mapa lleva la clase `.qm-wide` y va a pantalla completa solo en HUD: en Terminal se
-limita a 72rem, porque una tabla estirada a 1900 px manda el progreso al otro extremo de la
-pantalla y el ojo pierde la fila.
+Con el ancho acotado de `max-w-6xl` las dos interfaces quedan bien sin reglas especiales.
 
 ---
 

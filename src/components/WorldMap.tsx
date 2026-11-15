@@ -95,9 +95,19 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
           )}
         </div>
 
+        {/*
+         * El viewBox es 1000x640, así que el SVG se escala a lo que mida su contenedor. Por eso
+         * la página del mapa va acotada a max-w-6xl y NO a pantalla completa: con un viewBox fijo,
+         * "más ancho" no significa más lienzo, significa hexágonos y etiquetas más grandes. A
+         * pantalla completa el mapa llegó a 1540 px (1.54x) y se veía inflado; con 6xl queda en
+         * ~800. El tope de aquí es solo una red de seguridad por si alguien ensancha la página.
+         *
+         * Si quieres MÁS lienzo de verdad (más separación entre zonas) hay que ampliar el viewBox
+         * y recolocar las zonas, que es otro trabajo.
+         */}
         <svg
           viewBox="0 0 1000 640"
-          className="block h-auto w-full"
+          className="mx-auto block h-auto w-full max-w-[820px]"
           role="img"
           aria-label={`Mapa del mundo con ${zones.length} sectores`}
         >

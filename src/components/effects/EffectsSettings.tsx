@@ -12,7 +12,11 @@ export function EffectsSettings() {
   // Cada interfaz trae su paleta "natural"; después la puedes cambiar libremente.
   const setUi = (ui: Ui) => {
     const cur = readPrefs();
-    const theme = ui === "terminal" ? "fsociety" : cur.theme === "fsociety" ? "ctos" : cur.theme;
+    // Cada interfaz arrastra la paleta que la define. Es un salto inicial, no un candado:
+    // después puedes elegir cualquier otra paleta y se queda.
+    const DEFAULT_THEME = { hud: "ctos", terminal: "fsociety", retro: "frostpunk" } as const;
+    const current = Object.values(DEFAULT_THEME).includes(cur.theme as never);
+    const theme = ui === cur.ui || !current ? cur.theme : DEFAULT_THEME[ui];
     writePrefs({ ...cur, ui, theme });
   };
 

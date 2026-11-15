@@ -487,10 +487,19 @@ html[data-motion="on"] .qm-scanline {
 /* ===== Interfaz "Terminal" (Mr. Robot): html[data-ui="terminal"] =====
  * Fuera de capas a propósito: el CSS sin capa gana a las utilidades de Tailwind y a la capa components,
  * así que estas reglas pueden reescribir el layout sin tocar los componentes.
- * .ui-hud / .ui-term marcan las piezas que solo existen en una de las dos interfaces.
+ * .ui-hud marca las piezas GRÁFICAS (barra de progreso, logo con glitch) y .ui-term las de
+ * TEXTO (barra ASCII, nav tipo tmux). Ojo: .ui-term no significa "interfaz Terminal", significa
+ * "interfaz textual", y vale también para Consola Retro. Por eso la condición es "¿es HUD?".
+ *
+ * Las vistas del mapa sí son una por interfaz y se eligen con .map-nmap / .map-retro; la de
+ * hexágonos usa .ui-hud porque es la única gráfica.
  */
-html:not([data-ui="terminal"]) .ui-term,
-html[data-ui="terminal"] .ui-hud {
+html[data-ui="hud"] .ui-term,
+html:not([data-ui="hud"]) .ui-hud {
+  display: none !important;
+}
+html:not([data-ui="terminal"]) .map-nmap,
+html:not([data-ui="retro"]) .map-retro {
   display: none !important;
 }
 
@@ -613,4 +622,61 @@ html[data-ui="terminal"] .hud-logo:hover {
 }
 html[data-ui="terminal"] .qm-scanline {
   display: none !important;
+}
+
+/* ===== Interfaz "Consola Retro": html[data-ui="retro"] =====
+ * Una máquina de los 80: todo monoespaciado, mayúsculas, cajas de 2px y cero curvas. Comparte
+ * con Terminal las piezas de texto (.ui-term) pero NO su estética de shell de Mr. Robot: aquí
+ * no hay encabezados de markdown ni barra tipo tmux.
+ *
+ * Duplica unas pocas reglas del bloque de Terminal (paneles planos, fuente mono). Si algún día
+ * aparece una tercera interfaz textual, eso se factoriza con un atributo compartido en el html.
+ */
+html[data-ui="retro"] body {
+  background: var(--na-bg);
+  background-image: none;
+  font-family: var(--font-mono);
+  padding-bottom: 3.25rem; /* la barra de comandos fija también sale aquí */
+}
+html[data-ui="retro"] h1,
+html[data-ui="retro"] h2,
+html[data-ui="retro"] h3,
+html[data-ui="retro"] .font-title {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+html[data-ui="retro"] main,
+html[data-ui="retro"] header > div:first-child {
+  margin-inline: auto;
+}
+/* Paneles planos con borde grueso: la "interfaz gráfica" antes de las GUI. */
+html[data-ui="retro"] .hud-panel::before,
+html[data-ui="retro"] .hud-panel::after {
+  clip-path: none;
+}
+html[data-ui="retro"] .hud-panel::before {
+  border-width: 2px;
+}
+html[data-ui="retro"] .hud-corners {
+  background: none;
+}
+html[data-ui="retro"] .hud-item {
+  border-width: 2px;
+}
+html[data-ui="retro"] .hud-item::before,
+html[data-ui="retro"] .hud-item::after {
+  display: none;
+}
+html[data-ui="retro"] .hud-btn {
+  clip-path: none;
+  border-width: 2px;
+}
+html[data-ui="retro"] .hud-label::after {
+  display: none;
+}
+html[data-ui="retro"] header {
+  background: var(--na-surface);
+  backdrop-filter: none;
+  border-bottom-width: 2px;
 }

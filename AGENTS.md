@@ -252,8 +252,32 @@ ruta y se aplican juntos al activarla (`TrackSwitch` los escribe en **una sola**
 valores por defecto, no imposiciones — el usuario puede sobrescribirlos en Ajustes y su elección
 manda.
 
-La interfaz `terminal` dibuja el mapa como una tabla de texto (escaneo `nmap`), no como hexágonos.
-Con el ancho acotado de `max-w-6xl` las dos interfaces quedan bien sin reglas especiales.
+Cada interfaz dibuja el mapa a su manera: `hud` hexágonos, `terminal` un escaneo `nmap`, `retro`
+un POST de BIOS. Con el ancho acotado de `max-w-6xl` las tres quedan bien sin reglas especiales.
+
+### Añadir una interfaz
+
+`.ui-hud` y `.ui-term` **no** significan "interfaz HUD" e "interfaz Terminal": significan pieza
+**gráfica** y pieza **de texto** (barra de progreso contra barra ASCII, nav con corchetes contra
+nav tipo tmux). Por eso la regla de visibilidad pregunta "¿es HUD?" y no "¿es Terminal?", y una
+interfaz textual nueva hereda toda esa capa sin tocar nada.
+
+Lo único propio de cada interfaz es la vista del mapa, en `src/components/map/`. Para añadir una:
+
+1. Un componente nuevo en `src/components/map/` que reciba `MapViewProps`, con la clase
+   `map-view map-<id>` en su raíz.
+2. Renderizarlo en `WorldMap.tsx` junto a los demás.
+3. En `globals.css`: `html:not([data-ui="<id>"]) .map-<id> { display: none !important; }` y el
+   bloque `html[data-ui="<id>"]` con su estética.
+4. Registrar el id en `prefs.ts` (tipo `Ui`, array `UIS` y la validación de `readPrefs`), en el
+   `BOOT_SCRIPT` de `layout.tsx`, en el `z.enum` de `ui` en `src/content/schema.ts` y en el
+   `DEFAULT_THEME` de `EffectsSettings.tsx`.
+
+**Todas las vistas se renderizan y el CSS oculta las que no tocan.** Es a propósito: el
+`BOOT_SCRIPT` fija `data-ui` antes del primer pintado, así que no hay parpadeo ni desajuste de
+hidratación. Renderizar condicionalmente desde `localStorage` haría que se viera un instante la
+interfaz por defecto antes de saltar a la tuya. Si algún día hay tantas vistas que el coste de DOM
+pese, lo que hay que cambiar es *eso*, no el reparto en componentes.
 
 ---
 

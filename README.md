@@ -151,7 +151,11 @@ La racha cuenta **días con minutos registrados**, según la zona horaria de `.e
 
 Son dos cosas **independientes**: la *interfaz* cambia la estructura y el *tema* cambia solo los colores. Cualquier paleta funciona con cualquier interfaz. Cada ruta trae su combinación por defecto y la aplica al activarse, pero lo que elijas a mano aquí manda.
 
-La interfaz **Terminal** convierte todo en una shell: fuente mono, encabezados como comentarios de Markdown, el mapa como un escaneo `nmap`, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
+Hay tres interfaces, y cada una **dibuja el mapa a su manera**:
+
+- **HUD · Watch Dogs** — paneles angulares y el mapa como una retícula de hexágonos.
+- **Terminal · Mr. Robot** — todo es una shell: fuente mono, encabezados como comentarios de Markdown, el mapa como un escaneo `nmap`, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
+- **Consola Retro · BIOS** — una máquina de los 80: mayúsculas, cajas de 2 px y el mapa como un POST que detecta cada zona como si fuera un dispositivo (`READY`, `ACTIVE`, `PASSED`, `LOCKED`).
 
 ![La interfaz Terminal: la misma portada con fuente mono, pestañas tipo tmux y barra de comandos fija](docs/img/tema-terminal.jpg)
 

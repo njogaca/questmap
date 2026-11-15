@@ -58,7 +58,7 @@ export const trackSchema = z.object({
   /** Paleta que se aplica al activar la ruta; el usuario puede sobrescribirla en Ajustes. */
   palette: z.enum(["ctos", "neon", "dedsec", "fsociety", "frostpunk", "cyberpunk", "animus"]).optional(),
   /** Interfaz por defecto: "hud" (mapa de hexágonos) o "terminal" (mapa como escaneo nmap). */
-  ui: z.enum(["hud", "terminal"]).optional(),
+  ui: z.enum(["hud", "terminal", "retro"]).optional(),
   order: z.number().int().positive(),
   status,
 });

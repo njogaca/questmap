@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
  * y al z.enum de `palette` en src/content/schema.ts. Son cuatro sitios: ver AGENTS.md.
  */
 export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk" | "cyberpunk" | "animus";
-export type Ui = "hud" | "terminal";
+export type Ui = "hud" | "terminal" | "retro";
 
 export const THEMES: { id: Theme; name: string; desc: string; swatch: string[] }[] = [
   { id: "ctos", name: "ctOS", desc: "Watch Dogs 1: azul acero y blanco, ámbar para lo activo", swatch: ["#3aa8f0", "#ffb020", "#d9f1ff", "#ff5a3c"] },
@@ -27,6 +27,11 @@ export const UIS: { id: Ui; name: string; desc: string }[] = [
     id: "terminal",
     name: "Terminal · Mr. Robot",
     desc: "Todo es una shell: fuente mono, mapa como escaneo nmap, barras ASCII y barra de comandos fija. Aplica la paleta fsociety.",
+  },
+  {
+    id: "retro",
+    name: "Consola Retro · BIOS",
+    desc: "Una máquina de los 80: mayúsculas, cajas de 2px y el mapa como un POST que detecta sectores. Aplica la paleta Frostpunk.",
   },
 ];
 
@@ -58,7 +63,7 @@ export function readPrefs(): EffectsPrefs {
       motion: p.motion ?? fallback.motion,
       crt: p.crt ?? true,
       theme: isTheme(p.theme) ? p.theme : "ctos",
-      ui: p.ui === "terminal" ? "terminal" : "hud",
+      ui: p.ui === "terminal" || p.ui === "retro" ? p.ui : "hud",
     };
   } catch {
     return fallback;

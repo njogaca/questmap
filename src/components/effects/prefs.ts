@@ -12,8 +12,8 @@ import { useEffect, useState } from "react";
  * Para añadir una interfaz hay que tocar también globals.css, el BOOT_SCRIPT de
  * src/app/layout.tsx y el z.enum de `ui` en src/content/schema.ts. Ver AGENTS.md.
  */
-export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk" | "cyberpunk" | "animus";
-export type Ui = "hud" | "terminal" | "retro" | "animus";
+export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk" | "cyberpunk" | "animus" | "archivo";
+export type Ui = "hud" | "terminal" | "retro" | "animus" | "dossier";
 
 /**
  * La paleta de cada interfaz. `neon`, `dedsec` y `cyberpunk` siguen definidas en globals.css pero
@@ -24,6 +24,7 @@ export const UI_THEME: Record<Ui, Theme> = {
   terminal: "fsociety",
   retro: "frostpunk",
   animus: "animus",
+  dossier: "archivo",
 };
 
 export const UIS: { id: Ui; name: string; desc: string; swatch: string[] }[] = [
@@ -50,6 +51,12 @@ export const UIS: { id: Ui; name: string; desc: string; swatch: string[] }[] = [
     name: "Códice Animus · Assassin's Creed",
     desc: "La sala blanca: la única interfaz clara. El mapa como memorias por sincronizar, y lo bloqueado marcado como memoria corrupta.",
     swatch: ["#0a7fbf", "#b8860b", "#0e7a5f", "#c1272d"],
+  },
+  {
+    id: "dossier",
+    name: "Expediente · Archivo",
+    desc: "Papel, no pantalla: el mapa como las carpetas de un archivo, con pestañas y sellos. Lo bloqueado está CLASIFICADO.",
+    swatch: ["#1f5673", "#8a6a1f", "#3f6b3a", "#a32b22"],
   },
 ];
 

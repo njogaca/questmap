@@ -7,6 +7,7 @@ import { decryptRatio, encrypt } from "@/lib/encrypt";
 import type { NodeState } from "@/lib/progress";
 import { DecryptText } from "./effects/DecryptText";
 import { MapCodex } from "./map/MapCodex";
+import { MapDossier } from "./map/MapDossier";
 import { MapNmap } from "./map/MapNmap";
 import { MapRetro } from "./map/MapRetro";
 import { pad2, type MapEdge, type MapZone } from "./map/types";
@@ -249,6 +250,7 @@ export function WorldMap({ zones, edges }: { zones: MapZone[]; edges: MapEdge[] 
       <MapNmap zones={zones} selectedId={selectedId} onSelect={setSelectedId} />
       <MapRetro zones={zones} selectedId={selectedId} onSelect={setSelectedId} />
       <MapCodex zones={zones} selectedId={selectedId} onSelect={setSelectedId} />
+      <MapDossier zones={zones} selectedId={selectedId} onSelect={setSelectedId} />
 
       {/* Panel de info del sector seleccionado */}
       <aside className="hud-panel hud-corners p-4" aria-live="polite">

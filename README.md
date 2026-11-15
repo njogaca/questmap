@@ -71,7 +71,7 @@ Lo que salió de ese brief, más lo que se ha añadido después:
 - **384 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **162 recursos** de estudio.
 
 La zona 12, **Terminal Tundra** 🐧, no sale de la oferta: se agregó el 2026-11-07 al notar que todos los labs de las demás zonas entran a un Linux (`docker exec`) que nunca se enseñaba. Enseña terminal, permisos, triage de logs, procesos y señales, el Linux de los contenedores y de GKE, y bash para CI. Arranca desbloqueada, no es prerrequisito de nada y su skill `linux` no es core, para no tapar las recomendaciones de Java y Cassandra.
-- **Cuatro interfaces** entre las que eliges en Ajustes → Efectos, y cada una cambia estructura, colores y la forma del mapa: *HUD* (hexágonos, estilo Watch Dogs), *Terminal* (escaneo `nmap`, estilo Mr. Robot), *Consola Retro* (un POST de BIOS) y *Códice Animus* (memorias por sincronizar, la única clara). Comunes a todas: barra con rango, XP, racha y reloj, pantalla de arranque una vez al día, una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre, y un fondo de partículas vectoriales estilo arcade. Los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos. Ahí también apagas las animaciones o el efecto CRT.
+- **Cinco interfaces** entre las que eliges en Ajustes → Efectos, y cada una cambia estructura, colores y la forma del mapa: *HUD* (hexágonos, estilo Watch Dogs), *Terminal* (escaneo `nmap`, estilo Mr. Robot), *Consola Retro* (un POST de BIOS) y *Códice Animus* (memorias por sincronizar) y *Expediente* (carpetas de archivo sobre papel). Comunes a todas: barra con rango, XP, racha y reloj, pantalla de arranque una vez al día, una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre, y un fondo de partículas vectoriales estilo arcade. Los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos. Ahí también apagas las animaciones o el efecto CRT.
 
 **Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
 
@@ -156,7 +156,8 @@ Cada interfaz **cambia la estructura y los colores a la vez**, y sobre todo **di
 | **HUD · Watch Dogs** | una retícula de hexágonos | azul acero y ámbar |
 | **Terminal · Mr. Robot** | un escaneo `nmap` | gris y blanco con un solo rojo |
 | **Consola Retro · BIOS** | un POST que detecta dispositivos | ámbar sobre acero helado |
-| **Códice Animus** | una secuencia de memorias | la sala blanca: la única clara |
+| **Códice Animus** | una secuencia de memorias | la sala blanca |
+| **Expediente · Archivo** | un cajón de carpetas con sellos | papel envejecido y tinta |
 
 La **Terminal** convierte todo en una shell: fuente mono, encabezados como comentarios de Markdown, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
 
@@ -170,7 +171,11 @@ El **Códice Animus** es la única clara, y el mapa deja de ser una tabla: es un
 
 ![La interfaz Códice Animus: fondo blanco con retícula azul y las zonas como memorias en secuencia](docs/img/interfaz-animus.jpg)
 
-De fondo, en todas, hay un **campo de partículas vectoriales** al estilo de los arcade de los 80 — rocas en wireframe que giran y estrellas que caen, al 10 % de opacidad. Toma el color de la interfaz activa y se apaga junto con las animaciones en Ajustes.
+El **Expediente** no parece una pantalla: es papel. Cada zona es una carpeta con su pestaña de color y un sello ladeado, y lo que no puedes abrir todavía no está bloqueado, está **CLASIFICADO**.
+
+![La interfaz Expediente: el mapa como carpetas de archivo sobre papel, con sellos ladeados](docs/img/interfaz-expediente.jpg)
+
+De fondo, en todas, hay un **campo de partículas vectoriales** al estilo de los arcade de los 80 — rocas en wireframe que giran y estrellas que caen. Toma el color **y la opacidad** de la interfaz activa —cada una ajusta la suya para que se perciban igual de tenues sobre su fondo— y se apaga junto con las animaciones en Ajustes.
 
 ---
 
@@ -200,7 +205,7 @@ habría partido tu baraja de glosario en tres.
 
 ### Crear una ruta nueva
 
-1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `ui` (`hud`, `terminal`, `retro` o `animus`) y `order`.
+1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `ui` (`hud`, `terminal`, `retro`, `animus` o `dossier`) y `order`.
 2. Añade sus skills a `content/skills.yaml` con `track: <slug>`.
 3. Crea sus zonas en `content/zones/` con `track: <slug>`. Publica las primeras y deja el resto en `status: outline`.
 4. `docker compose up -d --build` y revisa el log del seed.

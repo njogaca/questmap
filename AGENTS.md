@@ -144,8 +144,14 @@ Todo sale de tokens en `:root` y sus variantes `html[data-theme="..."]`. Usa las
 su paleta y `data-theme` se deriva de `data-ui`. Los tokens de `neon`, `dedsec` y `cyberpunk` siguen
 en `globals.css` sin dueño, listos para la próxima interfaz que los adopte.
 
-La interfaz **Códice Animus** es la única clara. Si tocas colores, pruébala: es la que delata
+Las interfaces **Códice Animus** y **Expediente** son claras. Si tocas colores, pruébala: es la que delata
 cualquier color fijo que se te haya colado, porque las otras tres son oscuras y lo disimulan.
+
+El fondo de partículas (`ArcadeField`) lee su opacidad de `--qm-particle-alpha`, que **cada tema
+define por separado**. No es capricho: un alfa fijo del 10 % se intuía en ctOS y desaparecía en
+Frostpunk y en Animus, porque lo que decide si se ve no es el alfa sino el contraste resultante
+contra ESE fondo. Los valores actuales dan ~1.45x en todos los temas; si añades uno, calcula el
+suyo en vez de copiar el de otro.
 
 ### Anchos de página: hay tres niveles, respétalos
 
@@ -255,7 +261,7 @@ un POST de BIOS. Con el ancho acotado de `max-w-6xl` las tres quedan bien sin re
 `.ui-hud` y `.ui-term` **no** significan "interfaz HUD" e "interfaz Terminal": son dos **familias**
 —piezas gráficas y piezas de texto— y cada interfaz pertenece a una:
 
-    gráficas → hud, animus        textuales → terminal, retro
+    gráficas → hud, animus, dossier        textuales → terminal, retro
 
 La regla de visibilidad lista a los miembros de cada familia. Con dos interfaces bastaba preguntar
 "¿es HUD?", y eso fue justo lo que falló al añadir Códice Animus: por no ser HUD heredó la nav de

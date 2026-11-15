@@ -56,7 +56,7 @@ export const trackSchema = z.object({
   emoji: z.string().optional(),
   description: z.string().optional(),
   /** Interfaz por defecto de la ruta. Trae su propia paleta: ya no se eligen por separado. */
-  ui: z.enum(["hud", "terminal", "retro", "animus"]).optional(),
+  ui: z.enum(["hud", "terminal", "retro", "animus", "dossier"]).optional(),
   order: z.number().int().positive(),
   status,
 });

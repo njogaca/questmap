@@ -18,6 +18,10 @@
   --na-done: #d9f1ff; /* blanco hielo: nodo comprometido */
   --na-warn: #ff5a3c; /* rojo hostil: avisos */
   --hud-chamfer: 14px;
+  /* Opacidad del campo de partículas del fondo. Se ajusta POR TEMA porque el mismo 0.10 que se
+   * veía en ctOS desaparecía en Frostpunk y en Animus: lo que importa no es el alfa sino el
+   * contraste resultante contra ese fondo. Estos valores dan ~1.45x en los cuatro. */
+  --qm-particle-alpha: 0.24;
 }
 
 /* Neon Atlas (el tema original): cian y magenta sobre negro. */
@@ -63,6 +67,7 @@ html[data-theme="fsociety"] {
   --na-locked: #4a4a4a;
   --na-done: #73c278;
   --na-warn: #d9a21b;
+  --qm-particle-alpha: 0.17;
 }
 
 /* Frostpunk: el Generador. Brasas naranjas contra acero helado; oro para lo conquistado. */
@@ -78,6 +83,7 @@ html[data-theme="frostpunk"] {
   --na-locked: #4b5661;
   --na-done: #ffd166;
   --na-warn: #ff4d3d;
+  --qm-particle-alpha: 0.23;
 }
 
 /* Animus (Assassin's Creed): la sala blanca. ÚNICA PALETA CLARA del sistema — funciona porque
@@ -95,6 +101,7 @@ html[data-theme="animus"] {
   --na-locked: #9fb3c4;
   --na-done: #0e7a5f; /* sincronizado */
   --na-warn: #c1272d; /* DESINCRONIZACIÓN */
+  --qm-particle-alpha: 0.29;
 }
 
 /* La retícula de la sala del Animus. */
@@ -104,6 +111,22 @@ html[data-theme="animus"] body {
     linear-gradient(to bottom, rgba(10, 127, 191, 0.08) 1px, transparent 1px);
   background-size: 32px 32px;
   background-attachment: fixed;
+}
+
+/* Archivo (interfaz Expediente): papel envejecido y tinta. La segunda paleta clara. */
+html[data-theme="archivo"] {
+  --na-bg: #e8e2d4;
+  --na-surface: #f3efe4;
+  --na-surface-2: #e2dbc9;
+  --na-border: #c3b89e;
+  --na-text: #2b2620;
+  --na-text-dim: #6f6454;
+  --na-available: #1f5673; /* tinta azul desvaída */
+  --na-progress: #8a6a1f; /* ocre */
+  --na-locked: #a39780;
+  --na-done: #3f6b3a; /* sello verde */
+  --na-warn: #a32b22; /* sello rojo */
+  --qm-particle-alpha: 0.25;
 }
 
 /* Cyberpunk 2077 (Night City): amarillo señal y cian sobre negro con tinte sangre.
@@ -501,14 +524,16 @@ html[data-motion="on"] .qm-scanline {
  * hexágonos va con .ui-hud por ser la gráfica original.
  */
 html:not([data-ui="terminal"]):not([data-ui="retro"]) .ui-term,
-html:not([data-ui="hud"]):not([data-ui="animus"]) .ui-hud {
+html:not([data-ui="hud"]):not([data-ui="animus"]):not([data-ui="dossier"]) .ui-hud {
   display: none !important;
 }
 html:not([data-ui="terminal"]) .map-nmap,
 html:not([data-ui="retro"]) .map-retro,
 html:not([data-ui="animus"]) .map-codex,
+html:not([data-ui="dossier"]) .map-dossier,
 /* el mapa de hexágonos es .ui-hud, pero en Animus lo sustituye el códice */
-html[data-ui="animus"] .hud-crosshair {
+html[data-ui="animus"] .hud-crosshair,
+html[data-ui="dossier"] .hud-crosshair {
   display: none !important;
 }
 
@@ -718,5 +743,35 @@ html[data-ui="animus"] .hud-label::after {
 /* En claro, el barrido y la viñeta del mapa ensucian en vez de ambientar. */
 html[data-ui="animus"] .qm-scanline,
 html[data-ui="animus"] .hud-crt {
+  display: none !important;
+}
+
+/* ===== Interfaz "Expediente": html[data-ui="dossier"] =====
+ * Papel, no pantalla. Nada de cortes angulares, glitch ni barridos: aquí lo que hay son
+ * carpetas, pestañas y sellos. Es la interfaz más alejada de las otras cuatro a propósito.
+ */
+html[data-ui="dossier"] .hud-panel::before,
+html[data-ui="dossier"] .hud-panel::after {
+  clip-path: none;
+}
+html[data-ui="dossier"] .hud-corners {
+  background: none;
+}
+html[data-ui="dossier"] .hud-item::before,
+html[data-ui="dossier"] .hud-item::after {
+  display: none;
+}
+html[data-ui="dossier"] .hud-btn {
+  clip-path: none;
+}
+html[data-ui="dossier"] .hud-label {
+  letter-spacing: 0.2em;
+}
+html[data-ui="dossier"] .hud-label::after {
+  display: none;
+}
+/* En papel, el barrido y el CRT no pintan nada. */
+html[data-ui="dossier"] .qm-scanline,
+html[data-ui="dossier"] .hud-crt {
   display: none !important;
 }

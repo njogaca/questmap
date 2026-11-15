@@ -10,8 +10,8 @@ import { useEffectsPrefs } from "./prefs";
  *
  * Decisiones que importan:
  * - Un solo <canvas> fijo detrás de todo (z-0 con el contenido en z-10), `pointer-events: none`.
- * - Los colores salen de los tokens del tema, leídos del CSS, así que cambia con la interfaz sin
- *   saber nada de ella.
+ * - Los colores Y la opacidad salen de los tokens del tema, leídos del CSS, así que cambia con la
+ *   interfaz sin saber nada de ella. El alfa es por tema a propósito: ver --qm-particle-alpha.
  * - Respeta la preferencia de animaciones: si están apagadas, no se monta el bucle siquiera.
  * - Se pausa cuando la pestaña no está visible, para no gastar batería de fondo.
  */
@@ -80,11 +80,14 @@ export function ArcadeField() {
     const draw = () => {
       const line = token("--na-available", "#8899aa");
       const dim = token("--na-text-dim", "#8899aa");
+      // El alfa lo fija cada tema: un valor fijo se veía en ctOS y desaparecía en Frostpunk y
+      // Animus, porque lo que importa es el contraste contra ESE fondo, no el alfa en sí.
+      const alpha = Number(token("--qm-particle-alpha", "0.24")) || 0.24;
       ctx.clearRect(0, 0, w, h);
 
       // Estrellas: caen despacio, como el campo de Galaga.
       ctx.fillStyle = dim;
-      ctx.globalAlpha = 0.16;
+      ctx.globalAlpha = alpha * 1.25;
       for (const s of stars) {
         s.y += s.v;
         if (s.y > h) {
@@ -96,7 +99,7 @@ export function ArcadeField() {
 
       // Rocas en wireframe: solo contorno, nunca relleno.
       ctx.strokeStyle = line;
-      ctx.globalAlpha = 0.1;
+      ctx.globalAlpha = alpha;
       ctx.lineWidth = 1;
       for (const r of rocks) {
         r.x += r.vx;

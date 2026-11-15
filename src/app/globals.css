@@ -1,19 +1,53 @@
 @import "tailwindcss";
 
-/* ===== Neon Atlas / ctOS — tokens de color ===== */
+/* ===== Paletas (se eligen en Ajustes → Efectos; html[data-theme]) =====
+ * Todos los colores de la app salen de estos tokens, así que cambiar de tema es solo cambiar valores.
+ */
+
+/* ctOS (Watch Dogs 1, predeterminado): azul acero y blanco sobre azul marino casi negro; ámbar = activo, rojo = alerta. */
 :root {
+  --na-bg: #060a10;
+  --na-surface: #0c131d;
+  --na-surface-2: #121c2a;
+  --na-border: #223447;
+  --na-text: #e9f1fa;
+  --na-text-dim: #8aa0b8;
+  --na-available: #3aa8f0; /* azul ctOS: disponible */
+  --na-progress: #ffb020; /* ámbar: en progreso */
+  --na-locked: #4a5a6e; /* pizarra: bloqueado */
+  --na-done: #d9f1ff; /* blanco hielo: nodo comprometido */
+  --na-warn: #ff5a3c; /* rojo hostil: avisos */
+  --hud-chamfer: 14px;
+}
+
+/* Neon Atlas (el tema original): cian y magenta sobre negro. */
+html[data-theme="neon"] {
   --na-bg: #05070b;
   --na-surface: #0b0f16;
   --na-surface-2: #111823;
   --na-border: #1c2736;
   --na-text: #e6edf5;
   --na-text-dim: #8a99ad;
-  --na-available: #00e5ff; /* cian: disponible */
-  --na-progress: #ff2e88; /* magenta: en progreso */
-  --na-locked: #4a5568; /* gris: bloqueado */
-  --na-done: #39ff88; /* verde: completado */
-  --na-warn: #ffd60a; /* amarillo DedSec: avisos */
-  --hud-chamfer: 14px;
+  --na-available: #00e5ff;
+  --na-progress: #ff2e88;
+  --na-locked: #4a5568;
+  --na-done: #39ff88;
+  --na-warn: #ffd60a;
+}
+
+/* DedSec (Watch Dogs 2): amarillo ácido, rosa y cian sobre negro puro. */
+html[data-theme="dedsec"] {
+  --na-bg: #030303;
+  --na-surface: #0b0b0d;
+  --na-surface-2: #131316;
+  --na-border: #26262c;
+  --na-text: #f4f4f0;
+  --na-text-dim: #9a9aa3;
+  --na-available: #f2ff00;
+  --na-progress: #ff2d95;
+  --na-locked: #4d4d57;
+  --na-done: #00f0ff;
+  --na-warn: #ff6a00;
 }
 
 @theme inline {
@@ -51,9 +85,9 @@ body {
   min-height: 100dvh;
   /* Rejilla de holograma + viñeta: el centro un poco más claro, los bordes casi negros. */
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 229, 255, 0.06), transparent 60%),
-    linear-gradient(rgba(0, 229, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
+    radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--na-available) 7%, transparent), transparent 60%),
+    linear-gradient(color-mix(in srgb, var(--na-available) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--na-available) 4%, transparent) 1px, transparent 1px);
   background-size:
     100% 100%,
     32px 32px,
@@ -341,7 +375,7 @@ html[data-motion="on"] .qm-scanline {
   top: 0;
   height: 9%;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.08), transparent);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--na-available) 9%, transparent), transparent);
   animation: qm-scan 6s linear infinite;
 }
 

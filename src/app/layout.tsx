@@ -19,16 +19,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#05070b",
+  themeColor: "#060a10",
   width: "device-width",
   initialScale: 1,
 };
 
 /**
- * Decide ANTES del primer frame si toca la pantalla de arranque (una vez al día y solo con
- * animaciones activas). Lee las mismas claves de localStorage que src/components/effects/prefs.ts.
+ * Corre ANTES del primer frame: aplica la paleta elegida (para que no parpadee la predeterminada) y
+ * decide si toca la pantalla de arranque (una vez al día y solo con animaciones activas).
+ * Lee las mismas claves de localStorage que src/components/effects/prefs.ts.
  */
-const BOOT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();document.documentElement.dataset.boot=(m&&!seen)?"pending":"done";}catch(e){document.documentElement.dataset.boot="done";}})();`;
+const BOOT_SCRIPT = `(function(){var d=document.documentElement.dataset;try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");if(p.theme==="neon"||p.theme==="dedsec"||p.theme==="ctos")d.theme=p.theme;var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();d.boot=(m&&!seen)?"pending":"done";}catch(e){d.boot="done";}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

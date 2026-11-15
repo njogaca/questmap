@@ -50,6 +50,36 @@ html[data-theme="dedsec"] {
   --na-warn: #ff6a00;
 }
 
+/* fsociety (Mr. Robot): terminal monocroma; blanco para lo disponible y un solo rojo para lo que estás atacando. */
+html[data-theme="fsociety"] {
+  --na-bg: #000000;
+  --na-surface: #0a0a0a;
+  --na-surface-2: #121212;
+  --na-border: #2a2a2a;
+  --na-text: #c9c9c9;
+  --na-text-dim: #7c7c7c;
+  --na-available: #f2f2f2;
+  --na-progress: #e8282e;
+  --na-locked: #4a4a4a;
+  --na-done: #73c278;
+  --na-warn: #d9a21b;
+}
+
+/* Frostpunk: el Generador. Brasas naranjas contra acero helado; oro para lo conquistado. */
+html[data-theme="frostpunk"] {
+  --na-bg: #0a0d11;
+  --na-surface: #11161c;
+  --na-surface-2: #18202a;
+  --na-border: #2a3642;
+  --na-text: #e7edf2;
+  --na-text-dim: #8b98a4;
+  --na-available: #ff8a3d;
+  --na-progress: #8fd3ff;
+  --na-locked: #4b5661;
+  --na-done: #ffd166;
+  --na-warn: #ff4d3d;
+}
+
 @theme inline {
   --color-bg: var(--na-bg);
   --color-surface: var(--na-surface);
@@ -401,4 +431,134 @@ html[data-motion="on"] .qm-scanline {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ===== Interfaz "Terminal" (Mr. Robot): html[data-ui="terminal"] =====
+ * Fuera de capas a propósito: el CSS sin capa gana a las utilidades de Tailwind y a la capa components,
+ * así que estas reglas pueden reescribir el layout sin tocar los componentes.
+ * .ui-hud / .ui-term marcan las piezas que solo existen en una de las dos interfaces.
+ */
+html:not([data-ui="terminal"]) .ui-term,
+html[data-ui="terminal"] .ui-hud {
+  display: none !important;
+}
+
+html[data-ui="terminal"] body {
+  background: var(--na-bg);
+  background-image: none;
+  font-family: var(--font-mono);
+  padding-bottom: 3.25rem; /* espacio para la barra de comandos fija */
+}
+html[data-ui="terminal"] h1,
+html[data-ui="terminal"] h2,
+html[data-ui="terminal"] h3,
+html[data-ui="terminal"] .font-title {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}
+html[data-ui="terminal"] h1 {
+  text-transform: none;
+  font-weight: 600;
+}
+/* Encabezados como comentarios de markdown en la shell */
+html[data-ui="terminal"] main h1::before {
+  content: "# " / "";
+  color: var(--na-text-dim);
+  font-weight: 400;
+}
+html[data-ui="terminal"] main h2::before {
+  content: "## " / "";
+  color: var(--na-text-dim);
+  font-weight: 400;
+}
+html[data-ui="terminal"] main h3::before {
+  content: "### " / "";
+  color: var(--na-text-dim);
+  font-weight: 400;
+}
+
+/* Contenido pegado a la izquierda, con el resto de la pantalla en negro */
+html[data-ui="terminal"] main,
+html[data-ui="terminal"] header > div:first-child {
+  margin-left: clamp(1rem, 6vw, 7rem);
+  margin-right: auto;
+}
+
+/* Barra superior como la de tmux: ventana activa invertida */
+html[data-ui="terminal"] header {
+  background: var(--na-surface);
+  backdrop-filter: none;
+}
+html[data-ui="terminal"] header a[aria-current="page"] {
+  background: var(--na-available);
+  color: var(--na-bg);
+}
+
+/* Paneles planos: sin cortes, sin esquinas de profiler */
+html[data-ui="terminal"] .hud-panel::before,
+html[data-ui="terminal"] .hud-panel::after {
+  clip-path: none;
+}
+html[data-ui="terminal"] .hud-corners {
+  background: none;
+}
+html[data-ui="terminal"] .hud-item {
+  background: transparent;
+}
+html[data-ui="terminal"] .hud-item::before,
+html[data-ui="terminal"] .hud-item::after {
+  display: none;
+}
+html[data-ui="terminal"] .hud-item:hover,
+html[data-ui="terminal"] .hud-item:focus-visible {
+  border-color: var(--na-border);
+  background: color-mix(in srgb, var(--na-available) 7%, transparent);
+  box-shadow: inset 3px 0 0 var(--na-available);
+}
+html[data-ui="terminal"] .hud-btn {
+  clip-path: none;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+html[data-ui="terminal"] .hud-label {
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+html[data-ui="terminal"] .hud-label::after {
+  background: repeating-linear-gradient(90deg, var(--na-border) 0 6px, transparent 6px 10px);
+}
+/* Barras que siguen siendo gráficas: bloques tipo ▮▮▮ */
+html[data-ui="terminal"] .hud-bar::after {
+  background: repeating-linear-gradient(90deg, transparent 0 7px, var(--na-bg) 7px 10px);
+}
+
+/* Estados como [ disponible ] */
+html[data-ui="terminal"] .qm-badge {
+  border-color: transparent !important;
+  padding-left: 0;
+  padding-right: 0;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+html[data-ui="terminal"] .qm-badge::before {
+  content: "[";
+}
+html[data-ui="terminal"] .qm-badge::after {
+  content: "]";
+}
+html[data-ui="terminal"] .qm-badge > [aria-hidden] {
+  display: none;
+}
+
+/* Sin espectáculo: solo el cursor parpadea. El glitch queda para las recompensas. */
+html[data-ui="terminal"] .qm-spin,
+html[data-ui="terminal"] .qm-spin-rev,
+html[data-ui="terminal"] .qm-flow,
+html[data-ui="terminal"] .qm-pulse,
+html[data-ui="terminal"] main h1,
+html[data-ui="terminal"] .hud-logo:hover {
+  animation: none !important;
+}
+html[data-ui="terminal"] .qm-scanline {
+  display: none !important;
 }

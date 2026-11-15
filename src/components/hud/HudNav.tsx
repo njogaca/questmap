@@ -15,10 +15,16 @@ export function HudNav({ data }: { data: HudData }) {
     <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2.5">
         <Link href="/" className="hud-logo font-title text-xl font-bold tracking-widest" aria-label="QuestMap, inicio">
-          <span className="text-available">[</span>QUEST<span className="text-available">MAP]</span>
+          <span className="ui-hud">
+            <span className="text-available">[</span>QUEST<span className="text-available">MAP]</span>
+          </span>
+          <span className="ui-term text-base font-semibold normal-case tracking-normal">
+            <span className="text-done">friend@questmap</span>
+            <span className="text-dim">:~$</span>
+          </span>
         </Link>
         <NavLinks />
-        <div className="hidden items-center gap-4 font-mono text-[11px] uppercase tracking-wider text-dim md:flex">
+        <div className="hidden items-center gap-4 whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-dim md:flex">
           {data && (
             <>
               <span title={data.rank.nextName ? `Siguiente rango: ${data.rank.nextName}` : "Rango máximo"}>

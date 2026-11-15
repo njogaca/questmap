@@ -46,7 +46,7 @@ export default async function MapPage() {
       </div>
 
       {/* Lista compacta: útil en el celular y para lectores de pantalla */}
-      <section className="mt-6">
+      <section className="ui-hud mt-6">
         <h2 className="text-xl font-semibold">Sectores</h2>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {world.zones.map((z) => (

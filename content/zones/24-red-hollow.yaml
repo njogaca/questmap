@@ -1,0 +1,65 @@
+slug: red-hollow
+title: Red Hollow
+order: 24
+emoji: "🗡️"
+track: cybersecurity
+status: outline
+map: { x: 400, y: 120 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: bastion-gate, level: 2 }
+skills: [offensive, net_sec]
+story: >
+  La hondonada roja. Se cruza al otro lado para entender cómo piensa quien ataca: no por
+  el gusto de romper, sino porque no se defiende bien lo que no se sabe atacar. Todo aquí
+  ocurre en laboratorio propio y con permiso, que es la única forma en que esto es un
+  oficio y no un delito.
+
+levels:
+  - slug: hollow-1-aprendiz
+    number: 1
+    title: "Aprendiz ofensivo — Reconocimiento y superficie"
+    status: outline
+    story: "Antes de tocar nada, mirar. La fase más larga de cualquier intrusión real es la que no deja ruido."
+    quests:
+      - slug: hollow-1-learn-ethics
+        type: learn
+        title: Alcance, permiso y por qué el contrato va primero
+        status: outline
+        estimated_min: 30
+        skills: { offensive: 1.0 }
+      - slug: hollow-1-lab-recon
+        type: lab
+        title: "Lab — Reconocimiento pasivo de un objetivo propio"
+        status: outline
+        estimated_min: 60
+        skills: { offensive: 0.5, net_sec: 0.5 }
+
+  - slug: hollow-2-pentester
+    number: 2
+    title: "Pentester Jr — OWASP Top 10 en la práctica"
+    status: outline
+    story: "Las diez formas en que se rompe una aplicación web, probadas una por una en un laboratorio que puedes romper sin consecuencias."
+    quests:
+      - slug: hollow-2-learn-owasp
+        type: learn
+        title: Los diez riesgos, con un ejemplo real de cada uno
+        status: outline
+        estimated_min: 60
+        skills: { offensive: 1.0 }
+        resources:
+          - { ref: res-sec-owasp-top10 }
+      - slug: hollow-2-lab-injection
+        type: lab
+        title: "Lab — Inyección y control de acceso roto"
+        status: outline
+        estimated_min: 90
+        skills: { offensive: 1.0 }
+        resources:
+          - { ref: res-sec-tryhackme }
+      - slug: hollow-2-open-report
+        type: open_answer
+        title: Escribir el hallazgo como lo leería un desarrollador
+        status: outline
+        estimated_min: 45
+        skills: { offensive: 0.6, grc: 0.4 }

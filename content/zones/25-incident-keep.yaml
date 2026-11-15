@@ -1,0 +1,56 @@
+slug: incident-keep
+title: Incident Keep
+order: 25
+emoji: "🏰"
+track: cybersecurity
+status: outline
+map: { x: 770, y: 500 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: blue-harbor, level: 2 }
+skills: [ir_forensics, blue_ops]
+story: >
+  La fortaleza a la que se corre cuando ya pasó. Aquí no se discute si hubo incidente: se
+  contiene, se erradica, se recupera y se escribe qué falló, sin buscar a quién culpar.
+  El informe es parte del trabajo, no el papeleo de después.
+
+levels:
+  - slug: keep-1-responder
+    number: 1
+    title: "Analista de IR — Contener sin destruir la evidencia"
+    status: outline
+    story: "La primera reacción instintiva, apagar la máquina, suele borrar justo lo que necesitabas para entender qué pasó."
+    quests:
+      - slug: keep-1-learn-cycle
+        type: learn
+        title: El ciclo de respuesta y el orden de volatilidad
+        status: outline
+        estimated_min: 45
+        skills: { ir_forensics: 1.0 }
+        resources:
+          - { ref: res-sec-nist-ir }
+      - slug: keep-1-lab-triage
+        type: lab
+        title: "Lab — Triage forense de un endpoint"
+        status: outline
+        estimated_min: 90
+        skills: { ir_forensics: 1.0 }
+
+  - slug: keep-2-lead
+    number: 2
+    title: "Incident Lead — Coordinar, comunicar y cerrar"
+    status: outline
+    story: "Un incidente se gestiona hablando con gente que no es técnica, bajo presión y con información incompleta. Esa es la parte difícil."
+    quests:
+      - slug: keep-2-open-postmortem
+        type: open_answer
+        title: Postmortem sin culpables
+        status: outline
+        estimated_min: 60
+        skills: { ir_forensics: 0.7, grc: 0.3 }
+      - slug: keep-2-boss
+        type: boss
+        title: "Boss — Dirigir un incidente de principio a fin"
+        status: outline
+        estimated_min: 120
+        skills: { ir_forensics: 1.0 }

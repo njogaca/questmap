@@ -16,71 +16,85 @@ skills:
     description: Lenguaje orientado a objetos (preferiblemente Java)
     core: true
     target_xp: 850 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 850
+    track: backend-gcp
   - code: eda
     name: Event-driven / Pub/Sub
     description: Event-driven y colas/streaming (Google Cloud Pub/Sub)
     core: true
     target_xp: 680 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 680
+    track: backend-gcp
   - code: cassandra
     name: Apache Cassandra
     description: NoSQL, Apache Cassandra, alto throughput
     core: true
     target_xp: 610 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 608
+    track: backend-gcp
   - code: bigquery_sql
     name: BigQuery y SQL
     description: BigQuery y SQL, datasets grandes
     core: true
     target_xp: 770 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 774
+    track: backend-gcp
   - code: observability
     name: Observabilidad
     description: Prometheus + Grafana, métricas y alertas
     core: true
     target_xp: 590 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 592
+    track: backend-gcp
   - code: ai_tools
     name: Herramientas de IA
     description: Uso de herramientas de IA (Claude, asistentes LLM) en el desarrollo
     core: false
     target_xp: 100 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 100
+    track: null  # transversal: vale para todas las rutas
   - code: microservices_gcp
     name: Microservicios en GCP
     description: Microservicios y cloud (GCP preferido)
     core: true
     target_xp: 430 # Z1–Z12 (2026-11-07): 431 · antes Z1–Z11: 420
+    track: backend-gcp
   - code: cicd
     name: CI/CD
     description: CI/CD y pipelines de despliegue
     core: false
     target_xp: 240 # Z1–Z12 (2026-11-07): 243 · antes Z1–Z11: 210
+    track: backend-gcp
   - code: git
     name: Git
     description: Control de versiones
     core: false
     target_xp: 30 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 30
+    track: backend-gcp
   - code: debugging_rca
     name: Debugging y RCA
     description: Debugging y análisis de causa raíz
     core: false
     target_xp: 310 # Z1–Z12 (2026-11-07): 312 · antes Z1–Z11: 270
+    track: backend-gcp
   - code: security
     name: Seguridad (authn/authz)
     description: Autenticación y autorización de usuarios y servicios
     core: false
     target_xp: 540 # Z1–Z12 (2026-11-07): 543 · antes Z1–Z11: 510
+    track: backend-gcp
   - code: testing
     name: Testing
     description: Pruebas unitarias, funcionales, destructivas y de performance
     core: false
     target_xp: 460 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 464
+    track: backend-gcp
   - code: english
     name: Inglés técnico
     description: Comunicación y entrevistas en inglés
     core: true
     target_xp: 1630 # Z1–Z12 (2026-11-07): 1631 · antes Z1–Z11: 1600
+    track: null  # transversal: vale para todas las rutas
   - code: distributed_systems
     name: Sistemas distribuidos
     description: Teoría de sistemas distribuidos (base para todo lo anterior)
     core: false
     target_xp: 1180 # REAL con todo el contenido publicado (Z1–Z11, 2026-11-05): 1184
+    track: backend-gcp
   # Skill 15, agregada el 2026-11-07 con la Zona 12 (Terminal Tundra). No sale de la oferta:
   # es un hueco propio — todos los labs de las otras zonas entran a un Linux (docker exec)
   # que nunca se enseñaba. No es core para que no tape las recomendaciones de Java y Cassandra.
@@ -89,3 +103,53 @@ skills:
     description: Terminal, logs, procesos y permisos en Linux (dentro de contenedores y en GCP)
     core: false
     target_xp: 710 # REAL con la Zona 12 publicada (2026-11-07): 710
+    track: null  # transversal: vale para todas las rutas
+
+  # ---------------------------------------------- Ruta: Cyber Range (ciberseguridad)
+  # `linux` NO se repite aquí: es transversal y esta ruta la hereda junto con Terminal
+  # Tundra, que es justo la base que un analista necesita.
+  #
+  # target_xp provisional: la mayor parte del contenido está en `outline`. Recalcula con la
+  # suma real (xp × peso de cada quest required publicada) a medida que publiques zonas.
+  - code: net_sec
+    name: Redes y protocolos
+    description: TCP/IP, DNS, TLS y cómo se ve un paquete por dentro
+    core: true
+    target_xp: 300 # planeado con la ruta completa; publicado hoy: 149
+    track: cybersecurity
+  - code: sys_hardening
+    name: Sistemas y hardening
+    description: Identidad, permisos, superficie de ataque y bastionado
+    core: true
+    target_xp: 320 # planeado con la ruta completa; publicado hoy: 121
+    track: cybersecurity
+  - code: blue_ops
+    name: Blue Team / SOC
+    description: Logs, SIEM y triage de alertas en turno
+    core: true
+    target_xp: 420 # planeado con la ruta completa; publicado hoy: 300
+    track: cybersecurity
+  - code: threat_intel
+    name: Detección y ATT&CK
+    description: Tácticas y técnicas del adversario, reglas de detección y threat hunting
+    core: true
+    target_xp: 300 # planeado con la ruta completa; publicado hoy: 0
+    track: cybersecurity
+  - code: offensive
+    name: Ofensiva y OWASP
+    description: Reconocimiento, OWASP Top 10 y explotación básica en laboratorio
+    core: true
+    target_xp: 290 # planeado con la ruta completa; publicado hoy: 0
+    track: cybersecurity
+  - code: ir_forensics
+    name: Respuesta a incidentes
+    description: Contención, erradicación, recuperación y forense básico
+    core: true
+    target_xp: 300 # planeado con la ruta completa; publicado hoy: 65
+    track: cybersecurity
+  - code: grc
+    name: Riesgo y cumplimiento
+    description: Gestión de riesgo, marcos y por qué existen los controles
+    core: false
+    target_xp: 120 # planeado con la ruta completa; publicado hoy: 20
+    track: cybersecurity

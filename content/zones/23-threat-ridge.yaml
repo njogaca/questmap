@@ -1,0 +1,64 @@
+slug: threat-ridge
+title: Threat Ridge
+order: 23
+emoji: "🏔️"
+track: cybersecurity
+status: outline
+map: { x: 650, y: 280 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: blue-harbor, level: 2 }
+skills: [threat_intel, blue_ops]
+story: >
+  La cresta desde donde se ve venir al adversario. Dejas de reaccionar a alertas ajenas y
+  empiezas a escribir las tuyas: nombrar comportamientos con ATT&CK, convertirlos en
+  reglas y salir a buscar lo que ninguna alerta disparó.
+
+levels:
+  - slug: ridge-1-analista
+    number: 1
+    title: "Analista SOC II — Nombrar al adversario con ATT&CK"
+    status: outline
+    story: "Una técnica con nombre es una técnica que se puede detectar, medir y defender. Sin vocabulario común, cada analista describe el mismo ataque de forma distinta."
+    quests:
+      - slug: ridge-1-learn-attack
+        type: learn
+        title: Tácticas, técnicas y procedimientos
+        status: outline
+        estimated_min: 40
+        skills: { threat_intel: 1.0 }
+        resources:
+          - { ref: res-sec-attack-mitre }
+      - slug: ridge-1-lab-mapping
+        type: lab
+        title: "Lab — Mapear un incidente real a la matriz"
+        status: outline
+        estimated_min: 60
+        skills: { threat_intel: 1.0 }
+      - slug: ridge-1-lab-sigma
+        type: lab
+        title: "Lab — Escribir tu primera regla Sigma"
+        status: outline
+        estimated_min: 60
+        skills: { threat_intel: 0.6, blue_ops: 0.4 }
+        resources:
+          - { ref: res-sec-sigma }
+
+  - slug: ridge-2-hunter
+    number: 2
+    title: "Threat Hunter — Buscar lo que no disparó ninguna alerta"
+    status: outline
+    story: "La caza empieza con una hipótesis, no con una alerta. Si solo investigas lo que el SIEM te señala, solo encuentras lo que el SIEM ya sabía buscar."
+    quests:
+      - slug: ridge-2-learn-hunting
+        type: learn
+        title: Cazar por hipótesis y medir la cobertura
+        status: outline
+        estimated_min: 40
+        skills: { threat_intel: 1.0 }
+      - slug: ridge-2-boss
+        type: boss
+        title: "Boss — Una caza completa, de la hipótesis al informe"
+        status: outline
+        estimated_min: 120
+        skills: { threat_intel: 1.0 }

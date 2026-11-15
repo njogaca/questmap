@@ -1,0 +1,54 @@
+slug: cloud-bastion
+title: Cloud Bastion
+order: 26
+emoji: "☁️"
+track: cybersecurity
+status: outline
+map: { x: 880, y: 180 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: threat-ridge, level: 1 }
+skills: [sys_hardening, grc, blue_ops]
+story: >
+  La última torre, y la que más se parece a un empleo hoy. En la nube el perímetro no
+  existe: lo que antes era un firewall ahora es una política de identidad mal escrita.
+  Aquí la seguridad se vuelve código y entra en el pipeline.
+
+levels:
+  - slug: cloud-1-ingeniero
+    number: 1
+    title: "Ingeniero de seguridad cloud — La identidad es el perímetro"
+    status: outline
+    story: "La mayoría de los incidentes de nube no son exploits: son permisos de más y almacenamiento abierto por descuido."
+    quests:
+      - slug: cloud-1-learn-iam
+        type: learn
+        title: IAM, roles y el permiso que sobraba
+        status: outline
+        estimated_min: 45
+        skills: { sys_hardening: 1.0 }
+      - slug: cloud-1-lab-audit
+        type: lab
+        title: "Lab — Auditar los permisos de un proyecto propio"
+        status: outline
+        estimated_min: 75
+        skills: { sys_hardening: 0.6, blue_ops: 0.4 }
+
+  - slug: cloud-2-devsecops
+    number: 2
+    title: "DevSecOps — Seguridad dentro del pipeline"
+    status: outline
+    story: "Encontrar la vulnerabilidad en producción cuesta mucho más que encontrarla en el pull request."
+    quests:
+      - slug: cloud-2-learn-supplychain
+        type: learn
+        title: Dependencias, secretos y cadena de suministro
+        status: outline
+        estimated_min: 45
+        skills: { sys_hardening: 0.5, grc: 0.5 }
+      - slug: cloud-2-lab-scanning
+        type: lab
+        title: "Lab — Escaneo de secretos y dependencias en CI"
+        status: outline
+        estimated_min: 75
+        skills: { sys_hardening: 1.0 }

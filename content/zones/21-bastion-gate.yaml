@@ -1,0 +1,224 @@
+slug: bastion-gate
+title: Bastion Gate
+order: 21
+emoji: "🚪"
+track: cybersecurity
+map: { x: 160, y: 480 }
+unlocked_from_start: true
+prerequisites: []
+skills: [net_sec, sys_hardening]
+story: >
+  La puerta del Rango. Antes de defender nada hay que entender qué se está defendiendo:
+  cómo viaja un paquete, quién es quién en un sistema y por qué una contraseña bien
+  guardada no se puede devolver. Aquí no se ataca ni se defiende todavía: aquí se aprende
+  a mirar.
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: bastion-1-novato
+    number: 1
+    title: "Novato — Cómo viaja un paquete"
+    story: "Todo incidente que vas a investigar es, al final, tráfico. Si no sabes cómo se mueve un paquete en condiciones normales, no vas a notar cuándo se mueve raro."
+    quests:
+      - slug: bastion-1-learn-layers
+        type: learn
+        title: Qué pasa de verdad cuando escribes una URL
+        required: true
+        estimated_min: 35
+        skills: { net_sec: 1.0 }
+        resources:
+          - { ref: res-sec-wireshark-docs, required: false }
+        payload:
+          note_prompt: "Con tus palabras, cuenta el recorrido completo desde que escribes una dirección hasta que ves la página. Nombra en qué punto entra DNS, en qué punto entra TCP y en qué punto entra TLS."
+          summary_md: |
+            El recorrido, en orden:
+
+            1. **DNS**: el nombre se traduce a una dirección IP. Es la guía telefónica de internet, y es texto plano salvo que uses DoH/DoT. Un atacante que controla tu DNS te manda a donde quiera.
+            2. **TCP**: se abre la conexión con el *handshake* de tres pasos (SYN → SYN-ACK → ACK). Hasta aquí nadie ha cifrado nada.
+            3. **TLS**: recién ahora se negocia el cifrado y se valida el certificado del servidor. El candado del navegador significa "el canal está cifrado y el certificado es válido para este dominio" — **no** significa que el sitio sea honesto.
+            4. **HTTP**: ya dentro del túnel cifrado viaja la petición real.
+
+            Por qué importa en seguridad:
+            - Lo que va **antes** de TLS se ve desde fuera: a qué dominio te conectas (DNS, y el SNI del saludo TLS) queda a la vista aunque el contenido no.
+            - Un certificado válido prueba **identidad del dominio**, no bondad. Un sitio de phishing puede tener su candado perfecto.
+            - Cada capa deja un log distinto. Saber qué capa falló es la mitad del triage.
+
+      - slug: bastion-1-learn-addressing
+        type: learn
+        title: Direcciones, puertos y por qué tu casa tiene una sola IP pública
+        required: true
+        estimated_min: 30
+        skills: { net_sec: 1.0 }
+        payload:
+          note_prompt: "Explica la diferencia entre una IP privada y una pública, y por qué en los logs de un servidor web puedes ver una sola IP para cien empleados distintos."
+          summary_md: |
+            - **IP** identifica la máquina; **puerto** identifica el servicio dentro de ella. `10.0.0.5:443` es "el servicio HTTPS de esa máquina".
+            - Rangos **privados** (RFC 1918): `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`. No se enrutan por internet.
+            - **NAT** traduce muchas IP privadas a una pública de salida. Por eso cien empleados aparecen en el log del servidor con la misma IP: atribuir "quién fue" requiere los logs del lado interno también.
+            - Puertos que debes reconocer de memoria: 22 SSH, 53 DNS, 80 HTTP, 443 HTTPS, 3389 RDP, 445 SMB, 5432 PostgreSQL, 3306 MySQL.
+            - Un puerto de base de datos accesible desde internet es un hallazgo grave por sí solo, sin necesidad de explotar nada.
+
+      - slug: bastion-1-glossary-net
+        type: glossary
+        title: Vocabulario de la puerta
+        required: true
+        estimated_min: 15
+        skills: { net_sec: 0.6, sys_hardening: 0.4 }
+        payload:
+          terms:
+            - g-sec-cia
+            - g-sec-threat-model
+            - g-sec-attack-surface
+            - g-sec-tcp-handshake
+            - g-sec-port-scan
+
+      - slug: bastion-1-lab-capture
+        type: lab
+        title: "Lab — Capturar tu propio tráfico y leerlo"
+        required: true
+        estimated_min: 60
+        skills: { net_sec: 1.0 }
+        resources:
+          - { ref: res-sec-wireshark-docs }
+        payload:
+          steps_md: |
+            1. Instala Wireshark y captura en tu interfaz activa.
+            2. Filtra con `tcp.flags.syn == 1 && tcp.flags.ack == 0` y observa cuántas conexiones abre tu máquina **sin que hagas nada**. Anota tres destinos que no esperabas.
+            3. Abre un sitio HTTPS y localiza el `Client Hello`. Encuentra el campo **SNI**: ahí está el dominio en texto plano, aunque el contenido vaya cifrado.
+            4. Filtra `dns` y mira las consultas. ¿Van cifradas?
+            5. Para y responde: si alguien capturara tu red ahora mismo, ¿qué sabría de ti sin romper nada de criptografía?
+          evidence_prompt: "Pega el filtro que más te sirvió y escribe qué fue lo que más te sorprendió de tu propio tráfico."
+
+      - slug: bastion-1-quiz
+        type: quiz
+        title: Control de la puerta
+        required: true
+        estimated_min: 15
+        skills: { net_sec: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "Ves cientos de paquetes SYN hacia puertos distintos de un mismo host, sin SYN-ACK de respuesta. ¿Qué es lo más probable?"
+            options:
+              - Un escaneo de puertos
+              - Una descarga grande
+              - Una consulta DNS
+              - Una renovación de certificado
+            answer: 0
+            explanation: "El handshake queda a medias a propósito: el escáner solo quiere saber qué puerto responde, no completar la conexión."
+            skill: net_sec
+            difficulty: 1
+          - type: tf
+            prompt: "El candado de HTTPS garantiza que el sitio web no es malicioso."
+            answer: false
+            explanation: "Garantiza que el canal está cifrado y que el certificado es válido para ese dominio. Un sitio de phishing puede tener un certificado perfectamente válido."
+            skill: net_sec
+            difficulty: 1
+          - type: mcq
+            prompt: "En el log de tu servidor web aparecen cien peticiones de empleados distintos con la misma IP de origen. ¿Por qué?"
+            options:
+              - NAT traduce toda la red interna a una IP pública de salida
+              - El servidor está mal configurado
+              - Todos usan el mismo navegador
+              - Es un ataque de denegación de servicio
+            answer: 0
+            explanation: "Con NAT, atribuir una acción a una persona concreta exige cruzar con los logs del lado interno."
+            skill: net_sec
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Cuál de estos hallazgos es grave por sí solo, sin explotar nada?"
+            options:
+              - Un puerto 5432 de PostgreSQL accesible desde internet
+              - Un puerto 443 abierto en el servidor web
+              - Una consulta DNS saliente
+              - Un handshake TCP completo
+            answer: 0
+            explanation: "Una base de datos expuesta a internet es un hallazgo reportable tal cual: la superficie de ataque ya está ahí."
+            skill: net_sec
+            difficulty: 2
+
+  # ================================================================ NIVEL 2
+  - slug: bastion-2-novato
+    number: 2
+    title: "Novato — Identidad, permisos y secretos"
+    story: "Casi todo incidente real empieza por una credencial, no por un exploit de película. Toca entender cómo se prueba quién eres y cómo se guarda eso que pruebas."
+    quests:
+      - slug: bastion-2-learn-authn
+        type: learn
+        title: Autenticación, autorización y por qué no son lo mismo
+        required: true
+        estimated_min: 30
+        skills: { sys_hardening: 1.0 }
+        payload:
+          note_prompt: "Explica con un ejemplo de tu propio trabajo la diferencia entre autenticación y autorización, y di qué significa 'menor privilegio' aplicado a una cuenta de servicio."
+          summary_md: |
+            - **Autenticación** = probar quién eres. **Autorización** = qué te dejan hacer una vez dentro. Son dos controles distintos y fallan por separado.
+            - Factores: algo que **sabes** (contraseña), algo que **tienes** (token, móvil), algo que **eres** (huella). MFA = combinar dos de categorías distintas. Dos contraseñas no son MFA.
+            - **Menor privilegio**: cada cuenta recibe lo mínimo. Una cuenta de servicio que solo lee un bucket no debe poder borrarlo — cuando esa credencial se filtre, y se filtrará, el daño está acotado.
+            - Las cuentas de servicio son el punto ciego habitual: nadie las rota, nadie las revisa, y suelen tener permisos de más "por si acaso".
+
+      - slug: bastion-2-learn-hashing
+        type: learn
+        title: Cómo se guarda una contraseña sin guardarla
+        required: true
+        estimated_min: 30
+        skills: { sys_hardening: 0.5, net_sec: 0.5 }
+        resources:
+          - { ref: res-sec-hashcat-examples, required: false }
+        payload:
+          note_prompt: "¿Por qué una base de datos bien hecha no puede devolverte tu contraseña olvidada, solo dejarte poner una nueva? Explica qué papel juega el salt."
+          summary_md: |
+            - Un **hash** es de un solo sentido: de la contraseña sale la huella, de la huella no sale la contraseña. Por eso un sitio serio te deja *restablecer* la clave, nunca *recordártela*. Si una web te envía tu contraseña actual por correo, la está guardando en claro.
+            - Un **salt** aleatorio por usuario hace que dos personas con la misma contraseña tengan hashes distintos, y deja inservibles las tablas precalculadas.
+            - Para contraseñas se usan funciones **lentas a propósito** (bcrypt, scrypt, Argon2). SHA-256 es rápido, y eso aquí es un defecto: el atacante prueba millones por segundo.
+            - Hashes para **integridad** (SHA-256 de un archivo) y hashes para **contraseñas** son usos distintos de la misma idea. No los confundas en una entrevista.
+
+      - slug: bastion-2-glossary-crypto
+        type: glossary
+        title: Vocabulario de identidad y cripto
+        required: true
+        estimated_min: 15
+        skills: { sys_hardening: 1.0 }
+        payload:
+          terms:
+            - g-sec-hardening
+            - g-sec-least-privilege
+            - g-sec-hash
+            - g-sec-salt
+
+      - slug: bastion-2-lab-hashes
+        type: lab
+        title: "Lab — Identificar y romper hashes débiles"
+        required: true
+        estimated_min: 45
+        skills: { sys_hardening: 1.0 }
+        resources:
+          - { ref: res-sec-cyberchef }
+          - { ref: res-sec-hashcat-examples, required: false }
+        payload:
+          steps_md: |
+            Todo esto en tu máquina, sobre datos que generas tú.
+
+            1. Genera el hash MD5 y el SHA-256 de la palabra `password` con CyberChef. Apunta su longitud.
+            2. Busca el hash MD5 resultante en un buscador. Observa cuántos sitios te devuelven la palabra original al instante: eso es una tabla precalculada.
+            3. Ahora genera el hash de `password` + un salt tuyo (`password:a7f3`). Busca otra vez. Ya no aparece.
+            4. Compara el tiempo de calcular 10 000 hashes SHA-256 contra 10 000 con bcrypt. Esa diferencia es la defensa.
+            5. Usa la tabla de ejemplos de Hashcat para identificar de qué tipo es un hash a partir de su forma y longitud.
+          evidence_prompt: "Escribe qué longitud tiene un SHA-256 en hexadecimal y cómo distinguirías de un vistazo un MD5 de un bcrypt."
+
+      - slug: bastion-2-open-threatmodel
+        type: open_answer
+        title: Modela la amenaza de algo tuyo
+        required: true
+        estimated_min: 40
+        skills: { sys_hardening: 0.5, grc: 0.5 }
+        payload:
+          prompt_md: |
+            Elige un sistema que conozcas de verdad (tu PC, tu correo, o un servicio que hayas construido) y escribe su modelo de amenazas:
+
+            1. **Qué proteges**, en concreto. No "mis datos": qué dato y por qué duele perderlo.
+            2. **De quién.** Un ladrón de portátiles, un compañero curioso, un atacante con recursos. No es lo mismo.
+            3. **Por dónde entrarían.** Lista la superficie: cuentas, puertos, dependencias, personas.
+            4. **Qué pasa si falla**, usando la tríada CIA: ¿se filtra, se altera o se cae?
+            5. **Un control** que añadirías mañana y uno que **no** vale la pena, con su razón.
+          rubric_md: |
+            Una buena respuesta distingue activos de amenazas, nombra un atacante realista en lugar de "los hackers", y justifica por qué descarta un control. Decir que algo no vale la pena, y por qué, vale tanto como proponerlo.

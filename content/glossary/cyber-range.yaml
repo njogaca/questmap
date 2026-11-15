@@ -1,0 +1,136 @@
+zone: bastion-gate
+terms:
+  - slug: g-sec-cia
+    term: Tríada CIA
+    category: fundamentos
+    definition_es: "Los tres objetivos de la seguridad: confidencialidad (que solo lo vea quien debe), integridad (que nadie lo altere sin que se note) y disponibilidad (que esté cuando se necesita)."
+    definition_en: "The three goals of security: confidentiality, integrity and availability."
+    example_en: Ransomware attacks availability and confidentiality at the same time.
+    analogy: "Una caja fuerte: que nadie mire dentro, que nadie cambie lo que guardas, y que tú puedas abrirla cuando la necesites."
+    see_also: [g-sec-threat-model]
+
+  - slug: g-sec-threat-model
+    term: Modelo de amenazas
+    category: fundamentos
+    definition_es: Ejercicio de escribir qué estás protegiendo, de quién, y qué pasa si falla. Sin él, "asegurar" no tiene criterio para decidir qué vale la pena.
+    definition_en: Writing down what you protect, from whom, and what happens if it fails.
+    example_en: Our threat model assumes a stolen laptop, not a nation-state actor.
+    analogy: Antes de comprar la cerradura, decidir si te preocupa el vecino curioso o un ladrón profesional. No se compra la misma.
+    see_also: [g-sec-cia, g-sec-attack-surface]
+
+  - slug: g-sec-attack-surface
+    term: Superficie de ataque
+    category: fundamentos
+    definition_es: "La suma de todos los puntos por donde alguien podría entrar: puertos abiertos, formularios, dependencias, cuentas. Reducirla es más barato que defenderla entera."
+    definition_en: The sum of all the points where an attacker could try to get in.
+    example_en: Closing that debug port cut our attack surface for free.
+    analogy: Las puertas y ventanas de una casa. Tapiar una ventana que no usas es más fácil que vigilarla cada noche.
+    see_also: [g-sec-hardening]
+
+  - slug: g-sec-hardening
+    term: Hardening (bastionado)
+    category: sistemas
+    definition_es: Quitar de un sistema todo lo que no necesita —servicios, cuentas, permisos, puertos— para dejar menos por donde atacarlo.
+    definition_en: Removing everything a system does not need, so there is less to attack.
+    example_en: Hardening the image removed 40 packages we never used.
+    analogy: "Salir de casa con lo justo en los bolsillos: si te roban, pierdes menos."
+    see_also: [g-sec-attack-surface, g-sec-least-privilege]
+
+  - slug: g-sec-least-privilege
+    term: Menor privilegio
+    category: sistemas
+    definition_es: Cada cuenta y cada proceso recibe el mínimo permiso que necesita para su tarea, y nada más. Limita el daño cuando algo se compromete.
+    definition_en: Every account and process gets only the permissions it needs, nothing more.
+    example_en: The service account can read the bucket but not delete it — least privilege.
+    analogy: La llave del conserje abre el portal, no las cajas fuertes de los vecinos.
+    see_also: [g-sec-hardening, g-sec-lateral-movement]
+
+  - slug: g-sec-tcp-handshake
+    term: Handshake de TCP
+    category: redes
+    definition_es: Los tres mensajes (SYN, SYN-ACK, ACK) con los que dos máquinas acuerdan empezar a hablar. Si lo ves a medias en una captura, algo está escaneando o algo está roto.
+    definition_en: The three messages (SYN, SYN-ACK, ACK) that open a TCP connection.
+    example_en: Lots of SYNs without ACKs usually means a port scan.
+    analogy: "Llamar por teléfono: \"¿hola?\" — \"sí, te oigo\" — \"yo también\". Recién ahí empieza la conversación."
+    see_also: [g-sec-port-scan]
+
+  - slug: g-sec-port-scan
+    term: Escaneo de puertos
+    category: redes
+    definition_es: Probar sistemáticamente qué puertos responden en una máquina para saber qué servicios corre. Suele ser el primer paso del reconocimiento.
+    definition_en: Probing which ports answer on a host to learn what services it runs.
+    example_en: The scan found an exposed database port on 5432.
+    analogy: Caminar por el pasillo girando el picaporte de cada puerta para ver cuál cede.
+    see_also: [g-sec-tcp-handshake, g-sec-recon]
+
+  - slug: g-sec-recon
+    term: Reconocimiento
+    category: ofensiva
+    definition_es: "La fase en la que el atacante recoge información sobre el objetivo antes de tocarlo: dominios, empleados, tecnologías, puertos. Es la fase más larga y la más silenciosa."
+    definition_en: The phase where an attacker gathers information before attacking.
+    example_en: Most of the engagement was recon; the exploit took ten minutes.
+    analogy: "Vigilar el edificio una semana antes de entrar: a qué hora se va el guardia, qué puerta queda sin llave."
+    see_also: [g-sec-port-scan]
+
+  - slug: g-sec-hash
+    term: Hash
+    category: criptografia
+    definition_es: Función que convierte cualquier dato en una huella de tamaño fijo, imposible de revertir. Sirve para comprobar integridad y para guardar contraseñas sin guardarlas.
+    definition_en: A one-way function turning any data into a fixed-size fingerprint.
+    example_en: Compare the file hash before and after transfer to detect corruption.
+    analogy: "La huella digital de una persona: la identifica sin contener a la persona, y no puedes reconstruirla a partir de la huella."
+    see_also: [g-sec-salt]
+
+  - slug: g-sec-salt
+    term: Salt
+    category: criptografia
+    definition_es: Valor aleatorio que se añade a cada contraseña antes de hashearla, para que dos contraseñas iguales den hashes distintos y las tablas precalculadas no sirvan.
+    definition_en: Random value added to each password before hashing it.
+    example_en: Without a salt, every user with password "123456" shares the same hash.
+    analogy: "Echarle a cada plato una especia distinta: aunque dos personas pidan lo mismo, los platos no se parecen."
+    see_also: [g-sec-hash]
+
+  - slug: g-sec-siem
+    term: SIEM
+    category: blue-team
+    definition_es: Sistema que recoge logs de toda la organización, los normaliza y lanza alertas cuando se cumplen reglas. Es la mesa de trabajo del SOC.
+    definition_en: A system that collects logs org-wide, normalizes them and raises alerts.
+    example_en: The SIEM fired an alert for impossible travel on that account.
+    analogy: "La sala de cámaras de un centro comercial: todas las grabaciones llegan a un mismo escritorio, y una alarma suena si algo cuadra con un patrón."
+    see_also: [g-sec-false-positive, g-sec-ioc]
+
+  - slug: g-sec-false-positive
+    term: Falso positivo
+    category: blue-team
+    definition_es: "Alerta que señala un ataque donde no lo hay. El enemigo real de un SOC no es el atacante: es el ruido que esconde la alerta que sí importaba."
+    definition_en: An alert that flags an attack where there is none.
+    example_en: The backup job triggers that rule every night — classic false positive.
+    analogy: La alarma del coche que suena con el viento. Suena tanto que el día que entran a robarlo, nadie se asoma.
+    see_also: [g-sec-siem]
+
+  - slug: g-sec-ioc
+    term: IoC (indicador de compromiso)
+    category: blue-team
+    definition_es: "Un dato concreto que delata una intrusión: una IP, un hash de archivo, un dominio, una clave de registro. Es la pista que se busca en los logs."
+    definition_en: "A concrete artifact that reveals an intrusion: an IP, a file hash, a domain."
+    example_en: We swept all endpoints for that file hash as an IoC.
+    analogy: "La huella de barro en el pasillo: no es el ladrón, pero prueba que alguien pasó."
+    see_also: [g-sec-siem, g-sec-attack-matrix]
+
+  - slug: g-sec-attack-matrix
+    term: MITRE ATT&CK
+    category: deteccion
+    definition_es: Catálogo público de las tácticas (el para qué) y técnicas (el cómo) que usan los atacantes reales. Da un vocabulario común para describir y detectar comportamientos.
+    definition_en: A public catalog of real-world adversary tactics and techniques.
+    example_en: That behavior maps to T1059, command and scripting interpreter.
+    analogy: El manual de jugadas del equipo rival. No te dice cuándo juegan, pero sí qué saben hacer.
+    see_also: [g-sec-ioc, g-sec-lateral-movement]
+
+  - slug: g-sec-lateral-movement
+    term: Movimiento lateral
+    category: deteccion
+    definition_es: "Lo que hace un atacante después de entrar: saltar de la máquina comprometida a otras para acercarse a lo que de verdad quiere."
+    definition_en: Moving from the first compromised machine to others inside the network.
+    example_en: They landed on a laptop and moved laterally to the file server.
+    analogy: Entrar por la ventana del baño y luego recorrer la casa por dentro hasta el dormitorio.
+    see_also: [g-sec-least-privilege, g-sec-attack-matrix]

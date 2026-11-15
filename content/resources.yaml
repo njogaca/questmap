@@ -1618,3 +1618,94 @@ resources:
     required: true
     why: Pegas tu script y te marca las comillas que faltan. Es el equivalente a un compilador para bash.
     verified: true
+
+  # ------------------------------------------------- Ciberseguridad (Cyber Range)
+  # Añadidos con la ruta de ciberseguridad. verified: false porque no se abrieron
+  # una por una al crearlas: ábrelas y súbelas a true cuando las uses.
+  - slug: res-sec-owasp-top10
+    title: "OWASP Top 10 — los diez riesgos de aplicaciones web"
+    type: docs
+    url: https://owasp.org/www-project-top-ten/
+    language: en
+    duration_min: 180
+    cost: free
+    required: true
+    why: El vocabulario mínimo de seguridad en aplicaciones. Sale en toda entrevista de seguridad.
+    verified: false
+
+  - slug: res-sec-attack-mitre
+    title: "MITRE ATT&CK — matriz de tácticas y técnicas"
+    type: docs
+    url: https://attack.mitre.org/
+    language: en
+    duration_min: 240
+    cost: free
+    required: true
+    why: El mapa común con el que los equipos de detección nombran lo que hace un atacante.
+    verified: false
+
+  - slug: res-sec-nist-ir
+    title: "NIST SP 800-61 — guía de respuesta a incidentes"
+    type: docs
+    url: https://csrc.nist.gov/pubs/sp/800/61/r2/final
+    language: en
+    duration_min: 300
+    cost: free
+    required: false
+    why: El ciclo de respuesta a incidentes del que derivan casi todos los runbooks corporativos.
+    verified: false
+
+  - slug: res-sec-wireshark-docs
+    title: "Wireshark — guía de usuario"
+    type: docs
+    url: https://www.wireshark.org/docs/
+    language: en
+    duration_min: 120
+    cost: free
+    required: true
+    why: Para ver un paquete de verdad en vez de imaginártelo.
+    verified: false
+
+  - slug: res-sec-cyberchef
+    title: "CyberChef — navaja suiza de codificación y cifrado"
+    type: lab
+    url: https://gchq.github.io/CyberChef/
+    language: en
+    duration_min: 30
+    cost: free
+    required: false
+    why: Decodificar base64, hex y hashes sin escribir un script. Aparece en todo triage.
+    verified: false
+
+  - slug: res-sec-tryhackme
+    title: "TryHackMe — laboratorios guiados de seguridad"
+    type: lab
+    url: https://tryhackme.com/
+    language: en
+    duration_min: 600
+    cost: free
+    required: false
+    why: Laboratorios en el navegador con nivel de entrada real. Tiene salas gratuitas suficientes para empezar.
+    verified: false
+
+  - slug: res-sec-sigma
+    title: "Sigma — reglas de detección portables entre SIEM"
+    type: docs
+    url: https://sigmahq.io/
+    language: en
+    duration_min: 90
+    cost: free
+    required: false
+    why: Escribir una detección una vez y traducirla a cualquier SIEM.
+    verified: false
+
+  - slug: res-sec-hashcat-examples
+    title: "Modos y ejemplos de hash (Hashcat wiki)"
+    type: docs
+    url: https://hashcat.net/wiki/doku.php?id=example_hashes
+    language: en
+    duration_min: 20
+    cost: free
+    required: false
+    why: Tabla de referencia para identificar de qué tipo es un hash que te encontraste.
+    verified: false

@@ -1,0 +1,206 @@
+slug: blue-harbor
+title: Blue Harbor
+order: 22
+emoji: "🔵"
+track: cybersecurity
+map: { x: 400, y: 380 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: bastion-gate, level: 2 }
+skills: [blue_ops, ir_forensics]
+story: >
+  El puerto donde atraca todo lo que ocurre en la organización: cada inicio de sesión,
+  cada proceso, cada conexión saliente llega aquí convertido en una línea de log. Este es
+  el primer trabajo real de la ruta, y el que más se contrata: turno de SOC, una cola de
+  alertas y la pregunta de siempre — ¿esto es un ataque o es el backup de las tres?
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: blue-1-jr
+    number: 1
+    title: "Jr — Leer un log y no entrar en pánico"
+    story: "Tu primer turno. La cola tiene cuarenta alertas y treinta y ocho no son nada. El oficio no es encontrar al atacante: es descartar rápido y bien para que te quede tiempo para el que sí."
+    quests:
+      - slug: blue-1-learn-logs
+        type: learn
+        title: Qué logea cada cosa y dónde mirar primero
+        required: true
+        estimated_min: 35
+        skills: { blue_ops: 1.0 }
+        payload:
+          note_prompt: "Si te avisan de que una cuenta pudo ser comprometida, ¿qué tres fuentes de log consultas primero y qué buscas en cada una?"
+          summary_md: |
+            Las fuentes que importan, y qué pregunta responde cada una:
+
+            - **Autenticación** (Windows Security, `/var/log/auth.log`, IdP): ¿quién entró, desde dónde y a qué hora? Aquí se ve el *credential stuffing* y el viaje imposible.
+            - **Endpoint / EDR**: ¿qué proceso ejecutó qué? El árbol padre-hijo es lo más valioso: Word lanzando PowerShell es anómalo en cualquier organización.
+            - **Red / proxy / DNS**: ¿con quién habló la máquina después? La conexión saliente a un dominio recién registrado es la pista clásica de C2.
+            - **Aplicación y nube**: ¿qué se consultó o se descargó? Es donde se mide el impacto real.
+
+            Tres reglas de oficio:
+            - La **hora** es el eje de todo. Si tus fuentes no están en la misma zona horaria (o en UTC), vas a construir una historia falsa. Normaliza primero.
+            - Ausencia de log **es** una señal: un endpoint que dejó de reportar a las 02:14 te está diciendo algo.
+            - Un log sin **contexto de qué es normal** no sirve. Antes de alarmarte, pregunta si eso pasa todas las noches.
+
+      - slug: blue-1-learn-siem
+        type: learn
+        title: Qué hace un SIEM y por qué el ruido es el enemigo
+        required: true
+        estimated_min: 30
+        skills: { blue_ops: 1.0 }
+        resources:
+          - { ref: res-sec-sigma, required: false }
+        payload:
+          note_prompt: "Explica por qué una regla de detección demasiado sensible puede dejar a una organización menos segura que no tener esa regla."
+          summary_md: |
+            - Un **SIEM** recoge logs de todas partes, los **normaliza** a un formato común y dispara alertas cuando se cumple una regla. Lo difícil nunca es recoger: es normalizar y decidir qué merece despertar a alguien.
+            - Una regla se juzga por dos números: cuánto **detecta** y cuánto **ruido** mete. Una regla que dispara cien veces al día y acierta una vez es peor que no tenerla, porque entrena al analista a cerrar sin mirar. A eso se le llama fatiga de alertas, y es cómo se pierden los incidentes reales.
+            - **Sigma** permite escribir una detección una sola vez en YAML y traducirla al SIEM que uses. Es la forma de que tu trabajo no muera con la herramienta.
+            - Afinar una regla casi nunca es relajarla: es **añadirle contexto** (excluir la cuenta de backup, exigir que además haya conexión saliente).
+
+      - slug: blue-1-glossary-soc
+        type: glossary
+        title: Vocabulario de turno
+        required: true
+        estimated_min: 15
+        skills: { blue_ops: 1.0 }
+        payload:
+          terms:
+            - g-sec-siem
+            - g-sec-false-positive
+            - g-sec-ioc
+            - g-sec-lateral-movement
+
+      - slug: blue-1-lab-triage
+        type: lab
+        title: "Lab — Triar tus propios logs de autenticación"
+        required: true
+        estimated_min: 60
+        skills: { blue_ops: 1.0 }
+        resources:
+          - { ref: res-sec-tryhackme, required: false }
+        payload:
+          steps_md: |
+            Con tu propia máquina, que es el laboratorio más honesto que tienes.
+
+            1. En Linux/WSL, mira los intentos de autenticación: `grep -i "authentication failure\|Failed password" /var/log/auth.log | tail -50`. En Windows, abre el Visor de eventos y filtra Seguridad por **4625** (fallo) y **4624** (éxito).
+            2. Cuenta fallos por usuario y por hora. ¿Hay un patrón? `awk '{print $1, $2, $3}' | sort | uniq -c | sort -rn`
+            3. Define tu línea base: ¿cuántos fallos al día son normales *para ti*? Sin esa cifra no puedes llamar anómalo a nada.
+            4. Ahora genera la señal: falla tres veces a propósito un `sudo` o un inicio de sesión, y encuéntralo en el log. Mira qué campos lo distinguen de los demás.
+            5. Escribe en una frase la **regla de detección** que escribirías, y en otra frase el **falso positivo** que esa regla provocaría.
+          evidence_prompt: "Pega tu regla en una frase y el falso positivo que te provocaría. Las dos cosas, no solo la regla."
+
+  # ================================================================ NIVEL 2
+  - slug: blue-2-analista
+    number: 2
+    title: "Analista SOC I — De la alerta al veredicto"
+    story: "Ya no basta con mirar: hay que decidir y escribirlo. Una alerta que cierras sin justificar es una alerta que alguien va a volver a abrir dentro de un mes."
+    quests:
+      - slug: blue-2-learn-verdict
+        type: learn
+        title: Verdadero positivo, falso positivo y benigno verdadero
+        required: true
+        estimated_min: 30
+        skills: { blue_ops: 1.0 }
+        payload:
+          note_prompt: "Diferencia 'falso positivo' de 'verdadero positivo benigno' con un ejemplo de cada uno, y explica por qué se cierran de forma distinta."
+          summary_md: |
+            Tres veredictos, no dos:
+
+            - **Falso positivo**: la regla se equivocó, eso no pasó. Se arregla *afinando la regla*.
+            - **Verdadero positivo benigno**: sí pasó, pero lo hizo alguien autorizado por una razón válida. El administrador sí ejecutó PowerShell remoto. Se arregla *documentando la excepción*, no borrando la regla.
+            - **Verdadero positivo malicioso**: escalas y empieza la respuesta a incidentes.
+
+            Confundir los dos primeros es el error más caro del oficio: si cierras como falso positivo algo que sí ocurrió, estás silenciando la regla para la próxima vez que ocurra de verdad.
+
+            Lo que toda nota de cierre debe tener: **qué** disparó la alerta, **qué miraste** para decidir, **qué concluiste** y **qué harías para que no vuelva a molestar**. Si tu nota no deja que otro reconstruya tu razonamiento, no sirve.
+
+      - slug: blue-2-lab-playbook
+        type: lab
+        title: "Lab — Escribir el playbook de una alerta"
+        required: true
+        estimated_min: 60
+        skills: { blue_ops: 0.6, ir_forensics: 0.4 }
+        resources:
+          - { ref: res-sec-nist-ir, required: false }
+        payload:
+          steps_md: |
+            Elige una alerta concreta: *"inicio de sesión exitoso desde un país nuevo para esta cuenta"*.
+
+            1. **Enriquecimiento**: lista los cinco datos que pedirías antes de decidir nada (¿la cuenta viaja?, ¿hay VPN corporativa?, ¿qué hizo después?, ¿hubo MFA?, ¿el dispositivo es conocido?).
+            2. **Árbol de decisión**: escribe las ramas. Si hubo MFA válido y el dispositivo es conocido → benigno. Si no hubo MFA y hay descarga masiva después → escalar.
+            3. **Acciones de contención** para la rama mala, ordenadas por reversibilidad: revocar sesiones (reversible) antes que deshabilitar la cuenta (disruptivo).
+            4. **Criterio de escalado**: en qué momento exacto esto deja de ser tuyo y despiertas a alguien.
+            5. **Qué se registra** para que el siguiente turno entienda qué pasó.
+          evidence_prompt: "Pega tu árbol de decisión. Debe tener al menos una rama que termine en 'cerrar como benigno' y una que termine en 'escalar'."
+
+      - slug: blue-2-quiz
+        type: quiz
+        title: Examen de turno
+        required: true
+        estimated_min: 15
+        skills: { blue_ops: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "Una regla dispara cada noche a las 03:00 por el proceso de backup. ¿Cuál es el mejor cierre?"
+            options:
+              - Verdadero positivo benigno, y documentar la excepción de la cuenta de backup
+              - Falso positivo, y desactivar la regla
+              - Falso positivo, y bajar la sensibilidad al mínimo
+              - Verdadero positivo malicioso, y escalar
+            answer: 0
+            explanation: "El evento sí ocurrió, solo que lo causó algo autorizado. Cerrarlo como falso positivo o apagar la regla silencia la detección para cuando ocurra de verdad."
+            skill: blue_ops
+            difficulty: 2
+          - type: tf
+            prompt: "Si un endpoint deja de enviar logs, mientras no haya alertas no hay nada que investigar."
+            answer: false
+            explanation: "La ausencia de telemetría es en sí misma una señal: puede ser una máquina apagada, o un atacante que desactivó el agente."
+            skill: blue_ops
+            difficulty: 2
+          - type: mcq
+            prompt: "Investigas un posible compromiso de cuenta. ¿Qué haces ANTES de comparar eventos de varias fuentes?"
+            options:
+              - Normalizar todas las marcas de tiempo a una misma zona horaria
+              - Deshabilitar la cuenta
+              - Escribir la regla de detección
+              - Avisar al usuario
+            answer: 0
+            explanation: "Sin una línea de tiempo coherente construyes una secuencia de hechos falsa, y la conclusión será falsa aunque los datos sean buenos."
+            skill: blue_ops
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Cuál de estas acciones de contención es la más reversible y por tanto la primera a considerar?"
+            options:
+              - Revocar las sesiones activas de la cuenta
+              - Deshabilitar la cuenta del usuario
+              - Aislar el equipo de la red
+              - Reimagen del equipo
+            answer: 0
+            explanation: "Revocar sesiones corta el acceso del atacante con el menor daño operativo si resulta ser un benigno."
+            skill: blue_ops
+            difficulty: 3
+
+      - slug: blue-2-boss
+        type: boss
+        title: "Boss — Turno de guardia completo"
+        required: true
+        estimated_min: 90
+        skills: { blue_ops: 0.7, ir_forensics: 0.3 }
+        payload:
+          prompt_md: |
+            Te toca el turno. Tres alertas en cola, en este orden de llegada:
+
+            - **A las 02:14** — un endpoint dejó de reportar al EDR. Sin más contexto.
+            - **A las 02:31** — inicio de sesión exitoso de `j.garcia` desde una IP de otro país, sin MFA registrado.
+            - **A las 02:40** — un proceso `powershell.exe` con padre `winword.exe` en el portátil de contabilidad.
+
+            Responde:
+
+            1. **En qué orden las trabajas y por qué.** El orden de llegada no es el orden de gravedad.
+            2. **Para cada una**, los datos que pides para decidir.
+            3. **Si las tres están relacionadas**, cuenta la historia completa que las une. Si crees que no lo están, defiéndelo.
+            4. **Tu primera acción de contención** y por qué esa y no otra.
+            5. **Qué escribes** en el traspaso al turno siguiente.
+          rubric_md: |
+            Lo que se evalúa: que priorices por gravedad y no por orden de llegada; que la tercera alerta (Word lanzando PowerShell) te suene a ejecución inicial; que notes que las tres podrían ser una sola intrusión avanzando; y que tu contención sea proporcional y reversible. Decir "no tengo datos suficientes para afirmar que están relacionadas, pero esto es lo que pediría" es una respuesta fuerte, no débil.

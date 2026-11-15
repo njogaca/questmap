@@ -29,7 +29,7 @@ export const viewport: Viewport = {
  * decide si toca la pantalla de arranque (una vez al día y solo con animaciones activas).
  * Lee las mismas claves de localStorage que src/components/effects/prefs.ts.
  */
-const BOOT_SCRIPT = `(function(){var d=document.documentElement.dataset;try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");if(["ctos","neon","dedsec","fsociety","frostpunk"].indexOf(p.theme)>=0)d.theme=p.theme;d.ui=p.ui==="terminal"?"terminal":"hud";var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();d.boot=(m&&!seen)?"pending":"done";}catch(e){d.boot="done";}})();`;
+const BOOT_SCRIPT = `(function(){var d=document.documentElement.dataset;try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");if(["ctos","neon","dedsec","fsociety","frostpunk","cyberpunk","animus"].indexOf(p.theme)>=0)d.theme=p.theme;d.ui=p.ui==="terminal"?"terminal":"hud";var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();d.boot=(m&&!seen)?"pending":"done";}catch(e){d.boot="done";}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

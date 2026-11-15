@@ -46,7 +46,7 @@ export default async function ArenaPage() {
   const byMode = (mode: string) => templates.filter((t) => t.mode === mode);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6">
+    <main className="mx-auto max-w-7xl px-4 py-6">
       <p className="font-mono text-xs text-available">&gt; questmap://arena</p>
       <h1 className="mt-1 text-3xl font-bold">🎯 Interview Arena</h1>
       <p className="mt-1 max-w-2xl text-sm text-dim">

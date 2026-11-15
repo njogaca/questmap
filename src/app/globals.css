@@ -80,6 +80,57 @@ html[data-theme="frostpunk"] {
   --na-warn: #ff4d3d;
 }
 
+/* Animus (Assassin's Creed): la sala blanca. ÚNICA PALETA CLARA del sistema — funciona porque
+ * todos los colores salen de estos tokens y no hay un solo color fijo en los componentes.
+ * Azul Animus para lo interactivo, oro para la memoria en curso, rojo de desincronización. */
+html[data-theme="animus"] {
+  --na-bg: #eef3f8;
+  --na-surface: #ffffff;
+  --na-surface-2: #e3ecf4;
+  --na-border: #bfd2e2;
+  --na-text: #0b1a26;
+  --na-text-dim: #566f82;
+  --na-available: #0a7fbf; /* azul Animus: lo que puedes revivir */
+  --na-progress: #b8860b; /* oro: memoria en reproducción */
+  --na-locked: #9fb3c4;
+  --na-done: #0e7a5f; /* sincronizado */
+  --na-warn: #c1272d; /* DESINCRONIZACIÓN */
+}
+
+/* La retícula de la sala del Animus. */
+html[data-theme="animus"] body {
+  background-image:
+    linear-gradient(to right, rgba(10, 127, 191, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 127, 191, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+}
+
+/* Cyberpunk 2077 (Night City): amarillo señal y cian sobre negro con tinte sangre.
+ * Se distingue de DedSec por el fondo cálido (ahí es negro neutro) y el carmesí de alerta. */
+html[data-theme="cyberpunk"] {
+  --na-bg: #0b0407;
+  --na-surface: #150a0e;
+  --na-surface-2: #1e1016;
+  --na-border: #3d1f28;
+  --na-text: #f7ecef;
+  --na-text-dim: #a07f88;
+  --na-available: #fcee0a; /* el amarillo de la marca: lo que puedes tocar */
+  --na-progress: #00e5ff; /* cian "equipado" */
+  --na-locked: #5c3b45;
+  --na-done: #00ffa3;
+  --na-warn: #ff2a3c; /* carmesí de los rótulos de ripperdoc */
+}
+
+/* El halo rojo de Night City detrás del contenido. Solo en la interfaz HUD:
+ * la Terminal fuerza `background-image: none` para quedarse plana como una shell. */
+html[data-theme="cyberpunk"] body {
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, #3d0a16 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, #2a0610 0%, transparent 55%);
+  background-attachment: fixed;
+}
+
 @theme inline {
   --color-bg: var(--na-bg);
   --color-surface: var(--na-surface);
@@ -477,11 +528,11 @@ html[data-ui="terminal"] main h3::before {
   font-weight: 400;
 }
 
-/* Contenido pegado a la izquierda, con el resto de la pantalla en negro */
+/* Centrado, igual que la interfaz HUD. Antes iba pegado a la izquierda, pero en un monitor
+ * ancho eso deja media pantalla vacía y descuadra la cabecera respecto al contenido. */
 html[data-ui="terminal"] main,
 html[data-ui="terminal"] header > div:first-child {
-  margin-left: clamp(1rem, 6vw, 7rem);
-  margin-right: auto;
+  margin-inline: auto;
 }
 
 /* Barra superior como la de tmux: ventana activa invertida */

@@ -13,7 +13,7 @@ export type HudData = {
 export function HudNav({ data }: { data: HudData }) {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2.5">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5">
         <Link href="/" className="hud-logo font-title text-xl font-bold tracking-widest" aria-label="QuestMap, inicio">
           <span className="ui-hud">
             <span className="text-available">[</span>QUEST<span className="text-available">MAP]</span>

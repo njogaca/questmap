@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 /**
  * Preferencias de efectos por navegador (localStorage). Sonido: apagado por defecto; CRT: encendido.
  * Interfaz y paleta son independientes: cualquier paleta funciona con cualquier interfaz.
- * Si agregas una paleta, agrégala también al script inline de src/app/layout.tsx y a globals.css.
+ * Si agregas una paleta, agrégala también a globals.css, al script inline de src/app/layout.tsx
+ * y al z.enum de `palette` en src/content/schema.ts. Son cuatro sitios: ver AGENTS.md.
  */
-export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk";
+export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk" | "cyberpunk" | "animus";
 export type Ui = "hud" | "terminal";
 
 export const THEMES: { id: Theme; name: string; desc: string; swatch: string[] }[] = [
@@ -16,6 +17,8 @@ export const THEMES: { id: Theme; name: string; desc: string; swatch: string[] }
   { id: "dedsec", name: "DedSec", desc: "Watch Dogs 2: amarillo ácido, rosa y cian", swatch: ["#f2ff00", "#ff2d95", "#00f0ff", "#ff6a00"] },
   { id: "fsociety", name: "fsociety", desc: "Mr. Robot: terminal gris y blanca con un solo rojo", swatch: ["#f2f2f2", "#e8282e", "#73c278", "#d9a21b"] },
   { id: "frostpunk", name: "Frostpunk", desc: "El Generador: brasas naranjas contra acero helado", swatch: ["#ff8a3d", "#8fd3ff", "#ffd166", "#ff4d3d"] },
+  { id: "cyberpunk", name: "Cyberpunk", desc: "Night City: amarillo señal y cian sobre negro con tinte sangre", swatch: ["#fcee0a", "#00e5ff", "#00ffa3", "#ff2a3c"] },
+  { id: "animus", name: "Animus", desc: "Assassin's Creed: la sala blanca, azul Animus y oro. La única clara", swatch: ["#0a7fbf", "#b8860b", "#0e7a5f", "#c1272d"] },
 ];
 
 export const UIS: { id: Ui; name: string; desc: string }[] = [

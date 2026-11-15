@@ -4,45 +4,63 @@ import { useEffect, useState } from "react";
 
 /**
  * Preferencias de efectos por navegador (localStorage). Sonido: apagado por defecto; CRT: encendido.
- * Interfaz y paleta son independientes: cualquier paleta funciona con cualquier interfaz.
- * Si agregas una paleta, agrégala también a globals.css, al script inline de src/app/layout.tsx
- * y al z.enum de `palette` en src/content/schema.ts. Son cuatro sitios: ver AGENTS.md.
+ *
+ * LA PALETA YA NO SE ELIGE APARTE. Cada interfaz trae la suya y es parte de su identidad: elegir
+ * "Consola Retro" es elegir el ámbar, igual que elegir "Terminal" es elegir el gris con un rojo.
+ * El `data-theme` del html sigue existiendo —de ahí salen todos los colores— pero se deriva de `ui`.
+ *
+ * Para añadir una interfaz hay que tocar también globals.css, el BOOT_SCRIPT de
+ * src/app/layout.tsx y el z.enum de `ui` en src/content/schema.ts. Ver AGENTS.md.
  */
 export type Theme = "ctos" | "neon" | "dedsec" | "fsociety" | "frostpunk" | "cyberpunk" | "animus";
-export type Ui = "hud" | "terminal" | "retro";
+export type Ui = "hud" | "terminal" | "retro" | "animus";
 
-export const THEMES: { id: Theme; name: string; desc: string; swatch: string[] }[] = [
-  { id: "ctos", name: "ctOS", desc: "Watch Dogs 1: azul acero y blanco, ámbar para lo activo", swatch: ["#3aa8f0", "#ffb020", "#d9f1ff", "#ff5a3c"] },
-  { id: "neon", name: "Neon Atlas", desc: "El original: cian y magenta sobre negro", swatch: ["#00e5ff", "#ff2e88", "#39ff88", "#ffd60a"] },
-  { id: "dedsec", name: "DedSec", desc: "Watch Dogs 2: amarillo ácido, rosa y cian", swatch: ["#f2ff00", "#ff2d95", "#00f0ff", "#ff6a00"] },
-  { id: "fsociety", name: "fsociety", desc: "Mr. Robot: terminal gris y blanca con un solo rojo", swatch: ["#f2f2f2", "#e8282e", "#73c278", "#d9a21b"] },
-  { id: "frostpunk", name: "Frostpunk", desc: "El Generador: brasas naranjas contra acero helado", swatch: ["#ff8a3d", "#8fd3ff", "#ffd166", "#ff4d3d"] },
-  { id: "cyberpunk", name: "Cyberpunk", desc: "Night City: amarillo señal y cian sobre negro con tinte sangre", swatch: ["#fcee0a", "#00e5ff", "#00ffa3", "#ff2a3c"] },
-  { id: "animus", name: "Animus", desc: "Assassin's Creed: la sala blanca, azul Animus y oro. La única clara", swatch: ["#0a7fbf", "#b8860b", "#0e7a5f", "#c1272d"] },
-];
+/**
+ * La paleta de cada interfaz. `neon`, `dedsec` y `cyberpunk` siguen definidas en globals.css pero
+ * ninguna interfaz las usa todavía: quedan listas para la próxima que quiera adoptarlas.
+ */
+export const UI_THEME: Record<Ui, Theme> = {
+  hud: "ctos",
+  terminal: "fsociety",
+  retro: "frostpunk",
+  animus: "animus",
+};
 
-export const UIS: { id: Ui; name: string; desc: string }[] = [
-  { id: "hud", name: "HUD · Watch Dogs", desc: "Paneles angulares, mapa holográfico de hexágonos y animaciones." },
+export const UIS: { id: Ui; name: string; desc: string; swatch: string[] }[] = [
+  {
+    id: "hud",
+    name: "HUD · Watch Dogs",
+    desc: "Paneles angulares, mapa holográfico de hexágonos y animaciones. Azul acero y ámbar.",
+    swatch: ["#3aa8f0", "#ffb020", "#d9f1ff", "#ff5a3c"],
+  },
   {
     id: "terminal",
     name: "Terminal · Mr. Robot",
-    desc: "Todo es una shell: fuente mono, mapa como escaneo nmap, barras ASCII y barra de comandos fija. Aplica la paleta fsociety.",
+    desc: "Todo es una shell: fuente mono, el mapa como escaneo nmap, barras ASCII y barra de comandos fija. Gris y blanco con un solo rojo.",
+    swatch: ["#f2f2f2", "#e8282e", "#73c278", "#d9a21b"],
   },
   {
     id: "retro",
     name: "Consola Retro · BIOS",
-    desc: "Una máquina de los 80: mayúsculas, cajas de 2px y el mapa como un POST que detecta sectores. Aplica la paleta Frostpunk.",
+    desc: "Una máquina de los 80: mayúsculas, cajas de 2 px y el mapa como un POST que detecta sectores. Ámbar sobre acero helado.",
+    swatch: ["#ff8a3d", "#8fd3ff", "#ffd166", "#ff4d3d"],
+  },
+  {
+    id: "animus",
+    name: "Códice Animus · Assassin's Creed",
+    desc: "La sala blanca: la única interfaz clara. El mapa como memorias por sincronizar, y lo bloqueado marcado como memoria corrupta.",
+    swatch: ["#0a7fbf", "#b8860b", "#0e7a5f", "#c1272d"],
   },
 ];
 
-export type EffectsPrefs = { sound: boolean; motion: boolean; crt: boolean; theme: Theme; ui: Ui };
+const UI_IDS = new Set<string>(UIS.map((u) => u.id));
+const isUi = (v: unknown): v is Ui => typeof v === "string" && UI_IDS.has(v);
 
-const THEME_IDS = new Set<string>(THEMES.map((t) => t.id));
-const isTheme = (v: unknown): v is Theme => typeof v === "string" && THEME_IDS.has(v);
+export type EffectsPrefs = { sound: boolean; motion: boolean; crt: boolean; theme: Theme; ui: Ui };
 
 const KEY = "qm.effects";
 const EVENT = "qm-effects-change";
-const DEFAULTS: EffectsPrefs = { sound: false, motion: true, crt: true, theme: "ctos", ui: "hud" };
+const DEFAULTS: EffectsPrefs = { sound: false, motion: true, crt: true, theme: UI_THEME.hud, ui: "hud" };
 
 function systemReducedMotion() {
   try {
@@ -58,12 +76,14 @@ export function readPrefs(): EffectsPrefs {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return fallback;
     const p = JSON.parse(raw) as Partial<EffectsPrefs>;
+    const ui = isUi(p.ui) ? p.ui : "hud";
     return {
       sound: p.sound === true,
       motion: p.motion ?? fallback.motion,
       crt: p.crt ?? true,
-      theme: isTheme(p.theme) ? p.theme : "ctos",
-      ui: p.ui === "terminal" || p.ui === "retro" ? p.ui : "hud",
+      // La paleta se deriva de la interfaz: si había una guardada de antes, se ignora.
+      theme: UI_THEME[ui],
+      ui,
     };
   } catch {
     return fallback;
@@ -72,7 +92,7 @@ export function readPrefs(): EffectsPrefs {
 
 export function writePrefs(p: EffectsPrefs) {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(p));
+    window.localStorage.setItem(KEY, JSON.stringify({ ...p, theme: UI_THEME[p.ui] }));
   } catch {
     // modo privado o almacenamiento bloqueado: se usa el valor por defecto
   }

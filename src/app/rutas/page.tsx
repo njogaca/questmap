@@ -67,7 +67,7 @@ export default async function RutasPage() {
               </dl>
 
               <div className="mt-4">
-                <TrackSwitch trackId={t.id} palette={t.palette} ui={t.ui} active={active} />
+                <TrackSwitch trackId={t.id} ui={t.ui} active={active} />
               </div>
             </section>
           );

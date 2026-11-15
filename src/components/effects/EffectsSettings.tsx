@@ -1,6 +1,6 @@
 "use client";
 
-import { readPrefs, THEMES, UIS, useEffectsPrefs, writePrefs, type Ui } from "./prefs";
+import { readPrefs, UIS, useEffectsPrefs, writePrefs, type Ui } from "./prefs";
 import { playSound } from "./sound";
 
 const card = "hud-item flex cursor-pointer items-start gap-3 p-3";
@@ -9,16 +9,8 @@ const radio = "mt-1 h-4 w-4 shrink-0 accent-[var(--na-available)]";
 export function EffectsSettings() {
   const prefs = useEffectsPrefs();
 
-  // Cada interfaz trae su paleta "natural"; después la puedes cambiar libremente.
-  const setUi = (ui: Ui) => {
-    const cur = readPrefs();
-    // Cada interfaz arrastra la paleta que la define. Es un salto inicial, no un candado:
-    // después puedes elegir cualquier otra paleta y se queda.
-    const DEFAULT_THEME = { hud: "ctos", terminal: "fsociety", retro: "frostpunk" } as const;
-    const current = Object.values(DEFAULT_THEME).includes(cur.theme as never);
-    const theme = ui === cur.ui || !current ? cur.theme : DEFAULT_THEME[ui];
-    writePrefs({ ...cur, ui, theme });
-  };
+  // La paleta ya no se elige: writePrefs la deriva de la interfaz.
+  const setUi = (ui: Ui) => writePrefs({ ...readPrefs(), ui });
 
   return (
     <div className="space-y-4 text-sm">
@@ -31,7 +23,14 @@ export function EffectsSettings() {
               <label key={u.id} className={`${card} ${active ? "border-available" : ""}`}>
                 <input type="radio" name="ui" value={u.id} checked={active} onChange={() => setUi(u.id)} className={radio} />
                 <span className="min-w-0">
-                  <span className="block font-title text-base tracking-wider">{u.name}</span>
+                  <span className="flex items-center gap-2 font-title text-base tracking-wider">
+                    {u.name}
+                    <span className="inline-flex gap-0.5" aria-hidden>
+                      {u.swatch.map((c) => (
+                        <span key={c} className="inline-block h-2.5 w-2.5 rotate-45" style={{ background: c }} />
+                      ))}
+                    </span>
+                  </span>
                   <span className="mt-0.5 block text-xs text-dim">{u.desc}</span>
                 </span>
               </label>
@@ -40,37 +39,6 @@ export function EffectsSettings() {
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend className="hud-label mb-2 w-full">paleta</legend>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {THEMES.map((t) => {
-            const active = prefs.theme === t.id;
-            return (
-              <label key={t.id} className={`${card} ${active ? "border-available" : ""}`}>
-                <input
-                  type="radio"
-                  name="theme"
-                  value={t.id}
-                  checked={active}
-                  onChange={() => writePrefs({ ...readPrefs(), theme: t.id })}
-                  className={radio}
-                />
-                <span className="min-w-0">
-                  <span className="flex items-center gap-2 font-title text-base tracking-wider">
-                    {t.name}
-                    <span className="inline-flex gap-0.5" aria-hidden>
-                      {t.swatch.map((c) => (
-                        <span key={c} className="inline-block h-2.5 w-2.5 rotate-45" style={{ background: c }} />
-                      ))}
-                    </span>
-                  </span>
-                  <span className="mt-0.5 block text-xs text-dim">{t.desc}</span>
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      </fieldset>
 
       <div className="space-y-3">
         <label className="flex items-center gap-3">

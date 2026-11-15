@@ -487,19 +487,28 @@ html[data-motion="on"] .qm-scanline {
 /* ===== Interfaz "Terminal" (Mr. Robot): html[data-ui="terminal"] =====
  * Fuera de capas a propósito: el CSS sin capa gana a las utilidades de Tailwind y a la capa components,
  * así que estas reglas pueden reescribir el layout sin tocar los componentes.
- * .ui-hud marca las piezas GRÁFICAS (barra de progreso, logo con glitch) y .ui-term las de
- * TEXTO (barra ASCII, nav tipo tmux). Ojo: .ui-term no significa "interfaz Terminal", significa
- * "interfaz textual", y vale también para Consola Retro. Por eso la condición es "¿es HUD?".
+ * .ui-hud marca las piezas GRÁFICAS (barra de progreso, logo con glitch, nav con corchetes) y
+ * .ui-term las de TEXTO (barra ASCII, nav tipo tmux, barra de comandos fija). No son "interfaz
+ * HUD" e "interfaz Terminal": son dos familias, y cada interfaz pertenece a una.
  *
- * Las vistas del mapa sí son una por interfaz y se eligen con .map-nmap / .map-retro; la de
- * hexágonos usa .ui-hud porque es la única gráfica.
+ *   gráficas → hud, animus        textuales → terminal, retro
+ *
+ * Por eso la condición lista a los miembros en vez de preguntar "¿es HUD?": con solo dos
+ * interfaces eso bastaba, pero Códice Animus es limpia y NO textual, así que heredaba la nav
+ * de shell de Mr. Robot. Si añades una interfaz, métela en la familia que le toque.
+ *
+ * Las vistas del mapa sí son una por interfaz: .map-nmap, .map-retro, .map-codex, y la de
+ * hexágonos va con .ui-hud por ser la gráfica original.
  */
-html[data-ui="hud"] .ui-term,
-html:not([data-ui="hud"]) .ui-hud {
+html:not([data-ui="terminal"]):not([data-ui="retro"]) .ui-term,
+html:not([data-ui="hud"]):not([data-ui="animus"]) .ui-hud {
   display: none !important;
 }
 html:not([data-ui="terminal"]) .map-nmap,
-html:not([data-ui="retro"]) .map-retro {
+html:not([data-ui="retro"]) .map-retro,
+html:not([data-ui="animus"]) .map-codex,
+/* el mapa de hexágonos es .ui-hud, pero en Animus lo sustituye el códice */
+html[data-ui="animus"] .hud-crosshair {
   display: none !important;
 }
 
@@ -679,4 +688,35 @@ html[data-ui="retro"] header {
   background: var(--na-surface);
   backdrop-filter: none;
   border-bottom-width: 2px;
+}
+
+/* ===== Interfaz "Códice Animus": html[data-ui="animus"] =====
+ * La sala blanca. Es la ÚNICA interfaz clara, así que es la que delata cualquier color fijo que
+ * se cuele en un componente: si algo se ve mal aquí, casi siempre es un #hex escrito a mano.
+ * Nada de cortes angulares ni glitch: aquí todo es limpio, clínico y bien espaciado.
+ */
+html[data-ui="animus"] .hud-panel::before,
+html[data-ui="animus"] .hud-panel::after {
+  clip-path: none;
+}
+html[data-ui="animus"] .hud-corners {
+  background: none;
+}
+html[data-ui="animus"] .hud-item::before,
+html[data-ui="animus"] .hud-item::after {
+  display: none;
+}
+html[data-ui="animus"] .hud-btn {
+  clip-path: none;
+}
+html[data-ui="animus"] .hud-label {
+  letter-spacing: 0.22em;
+}
+html[data-ui="animus"] .hud-label::after {
+  display: none;
+}
+/* En claro, el barrido y la viñeta del mapa ensucian en vez de ambientar. */
+html[data-ui="animus"] .qm-scanline,
+html[data-ui="animus"] .hud-crt {
+  display: none !important;
 }

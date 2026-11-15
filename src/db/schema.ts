@@ -40,6 +40,7 @@ export const tracks = pgTable("tracks", {
   title: text("title").notNull(),
   emoji: text("emoji"),
   description: text("description"),
+  /** OBSOLETA: la paleta la trae la interfaz (`ui`). Se deja la columna por no migrar en vano. */
   palette: text("palette"),
   /** Interfaz por defecto de la ruta: "hud" (hexágonos) o "terminal" (escaneo nmap). */
   ui: text("ui"),

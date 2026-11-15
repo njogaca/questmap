@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Chakra_Petch, Inter, JetBrains_Mono } from "next/font/google";
+import { ArcadeField } from "@/components/effects/ArcadeField";
 import { MotionRoot } from "@/components/effects/MotionRoot";
 import { Hud } from "@/components/hud/Hud";
 import "./globals.css";
@@ -29,7 +30,7 @@ export const viewport: Viewport = {
  * decide si toca la pantalla de arranque (una vez al día y solo con animaciones activas).
  * Lee las mismas claves de localStorage que src/components/effects/prefs.ts.
  */
-const BOOT_SCRIPT = `(function(){var d=document.documentElement.dataset;try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");if(["ctos","neon","dedsec","fsociety","frostpunk","cyberpunk","animus"].indexOf(p.theme)>=0)d.theme=p.theme;d.ui=(p.ui==="terminal"||p.ui==="retro")?p.ui:"hud";var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();d.boot=(m&&!seen)?"pending":"done";}catch(e){d.boot="done";}})();`;
+const BOOT_SCRIPT = `(function(){var d=document.documentElement.dataset;try{var p=JSON.parse(localStorage.getItem("qm.effects")||"{}");var T={hud:"ctos",terminal:"fsociety",retro:"frostpunk",animus:"animus"};var u=T[p.ui]?p.ui:"hud";d.ui=u;d.theme=T[u];var m=typeof p.motion==="boolean"?p.motion:!matchMedia("(prefers-reduced-motion: reduce)").matches;var seen=localStorage.getItem("qm.boot")===new Date().toDateString();d.boot=(m&&!seen)?"pending":"done";}catch(e){d.boot="done";}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -37,6 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
         <MotionRoot />
+        {/* Fondo de partículas vectoriales. Va detrás de todo y no intercepta clics. */}
+        <ArcadeField />
         <Hud />
         {children}
         <div className="hud-crt" aria-hidden />

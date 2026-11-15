@@ -140,17 +140,12 @@ Todo sale de tokens en `:root` y sus variantes `html[data-theme="..."]`. Usa las
 (`text-available`, `bg-surface-2`, `border-line`, `text-done`, `text-warn`), no `#hex` ni
 `text-blue-500`. Un color a mano se rompe en las otras cinco paletas.
 
-Para **añadir una paleta** hay que tocar **cuatro** sitios, y olvidar uno la deja medio rota:
+**Las paletas no se eligen: las trae la interfaz.** `UI_THEME` en `prefs.ts` mapea cada interfaz a
+su paleta y `data-theme` se deriva de `data-ui`. Los tokens de `neon`, `dedsec` y `cyberpunk` siguen
+en `globals.css` sin dueño, listos para la próxima interfaz que los adopte.
 
-1. `src/app/globals.css` — el bloque `html[data-theme="<id>"]` con los tokens
-2. `src/components/effects/prefs.ts` — el tipo `Theme` y el array `THEMES`
-3. `src/app/layout.tsx` — la lista blanca dentro de `BOOT_SCRIPT` (si falta, parpadea la paleta
-   por defecto antes de aplicarse la tuya)
-4. `src/content/schema.ts` — el `z.enum` de `palette` en `trackSchema`, o el seed rechaza una ruta
-   que use esa paleta
-
-La paleta **Animus** es la única clara. Si tocas colores, pruébala: es la que delata cualquier color
-fijo que se te haya colado, porque el resto de paletas son oscuras y lo disimulan.
+La interfaz **Códice Animus** es la única clara. Si tocas colores, pruébala: es la que delata
+cualquier color fijo que se te haya colado, porque las otras tres son oscuras y lo disimulan.
 
 ### Anchos de página: hay tres niveles, respétalos
 
@@ -257,10 +252,14 @@ un POST de BIOS. Con el ancho acotado de `max-w-6xl` las tres quedan bien sin re
 
 ### Añadir una interfaz
 
-`.ui-hud` y `.ui-term` **no** significan "interfaz HUD" e "interfaz Terminal": significan pieza
-**gráfica** y pieza **de texto** (barra de progreso contra barra ASCII, nav con corchetes contra
-nav tipo tmux). Por eso la regla de visibilidad pregunta "¿es HUD?" y no "¿es Terminal?", y una
-interfaz textual nueva hereda toda esa capa sin tocar nada.
+`.ui-hud` y `.ui-term` **no** significan "interfaz HUD" e "interfaz Terminal": son dos **familias**
+—piezas gráficas y piezas de texto— y cada interfaz pertenece a una:
+
+    gráficas → hud, animus        textuales → terminal, retro
+
+La regla de visibilidad lista a los miembros de cada familia. Con dos interfaces bastaba preguntar
+"¿es HUD?", y eso fue justo lo que falló al añadir Códice Animus: por no ser HUD heredó la nav de
+shell de Mr. Robot. Al añadir una interfaz, **métela en su familia**.
 
 Lo único propio de cada interfaz es la vista del mapa, en `src/components/map/`. Para añadir una:
 
@@ -269,9 +268,10 @@ Lo único propio de cada interfaz es la vista del mapa, en `src/components/map/`
 2. Renderizarlo en `WorldMap.tsx` junto a los demás.
 3. En `globals.css`: `html:not([data-ui="<id>"]) .map-<id> { display: none !important; }` y el
    bloque `html[data-ui="<id>"]` con su estética.
-4. Registrar el id en `prefs.ts` (tipo `Ui`, array `UIS` y la validación de `readPrefs`), en el
-   `BOOT_SCRIPT` de `layout.tsx`, en el `z.enum` de `ui` en `src/content/schema.ts` y en el
-   `DEFAULT_THEME` de `EffectsSettings.tsx`.
+4. Registrar el id en `prefs.ts` (tipo `Ui`, mapa `UI_THEME` y array `UIS`), en el `BOOT_SCRIPT` de
+   `layout.tsx` (que también deriva ahí el `data-theme`) y en el `z.enum` de `ui` en
+   `src/content/schema.ts`.
+5. Añadirla a su familia en la regla de `.ui-hud` / `.ui-term` de `globals.css`.
 
 **Todas las vistas se renderizan y el CSS oculta las que no tocan.** Es a propósito: el
 `BOOT_SCRIPT` fija `data-ui` antes del primer pintado, así que no hay parpadeo ni desajuste de

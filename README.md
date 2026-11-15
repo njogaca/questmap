@@ -71,7 +71,7 @@ Lo que salió de ese brief, más lo que se ha añadido después:
 - **384 términos** de glosario (definición en español, el término en inglés, ejemplo y una analogía cotidiana) y **162 recursos** de estudio.
 
 La zona 12, **Terminal Tundra** 🐧, no sale de la oferta: se agregó el 2026-11-07 al notar que todos los labs de las demás zonas entran a un Linux (`docker exec`) que nunca se enseñaba. Enseña terminal, permisos, triage de logs, procesos y señales, el Linux de los contenedores y de GKE, y bash para CI. Arranca desbloqueada, no es prerrequisito de nada y su skill `linux` no es core, para no tapar las recomendaciones de Java y Cassandra.
-- Tema visual **Neon Atlas / ctOS** (inspirado en Watch Dogs): paneles angulares con esquinas cortadas y marcas de "profiler", barra HUD con rango, XP, racha y reloj, mapa con retícula de objetivo y flujo de datos en los caminos abiertos, pantalla de arranque una vez al día y una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre. Los sectores bloqueados se ven como "datos cifrados" (también en la terminal) y se descifran al cumplir sus requisitos. En **Ajustes → Efectos** eliges la **interfaz** (*HUD* estilo Watch Dogs, o *Terminal* estilo Mr. Robot: todo en fuente mono, el mapa como un escaneo `nmap`, barras ASCII, arranque por `ssh` y una barra de comandos fija que entiende `cd java`, `ls` o `cd ..`) y la **paleta**, independiente de la interfaz: **ctOS** (azul acero y ámbar, la predeterminada), **Neon Atlas** (cian y magenta), **DedSec** (amarillo ácido y rosa), **fsociety** (gris y blanco con un solo rojo), **Frostpunk** (naranja de brasa contra acero helado), **Cyberpunk** (amarillo señal y cian sobre negro con tinte sangre) o **Animus** (Assassin's Creed: la sala blanca, la única paleta clara). Ahí también apagas las animaciones o el efecto CRT. Cada ruta trae una paleta por defecto que se aplica al activarla, pero lo que elijas a mano en Ajustes manda.
+- **Cuatro interfaces** entre las que eliges en Ajustes → Efectos, y cada una cambia estructura, colores y la forma del mapa: *HUD* (hexágonos, estilo Watch Dogs), *Terminal* (escaneo `nmap`, estilo Mr. Robot), *Consola Retro* (un POST de BIOS) y *Códice Animus* (memorias por sincronizar, la única clara). Comunes a todas: barra con rango, XP, racha y reloj, pantalla de arranque una vez al día, una **terminal de comandos** (`Ctrl+K` o `/`) para saltar a cualquier página o sector escribiendo su nombre, y un fondo de partículas vectoriales estilo arcade. Los sectores bloqueados se ven como "datos cifrados" y se descifran al cumplir sus requisitos. Ahí también apagas las animaciones o el efecto CRT.
 
 **Stack:** Next.js 15 + React 19 (App Router, Server Actions), Postgres 16 con Drizzle ORM, Tailwind 4, todo en Docker Compose. Contenido en YAML validado con Zod. Pruebas de lógica con `node:test`.
 
@@ -145,27 +145,32 @@ La racha cuenta **días con minutos registrados**, según la zona horaria de `.e
 
 ### Ajustes
 
-`/ajustes` tiene tres cosas: **Respaldo** (exportar/importar progreso, reiniciar una zona), **Efectos** (interfaz HUD o Terminal, paleta, animaciones, CRT, sonidos) y el estado de la API de Claude.
+`/ajustes` tiene tres cosas: **Respaldo** (exportar/importar progreso, reiniciar una zona), **Efectos** (la interfaz, las animaciones, el CRT y los sonidos) y el estado de la API de Claude.
 
-### Interfaces y paletas
+### Interfaces
 
-Son dos cosas **independientes**: la *interfaz* cambia la estructura y el *tema* cambia solo los colores. Cualquier paleta funciona con cualquier interfaz. Cada ruta trae su combinación por defecto y la aplica al activarse, pero lo que elijas a mano aquí manda.
+Cada interfaz **cambia la estructura y los colores a la vez**, y sobre todo **dibuja el mapa de otra forma**. No hay un selector de paleta aparte: elegir una interfaz es elegir su mundo entero.
 
-Hay tres interfaces, y cada una **dibuja el mapa a su manera**:
+| interfaz | el mapa es… | colores |
+|---|---|---|
+| **HUD · Watch Dogs** | una retícula de hexágonos | azul acero y ámbar |
+| **Terminal · Mr. Robot** | un escaneo `nmap` | gris y blanco con un solo rojo |
+| **Consola Retro · BIOS** | un POST que detecta dispositivos | ámbar sobre acero helado |
+| **Códice Animus** | una secuencia de memorias | la sala blanca: la única clara |
 
-- **HUD · Watch Dogs** — paneles angulares y el mapa como una retícula de hexágonos.
-- **Terminal · Mr. Robot** — todo es una shell: fuente mono, encabezados como comentarios de Markdown, el mapa como un escaneo `nmap`, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
-- **Consola Retro · BIOS** — una máquina de los 80: mayúsculas, cajas de 2 px y el mapa como un POST que detecta cada zona como si fuera un dispositivo (`READY`, `ACTIVE`, `PASSED`, `LOCKED`).
+La **Terminal** convierte todo en una shell: fuente mono, encabezados como comentarios de Markdown, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
 
-![La interfaz Terminal: la misma portada con fuente mono, pestañas tipo tmux y barra de comandos fija](docs/img/tema-terminal.jpg)
+![La interfaz Terminal: la misma portada con fuente mono, pestañas tipo tmux y barra de comandos fija](docs/img/interfaz-terminal.jpg)
 
-De las siete paletas, **Animus** (Assassin's Creed) es la única clara: la sala blanca con su retícula azul, azul Animus para lo que puedes revivir, oro para la memoria en curso y rojo de desincronización.
+La **Consola Retro** arranca como una máquina de los 80: cada zona es un dispositivo que la BIOS detecta, con su `READY`, `ACTIVE`, `PASSED` o `LOCKED`.
 
-![La paleta Animus: fondo blanco con retícula azul, paneles blancos y acentos azul y oro](docs/img/tema-animus.jpg)
+![La interfaz Consola Retro: el mapa como un POST de BIOS en ámbar, con la fila apuntada invertida](docs/img/interfaz-retro.jpg)
 
-En el mapa es donde más se nota el cambio de aire:
+El **Códice Animus** es la única clara, y el mapa deja de ser una tabla: es una secuencia de memorias enhebradas, donde lo que no puedes revivir todavía aparece como *memoria corrupta*.
 
-![El mapa con la paleta Animus: hexágonos azules sobre blanco, como el corredor de memorias](docs/img/tema-animus-mapa.jpg)
+![La interfaz Códice Animus: fondo blanco con retícula azul y las zonas como memorias en secuencia](docs/img/interfaz-animus.jpg)
+
+De fondo, en todas, hay un **campo de partículas vectoriales** al estilo de los arcade de los 80 — rocas en wireframe que giran y estrellas que caen, al 10 % de opacidad. Toma el color de la interfaz activa y se apaga junto con las animaciones en Ajustes.
 
 ---
 
@@ -181,7 +186,7 @@ Entra a `/rutas` y verás una tarjeta por ruta con su XP, su rango y su avance. 
 esta ruta →"** la activa:
 
 - El mapa, la portada, el readiness y el glosario pasan a ser los de esa ruta.
-- Se aplica **el aspecto de la ruta**: su paleta y su interfaz. Backend & GCP entra en HUD + ctOS, con el mapa de hexágonos; Cyber Range entra en Terminal + fsociety, con el mapa como escaneo `nmap`. Las dos cosas son valores por defecto: si luego las cambias a mano en Ajustes, tu elección se queda.
+- Se aplica **la interfaz de la ruta**, que trae sus colores y su forma de mapa: Backend & GCP entra en HUD con los hexágonos; Cyber Range entra en Terminal con el escaneo `nmap`. Es un valor por defecto: si luego la cambias a mano en Ajustes, tu elección se queda.
 - **No se borra nada.** Cambiar de ruta solo mueve un puntero: el progreso de la otra se queda intacto y vuelve tal cual al regresar.
 
 ### Zonas transversales
@@ -195,7 +200,7 @@ habría partido tu baraja de glosario en tres.
 
 ### Crear una ruta nueva
 
-1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `palette`, `ui` (`hud` o `terminal`) y `order`.
+1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `ui` (`hud`, `terminal`, `retro` o `animus`) y `order`.
 2. Añade sus skills a `content/skills.yaml` con `track: <slug>`.
 3. Crea sus zonas en `content/zones/` con `track: <slug>`. Publica las primeras y deja el resto en `status: outline`.
 4. `docker compose up -d --build` y revisa el log del seed.
@@ -272,7 +277,7 @@ Todo vive en `content/` (YAML):
 
 | Carpeta | Qué hay |
 |---|---|
-| `tracks.yaml` | Las rutas de estudio: `slug`, título, emoji, y el aspecto por defecto (`palette` e `ui`) |
+| `tracks.yaml` | Las rutas de estudio: `slug`, título, emoji, la interfaz por defecto (`ui`) y el orden |
 | `skills.yaml` | Las 22 skills con su `target_xp` (y el cálculo comentado) y su `track` |
 | `resources.yaml` | Recursos de estudio. Solo `verified: true` si la URL se abrió; si no, `url: null` + `how_to_find` |
 | `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss). El campo `track` decide a qué ruta pertenece |

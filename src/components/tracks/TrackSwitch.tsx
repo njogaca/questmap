@@ -3,24 +3,22 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { activateTrack } from "@/app/track-actions";
-import { readPrefs, writePrefs, THEMES, type Theme, type Ui } from "@/components/effects/prefs";
+import { readPrefs, writePrefs, UIS, type Ui } from "@/components/effects/prefs";
 import { btnPrimary } from "@/components/ui";
 
-const THEME_IDS = new Set<string>(THEMES.map((t) => t.id));
+const UI_IDS = new Set<string>(UIS.map((u) => u.id));
 
 /**
- * Activa una ruta y aplica su aspecto: paleta e interfaz (hexágonos o terminal). Las dos son
- * valores por defecto, no imposiciones — se escriben en las preferencias del navegador igual
- * que si las eligieras en Ajustes, así que puedes cambiarlas después y tu elección manda.
+ * Activa una ruta y aplica su interfaz, que a su vez trae su paleta. Es un valor por defecto, no
+ * una imposición: se escribe en las preferencias del navegador igual que si la eligieras en
+ * Ajustes, así que puedes cambiarla después y tu elección manda.
  */
 export function TrackSwitch({
   trackId,
-  palette,
   ui,
   active,
 }: {
   trackId: number;
-  palette: string | null;
   ui: string | null;
   active: boolean;
 }) {
@@ -44,14 +42,8 @@ export function TrackSwitch({
         setError(res.error);
         return;
       }
-      // Una sola escritura con las dos cosas: dos writePrefs seguidos dispararían dos
-      // repintados y el segundo leería un estado a medias.
       const prefs = readPrefs();
-      writePrefs({
-        ...prefs,
-        theme: palette && THEME_IDS.has(palette) ? (palette as Theme) : prefs.theme,
-        ui: ui === "hud" || ui === "terminal" ? (ui as Ui) : prefs.ui,
-      });
+      if (ui && UI_IDS.has(ui)) writePrefs({ ...prefs, ui: ui as Ui });
       router.refresh();
     });
 

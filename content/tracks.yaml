@@ -4,16 +4,15 @@
 # (inglés, entrevistas, Linux). Si el YAML de una zona no trae `track`, el seed no toca
 # la ruta que ya tenga asignada en la base.
 #
-# `palette` y `ui` son el aspecto por defecto de la ruta y se aplican al activarla:
-# `ui: hud` dibuja el mapa como hexágonos y `ui: terminal` como un escaneo nmap.
-# Los dos son valores por defecto, no imposiciones: puedes cambiarlos a mano en
-# Ajustes → Efectos y tu elección se queda.
+# `ui` es la interfaz por defecto de la ruta y se aplica al activarla. Cada interfaz trae
+# su propia paleta, así que no se eligen por separado: `hud` dibuja el mapa como hexágonos,
+# `terminal` como un escaneo nmap, `retro` como un POST de BIOS y `animus` como memorias.
+# Es un valor por defecto, no una imposición: puedes cambiarlo en Ajustes → Efectos.
 
 tracks:
   - slug: backend-gcp
     title: Backend & GCP
     emoji: "🗺️"
-    palette: ctos
     ui: hud
     order: 1
     description: >
@@ -23,7 +22,6 @@ tracks:
   - slug: cybersecurity
     title: Cyber Range
     emoji: "🛡️"
-    palette: fsociety
     ui: terminal
     order: 2
     description: >

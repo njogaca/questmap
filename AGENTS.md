@@ -317,3 +317,33 @@ pese, lo que hay que cambiar es *eso*, no el reparto en componentes.
 
 Y al verificar por `grep` sobre el HTML, elige cadenas distintivas: buscar `class` o un prefijo de
 slug da falsos positivos en cada atributo del documento. Eso también ya pasó.
+
+---
+
+## 9. Pendiente conocido: el fondo de partículas no se ve
+
+`ArcadeField` (`src/components/effects/ArcadeField.tsx`) **no se ve en ninguna interfaz**, ni
+siquiera en los márgenes vacíos de la página, donde nada lo taparía. Está sin resolver.
+
+Lo que ya se descartó:
+- **No es el color ni el alfa.** Se calibró `--qm-particle-alpha` por tema para dar ~1.45x de
+  contraste en cada fondo (0.24 ctOS, 0.17 fsociety, 0.23 Frostpunk, 0.29 Animus, 0.25 Archivo).
+  Antes era 0.10 fijo, que daba ~1.13x en los cinco. Subirlo no cambió nada.
+- **No es que falte el elemento.** El `<canvas>` está en el DOM, con `z-index: -10` y
+  `display: block`.
+
+Por dónde seguir, en orden de sospecha:
+
+1. **`prefers-reduced-motion` del sistema.** Si Windows tiene los efectos de animación apagados,
+   `readPrefs()` devuelve `motion: false` y el componente hace `return null` sin avisar. Es la
+   explicación que encaja con "no se ve en ninguna interfaz". Comprobar en consola:
+   `matchMedia("(prefers-reduced-motion: reduce)").matches`.
+2. **Apilamiento.** `-z-10` depende de que el fondo de `body` se propague al lienzo del viewport.
+   Si algo acaba dándole fondo propio al `body` sin propagar, lo tapa. Probar con `z-0` y el
+   contenido en un contexto por encima.
+3. **El bucle no corre.** Comprobar que `draw()` se ejecuta de verdad: contar frames y leer
+   `getImageData`. Si sale 0, el `requestAnimationFrame` nunca arranca.
+
+**Aviso para medirlo:** `requestAnimationFrame` NO se ejecuta en una pestaña oculta. Si lo
+inspeccionas desde un navegador controlado cuyo panel no está visible, el canvas saldrá siempre
+en blanco y medirás un falso positivo del bug. Hay que verificarlo con la ventana a la vista.

@@ -4,14 +4,17 @@
 # (inglés, entrevistas, Linux). Si el YAML de una zona no trae `track`, el seed no toca
 # la ruta que ya tenga asignada en la base.
 #
-# `palette` es la paleta que se aplica al activar la ruta. Es un valor por defecto:
-# siempre puedes cambiarla a mano en Ajustes → Efectos.
+# `palette` y `ui` son el aspecto por defecto de la ruta y se aplican al activarla:
+# `ui: hud` dibuja el mapa como hexágonos y `ui: terminal` como un escaneo nmap.
+# Los dos son valores por defecto, no imposiciones: puedes cambiarlos a mano en
+# Ajustes → Efectos y tu elección se queda.
 
 tracks:
   - slug: backend-gcp
     title: Backend & GCP
     emoji: "🗺️"
     palette: ctos
+    ui: hud
     order: 1
     description: >
       La ruta original: Java, event-driven, Cassandra, BigQuery y nube hasta estar
@@ -21,6 +24,7 @@ tracks:
     title: Cyber Range
     emoji: "🛡️"
     palette: fsociety
+    ui: terminal
     order: 2
     description: >
       De cero a analista de seguridad: redes y sistemas, un SOC donde triar alertas de

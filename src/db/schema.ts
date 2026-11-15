@@ -41,6 +41,8 @@ export const tracks = pgTable("tracks", {
   emoji: text("emoji"),
   description: text("description"),
   palette: text("palette"),
+  /** Interfaz por defecto de la ruta: "hud" (hexágonos) o "terminal" (escaneo nmap). */
+  ui: text("ui"),
   order: integer("order").notNull().default(0),
   status: contentStatus("status").notNull().default("published"),
 });

@@ -535,6 +535,13 @@ html[data-ui="terminal"] header > div:first-child {
   margin-inline: auto;
 }
 
+/* El mapa va a pantalla completa (.qm-wide) porque los hexágonos de la interfaz HUD ganan
+ * con el espacio. En la Terminal ese mismo mapa es una TABLA DE TEXTO, y estirada a 1900 px
+ * manda el progreso al otro extremo de la pantalla: el ojo pierde la fila. Aquí se limita. */
+html[data-ui="terminal"] main.qm-wide {
+  max-width: 72rem;
+}
+
 /* Barra superior como la de tmux: ventana activa invertida */
 html[data-ui="terminal"] header {
   background: var(--na-surface);

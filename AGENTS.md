@@ -158,7 +158,7 @@ fijo que se te haya colado, porque el resto de paletas son oscuras y lo disimula
 |---|---|---|
 | Lectura | `max-w-3xl` | quest, zone, level, glosario, ajustes |
 | Tablero | `max-w-7xl` | inicio, arena, rutas |
-| Completo | `w-full` | mapa |
+| Completo | `w-full .qm-wide` | mapa (en la interfaz Terminal se limita a 72rem) |
 
 Si cambias el nivel tablero, cambia también `max-w-7xl` en `src/components/hud/HudNav.tsx` o la
 cabecera deja de alinearse con el contenido, que se nota mucho más que el ancho en sí.
@@ -240,8 +240,16 @@ En el YAML de una zona o skill, el campo `track`:
 - **`null`** → transversal explícito
 - **`"<slug>"`** → esa ruta
 
-Las rutas se definen en `content/tracks.yaml`. `palette` es el valor por defecto que se aplica al
-activarla; el usuario puede sobrescribirlo en Ajustes y su elección manda.
+Las rutas se definen en `content/tracks.yaml`. `palette` e `ui` son el **aspecto por defecto** de la
+ruta y se aplican juntos al activarla (`TrackSwitch` los escribe en **una sola** llamada a
+`writePrefs`: dos seguidas repintarían dos veces y la segunda leería un estado a medias). Son
+valores por defecto, no imposiciones — el usuario puede sobrescribirlos en Ajustes y su elección
+manda.
+
+La interfaz `terminal` dibuja el mapa como una tabla de texto (escaneo `nmap`), no como hexágonos.
+Por eso el mapa lleva la clase `.qm-wide` y va a pantalla completa solo en HUD: en Terminal se
+limita a 72rem, porque una tabla estirada a 1900 px manda el progreso al otro extremo de la
+pantalla y el ojo pierde la fila.
 
 ---
 

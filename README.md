@@ -149,7 +149,7 @@ La racha cuenta **días con minutos registrados**, según la zona horaria de `.e
 
 ### Interfaces y paletas
 
-Son dos cosas **independientes**: la *interfaz* cambia la estructura y el *tema* cambia solo los colores. Cualquier paleta funciona con cualquier interfaz.
+Son dos cosas **independientes**: la *interfaz* cambia la estructura y el *tema* cambia solo los colores. Cualquier paleta funciona con cualquier interfaz. Cada ruta trae su combinación por defecto y la aplica al activarse, pero lo que elijas a mano aquí manda.
 
 La interfaz **Terminal** convierte todo en una shell: fuente mono, encabezados como comentarios de Markdown, el mapa como un escaneo `nmap`, barras ASCII y una barra de comandos fija abajo que entiende `cd java`, `ls` o `cd ..`.
 
@@ -177,7 +177,7 @@ Entra a `/rutas` y verás una tarjeta por ruta con su XP, su rango y su avance. 
 esta ruta →"** la activa:
 
 - El mapa, la portada, el readiness y el glosario pasan a ser los de esa ruta.
-- Se aplica su paleta por defecto (Cyber Range entra en *fsociety*), que puedes cambiar luego en Ajustes.
+- Se aplica **el aspecto de la ruta**: su paleta y su interfaz. Backend & GCP entra en HUD + ctOS, con el mapa de hexágonos; Cyber Range entra en Terminal + fsociety, con el mapa como escaneo `nmap`. Las dos cosas son valores por defecto: si luego las cambias a mano en Ajustes, tu elección se queda.
 - **No se borra nada.** Cambiar de ruta solo mueve un puntero: el progreso de la otra se queda intacto y vuelve tal cual al regresar.
 
 ### Zonas transversales
@@ -191,7 +191,7 @@ habría partido tu baraja de glosario en tres.
 
 ### Crear una ruta nueva
 
-1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `palette` y `order`.
+1. Añádela a [`content/tracks.yaml`](content/tracks.yaml) con su `slug`, `title`, `emoji`, `palette`, `ui` (`hud` o `terminal`) y `order`.
 2. Añade sus skills a `content/skills.yaml` con `track: <slug>`.
 3. Crea sus zonas en `content/zones/` con `track: <slug>`. Publica las primeras y deja el resto en `status: outline`.
 4. `docker compose up -d --build` y revisa el log del seed.
@@ -268,7 +268,7 @@ Todo vive en `content/` (YAML):
 
 | Carpeta | Qué hay |
 |---|---|
-| `tracks.yaml` | Las rutas de estudio: `slug`, título, emoji, paleta por defecto y orden |
+| `tracks.yaml` | Las rutas de estudio: `slug`, título, emoji, y el aspecto por defecto (`palette` e `ui`) |
 | `skills.yaml` | Las 22 skills con su `target_xp` (y el cálculo comentado) y su `track` |
 | `resources.yaml` | Recursos de estudio. Solo `verified: true` si la URL se abrió; si no, `url: null` + `how_to_find` |
 | `zones/*.yaml` | Zonas → niveles → quests (learn, glossary, lab, quiz, micro, open_answer, interview, boss). El campo `track` decide a qué ruta pertenece |

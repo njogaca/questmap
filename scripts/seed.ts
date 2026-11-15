@@ -47,6 +47,7 @@ async function main() {
           emoji: t.emoji ?? null,
           description: t.description ?? null,
           palette: t.palette ?? null,
+          ui: t.ui ?? null,
           order: t.order,
           status: t.status,
         };

@@ -34,7 +34,7 @@ export default async function MapPage() {
   });
 
   return (
-    <main className="mx-auto w-full px-4 py-6 2xl:px-10">
+    <main className="qm-wide mx-auto w-full px-4 py-6 2xl:px-10">
       <p className="font-mono text-xs text-available">&gt; questmap://atlas</p>
       <h1 className="mt-1 text-3xl font-bold">Mapa del reino</h1>
       <p className="mt-1 max-w-2xl text-sm text-dim">

@@ -36,6 +36,13 @@
       "when": 1794766253722,
       "tag": "0004_tracks",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794771947626,
+      "tag": "0005_track_ui",
+      "breakpoints": true
     }
   ]
 }

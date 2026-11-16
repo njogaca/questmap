@@ -43,6 +43,43 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "El proyecto OrderBridge creado con Spring Boot y un endpoint `GET /status` que responde con el nombre y el estado del servicio."
+          spec:
+            context: |
+              OrderBridge es el servicio de pedidos que vas a construir durante todo este mundo.
+              Antes de escribir una sola regla de negocio, el equipo de plataforma necesita un
+              endpoint para saber si el servicio está vivo: el balanceador lo va a consultar cada
+              pocos segundos y lo que responda decide si te manda tráfico o no.
+            requirements:
+              - "El proyecto es Spring Boot 3 con Maven y Java 21, `artifactId` `orderbridge`, y la dependencia `spring-boot-starter-web`."
+              - "`GET /status` responde `200 OK` con `Content-Type: application/json`."
+              - "El cuerpo es un objeto JSON con exactamente dos campos: `service` y `status`."
+              - "El servicio escucha en el puerto `8080`."
+              - "El código está en un repositorio de GitHub llamado `orderbridge`, con `.gitignore` de Maven."
+            inputs:
+              - { name: "GET /status", type: "petición HTTP", desc: "Sin cuerpo, sin parámetros y sin cabeceras obligatorias." }
+            outputs:
+              - { name: "service", type: "string", desc: "Nombre del servicio. Siempre `orderbridge`." }
+              - { name: "status", type: "string", desc: "`UP` mientras el servicio atiende peticiones." }
+            rules:
+              - "La respuesta sale de un tipo propio (un `record StatusResponse(String service, String status)`), no de un `Map` ni de un texto armado a mano."
+              - "El nombre del servicio se lee de `spring.application.name`; no está repetido dentro del controlador."
+              - "El controlador solo atiende `GET`. Otro método sobre `/status` responde `405`."
+            examples:
+              - title: "Servicio arriba"
+                input: |
+                  curl -i http://localhost:8080/status
+                output: |
+                  HTTP/1.1 200
+                  Content-Type: application/json
+
+                  {"service":"orderbridge","status":"UP"}
+            edge_cases:
+              - "`POST /status` responde `405 Method Not Allowed`."
+              - "`GET /no-existe` responde `404`, no `200` ni una página en blanco."
+              - "Si el puerto 8080 está ocupado, el arranque falla con un mensaje claro. Identifica qué proceso lo usa en vez de cambiar el puerto en el código."
+            out_of_scope:
+              - "Spring Boot Actuator. Es la herramienta real para esto, pero aquí escribes el endpoint a mano para entender un controlador."
+              - "Base de datos, seguridad y pruebas. Cada una tiene su nivel."
           steps:
             - title: "Crea el proyecto"
               body: "Genera un proyecto Spring Boot con Maven y la dependencia web. Arráncalo."
@@ -125,6 +162,81 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Los endpoints de `/orders` para crear, leer, actualizar y borrar, con los pedidos guardados en memoria por ahora."
+          spec:
+            context: |
+              El equipo de la tienda web necesita registrar pedidos desde su frontend y consultarlos
+              después. Tú eres dueño de la API: este requerimiento es el contrato que ellos van a
+              programar contra ti, así que los nombres de los campos, los tipos y los códigos HTTP
+              no son detalles. Si cambian después, les rompes la integración.
+            requirements:
+              - "`POST /orders` crea un pedido. Responde `201 Created`, la cabecera `Location: /orders/{id}` y el pedido creado en el cuerpo."
+              - "`GET /orders` responde `200` con un arreglo JSON de todos los pedidos. Sin pedidos, responde `[]`."
+              - "`GET /orders/{id}` responde `200` con el pedido, o `404` si no existe."
+              - "`PUT /orders/{id}` reemplaza `customerEmail` e `items` del pedido. Responde `200` con el pedido actualizado, o `404` si no existe."
+              - "`DELETE /orders/{id}` borra el pedido. Responde `204` sin cuerpo, o `404` si no existe."
+              - "El código está en tres capas: `OrderController` (HTTP), `OrderService` (reglas) y `OrderRepository` (almacén en memoria)."
+            inputs:
+              - { name: "customerEmail", type: "string", desc: "Correo del cliente que hace el pedido." }
+              - { name: "items", type: "array", desc: "Líneas del pedido." }
+              - { name: "items[].sku", type: "string", desc: "Código del producto, por ejemplo `KB-001`." }
+              - { name: "items[].productName", type: "string", desc: "Nombre del producto tal como se mostró al cliente." }
+              - { name: "items[].unitPrice", type: "number", desc: "Precio unitario con dos decimales. En Java, `BigDecimal`." }
+              - { name: "items[].quantity", type: "integer", desc: "Unidades. En Java, `int`." }
+              - { name: "id (ruta)", type: "UUID", desc: "Identificador del pedido en `/orders/{id}`." }
+            outputs:
+              - { name: "id", type: "string (UUID)", desc: "Lo genera el servidor al crear. El cliente nunca lo envía." }
+              - { name: "customerEmail", type: "string", desc: "El mismo que se recibió." }
+              - { name: "items", type: "array", desc: "Las mismas líneas, con los mismos cuatro campos." }
+              - { name: "total", type: "number", desc: "Lo calcula el servidor. En Java, `BigDecimal` con dos decimales." }
+              - { name: "createdAt", type: "string (ISO-8601, UTC)", desc: "Momento de creación, por ejemplo `2027-01-12T15:04:05Z`. En Java, `Instant`." }
+            rules:
+              - "`total` = suma de `unitPrice × quantity` de todas las líneas. Si el cliente manda un `total` en el cuerpo, se ignora."
+              - "El dinero es `BigDecimal`, nunca `double`."
+              - "`PUT` recalcula `total` y conserva `id` y `createdAt`."
+              - "El controlador no tiene reglas de negocio: traduce HTTP a llamadas del servicio y de vuelta."
+              - "La petición y la respuesta son tipos distintos (`OrderRequest` y `OrderResponse`). La clase interna `Order` no se expone directamente."
+            examples:
+              - title: "Crear un pedido"
+                input: |
+                  POST /orders
+                  Content-Type: application/json
+
+                  {
+                    "customerEmail": "ana@example.com",
+                    "items": [
+                      { "sku": "KB-001", "productName": "Teclado", "unitPrice": 40.00, "quantity": 2 },
+                      { "sku": "MS-002", "productName": "Mouse", "unitPrice": 15.00, "quantity": 1 }
+                    ]
+                  }
+                output: |
+                  HTTP/1.1 201
+                  Location: /orders/3f2b8c1e-6a4d-4e0b-9c7a-2d5e8f1a0b3c
+                  Content-Type: application/json
+
+                  {
+                    "id": "3f2b8c1e-6a4d-4e0b-9c7a-2d5e8f1a0b3c",
+                    "customerEmail": "ana@example.com",
+                    "items": [
+                      { "sku": "KB-001", "productName": "Teclado", "unitPrice": 40.00, "quantity": 2 },
+                      { "sku": "MS-002", "productName": "Mouse", "unitPrice": 15.00, "quantity": 1 }
+                    ],
+                    "total": 95.00,
+                    "createdAt": "2027-01-12T15:04:05Z"
+                  }
+              - title: "Pedir un id que no existe"
+                input: |
+                  GET /orders/00000000-0000-0000-0000-000000000000
+                output: |
+                  HTTP/1.1 404
+            edge_cases:
+              - "Borrar dos veces el mismo pedido: la primera responde `204`, la segunda `404`."
+              - "Un id que no es UUID (`GET /orders/abc`) responde `400`, no `500`."
+              - "`PUT` sobre un id inexistente responde `404`. No crea el pedido."
+              - "Dos `POST` con el mismo cuerpo crean dos pedidos con ids distintos."
+            out_of_scope:
+              - "Validar el contenido del cuerpo. Es el nivel 5."
+              - "Base de datos. Es el nivel 3: al reiniciar el servicio, los pedidos se pierden."
+              - "Paginación, filtros y `PATCH`."
           steps:
             - title: "Capas"
               body: "Separa controlador, servicio y un almacén en memoria. El controlador no tiene reglas de negocio."
@@ -218,6 +330,66 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "El almacén en memoria reemplazado por PostgreSQL con Spring Data JPA."
+          spec:
+            context: |
+              Ayer reiniciaron el servicio para desplegar un cambio y se perdieron todos los pedidos
+              del día. Hay que guardarlos en PostgreSQL. La condición del equipo web es que no se
+              enteren: la API debe responder exactamente igual que en el nivel 2.
+            requirements:
+              - "Los pedidos y sus líneas se guardan en PostgreSQL 16."
+              - "`Order` y `OrderItem` son entidades JPA, con una relación de uno a muchos."
+              - "`OrderRepository` pasa a ser una interfaz de Spring Data (`JpaRepository<Order, UUID>`). El servicio y el controlador no cambian su contrato."
+              - "Las tablas las crea una migración de Flyway, `V1__create_orders.sql`."
+              - "Los cinco endpoints del nivel 2 responden con los mismos cuerpos y los mismos códigos."
+            inputs:
+              - { name: "spring.datasource.url", type: "string", desc: "URL JDBC, por ejemplo `jdbc:postgresql://localhost:5432/orderbridge`." }
+              - { name: "spring.datasource.username", type: "string", desc: "Usuario de la base. Por ahora en `application.yml`; sale del código en el nivel 10." }
+              - { name: "spring.datasource.password", type: "string", desc: "Contraseña de la base. Igual que el usuario." }
+            outputs:
+              - { name: "orders.id", type: "uuid", desc: "Clave primaria." }
+              - { name: "orders.customer_email", type: "varchar(255) NOT NULL", desc: "Correo del cliente." }
+              - { name: "orders.total", type: "numeric(12,2) NOT NULL", desc: "Total calculado por el servicio." }
+              - { name: "orders.created_at", type: "timestamptz NOT NULL", desc: "Momento de creación." }
+              - { name: "order_items.id", type: "bigint", desc: "Clave primaria generada por la base." }
+              - { name: "order_items.order_id", type: "uuid NOT NULL", desc: "Clave foránea a `orders(id)` con `ON DELETE CASCADE`." }
+              - { name: "order_items.sku", type: "varchar(40) NOT NULL", desc: "Código del producto." }
+              - { name: "order_items.product_name", type: "varchar(120) NOT NULL", desc: "Nombre del producto." }
+              - { name: "order_items.unit_price", type: "numeric(12,2) NOT NULL", desc: "Precio unitario." }
+              - { name: "order_items.quantity", type: "integer NOT NULL", desc: "Unidades." }
+            rules:
+              - "`spring.jpa.hibernate.ddl-auto` vale `validate`. Hibernate comprueba el esquema; no lo crea ni lo modifica."
+              - "Una migración ya aplicada no se edita. Un cambio de esquema es un archivo nuevo (`V2__...`)."
+              - "Borrar un pedido borra sus líneas."
+              - "Las entidades no salen por la API: el controlador sigue devolviendo `OrderResponse`."
+              - "El dinero es `numeric` en la base y `BigDecimal` en Java. Nunca `float`, `double` ni `real`."
+            examples:
+              - title: "Los datos sobreviven al reinicio"
+                input: |
+                  1. POST /orders          (el pedido de Ana del nivel 2)
+                  2. Detén el servicio y vuelve a arrancarlo
+                  3. GET /orders
+                output: |
+                  HTTP/1.1 200
+
+                  [ { "id": "3f2b8c1e-...", "customerEmail": "ana@example.com", "total": 95.00, ... } ]
+              - title: "Lo que quedó en la base"
+                lang: "sql"
+                input: |
+                  SELECT sku, unit_price, quantity FROM order_items ORDER BY id;
+                output: |
+                  sku    | unit_price | quantity
+                  -------+------------+---------
+                  KB-001 |      40.00 |        2
+                  MS-002 |      15.00 |        1
+            edge_cases:
+              - "Arrancar con la base apagada: el servicio falla al iniciar con un error de conexión legible. No arranca a medias."
+              - "Arrancar contra una base vacía: Flyway crea las tablas solo, sin pasos manuales."
+              - "`DELETE /orders/{id}` no deja filas huérfanas en `order_items`."
+              - "`GET /orders/{id}` devuelve las líneas sin lanzar `LazyInitializationException`."
+            out_of_scope:
+              - "Tablas de clientes o de productos: el pedido guarda el correo y el nombre del producto como texto."
+              - "Índices y rendimiento. Es el nivel 4."
+              - "Docker. Por ahora PostgreSQL corre como lo tengas instalado; el nivel 8 lo mete en Compose."
           steps:
             - title: "Base de datos"
               body: "Levanta PostgreSQL en local y configura la conexión en el proyecto."
@@ -311,9 +483,64 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un archivo `queries.sql` con consultas escritas a mano sobre pedidos, y un índice justificado con el plan de la consulta."
+          spec:
+            context: |
+              Operaciones pide cinco reportes y el panel de «pedidos recientes» tarda varios segundos
+              en producción. El ORM no te va a resolver ninguna de las dos cosas: toca escribir SQL
+              a mano, medir, y demostrar con números que el índice que propones sirve.
+            requirements:
+              - "`db/queries.sql` contiene cinco consultas, cada una precedida por un comentario con su número y lo que responde."
+              - "Q1: cada pedido con sus líneas (una fila por línea)."
+              - "Q2: total vendido y número de pedidos por cliente."
+              - "Q3: los tres productos más vendidos por unidades."
+              - "Q4: pedidos que no tienen ninguna línea."
+              - "Q5: pedidos creados en los últimos 7 días, del más reciente al más antiguo."
+              - "`db/seed.sql` carga datos de prueba: al menos 100 000 pedidos repartidos en el último año, con 1 a 5 líneas cada uno."
+              - "Una migración `V2__...sql` agrega un índice que mejora Q5."
+              - "El README tiene una sección «Performance» con el plan de Q5 antes y después del índice."
+            inputs:
+              - { name: "orders", type: "tabla", desc: "La del nivel 3: `id`, `customer_email`, `total`, `created_at`." }
+              - { name: "order_items", type: "tabla", desc: "La del nivel 3: `order_id`, `sku`, `product_name`, `unit_price`, `quantity`." }
+            outputs:
+              - { name: "Q1", type: "filas", desc: "`order_id`, `customer_email`, `sku`, `quantity`, `unit_price`, ordenado por `order_id` y `sku`." }
+              - { name: "Q2", type: "filas", desc: "`customer_email`, `orders_count`, `total_spent`, de mayor a menor gasto." }
+              - { name: "Q3", type: "3 filas", desc: "`sku`, `units_sold`, de mayor a menor." }
+              - { name: "Q4", type: "filas", desc: "`id`, `customer_email`, `created_at` de los pedidos sin líneas." }
+              - { name: "Q5", type: "filas", desc: "`id`, `customer_email`, `total`, `created_at`." }
+              - { name: "medición", type: "tabla en el README", desc: "Tipo de nodo (`Seq Scan` o `Index Scan`) y `Execution Time` en ms, antes y después." }
+            rules:
+              - "Ninguna consulta usa `SELECT *`: se nombran las columnas."
+              - "Q1 usa `JOIN`, Q2 y Q3 usan `GROUP BY`, y Q4 se resuelve con `LEFT JOIN ... IS NULL` o con `NOT EXISTS`."
+              - "Toda consulta con `ORDER BY` desempata con una segunda columna, para que el resultado sea siempre el mismo."
+              - "Q5 calcula la fecha con `now() - interval '7 days'`. No lleva una fecha escrita a mano."
+              - "El índice se justifica con `EXPLAIN ANALYZE`, medido sobre los datos del seed. «Debería ir más rápido» no cuenta."
+              - "El seed es un script repetible (usa `generate_series`), no un volcado de un millón de `INSERT`."
+            examples:
+              - title: "Forma del resultado de Q2"
+                lang: "sql"
+                output: |
+                  customer_email   | orders_count | total_spent
+                  -----------------+--------------+------------
+                  luis@example.com |            1 |      200.00
+                  ana@example.com  |            2 |      100.00
+              - title: "Sección Performance del README"
+                lang: "markdown"
+                output: |
+                  | Q5 (last 7 days) | Plan node  | Execution time |
+                  |------------------|------------|----------------|
+                  | Before index     | Seq Scan   | (tu medición) ms |
+                  | After index      | Index Scan | (tu medición) ms |
+            edge_cases:
+              - "Inserta a mano un pedido sin líneas y comprueba que Q4 lo devuelve y que Q1 no."
+              - "Dos productos empatados en unidades en Q3: el orden debe ser el mismo en cada ejecución."
+              - "Con pocos datos PostgreSQL ignora el índice y sigue con `Seq Scan`. No es un error: por eso se mide con 100 000 pedidos."
+              - "Después de cargar el seed, ejecuta `ANALYZE` antes de medir."
+            out_of_scope:
+              - "Reescribir los endpoints con SQL nativo. La API sigue usando JPA."
+              - "Particiones, vistas materializadas y réplicas."
           steps:
             - title: "Consultas"
-              body: "Escribe cinco consultas: pedidos con su cliente, total por cliente, los tres productos más vendidos, clientes sin pedidos y pedidos de los últimos 7 días."
+              body: "Escribe las cinco consultas del requerimiento en `db/queries.sql` y pruébalas con pocos datos, donde puedas comprobar el resultado a ojo."
             - title: "Mide"
               body: "Carga datos de prueba suficientes y mira el plan de una consulta lenta con `EXPLAIN ANALYZE`."
             - title: "Índice"
@@ -404,6 +631,89 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Entradas validadas y todos los errores de la API con el mismo formato."
+          spec:
+            context: |
+              El equipo web abrió un ticket: mandaron un pedido con cantidad `-3`, la API respondió
+              `201` y el total salió negativo. Otro día recibieron un `500` con un stack trace de
+              Hibernate en el cuerpo. Piden dos cosas: que la API rechace los datos malos, y que
+              todos los errores tengan la misma forma para tratarlos con un solo bloque de código.
+            requirements:
+              - "`POST /orders` y `PUT /orders/{id}` validan el cuerpo antes de llegar al servicio."
+              - "Un cuerpo inválido responde `400` con la lista de todos los campos que fallaron, no solo el primero."
+              - "Todos los errores de la API (400, 404, 405, 500) responden con formato Problem Details (RFC 9457) y `Content-Type: application/problem+json`."
+              - "Una sola clase con `@RestControllerAdvice` convierte las excepciones en respuestas. Los controladores no tienen `try/catch`."
+              - "Un pedido inexistente lanza una excepción propia, `OrderNotFoundException`, que el manejador convierte en `404`."
+            inputs:
+              - { name: "customerEmail", type: "string", desc: "Obligatorio, con formato de correo, máximo 255 caracteres." }
+              - { name: "items", type: "array", desc: "Obligatorio, con al menos 1 línea y máximo 50." }
+              - { name: "items[].sku", type: "string", desc: "Obligatorio, no en blanco, máximo 40 caracteres." }
+              - { name: "items[].productName", type: "string", desc: "Obligatorio, no en blanco, máximo 120 caracteres." }
+              - { name: "items[].unitPrice", type: "number", desc: "Obligatorio, mayor que `0`, máximo dos decimales." }
+              - { name: "items[].quantity", type: "integer", desc: "Obligatorio, entre `1` y `1000`." }
+            outputs:
+              - { name: "type", type: "string (URI)", desc: "Identifica el tipo de problema. `about:blank` si no hay uno específico." }
+              - { name: "title", type: "string", desc: "Resumen corto y fijo para ese tipo de error." }
+              - { name: "status", type: "integer", desc: "El mismo código HTTP de la respuesta." }
+              - { name: "detail", type: "string", desc: "Explicación de este caso concreto, pensada para quien integra." }
+              - { name: "instance", type: "string", desc: "La ruta que se pidió." }
+              - { name: "errors", type: "array", desc: "Solo en los `400` de validación: objetos con `field` y `message`." }
+            rules:
+              - "Las reglas van como anotaciones de Bean Validation en `OrderRequest` (`@NotBlank`, `@Email`, `@Size`, `@Positive`, `@Min`, `@Valid` en la lista)."
+              - "Ninguna respuesta incluye stack trace, nombres de clases Java ni texto SQL."
+              - "Un error inesperado responde `500` con un `detail` genérico. El detalle real va al log del servidor, con el stack trace."
+              - "Un pedido rechazado no se guarda."
+              - "El nombre de `field` usa la ruta del JSON, por ejemplo `items[0].quantity`."
+            examples:
+              - title: "Pedido con dos campos inválidos"
+                input: |
+                  POST /orders
+                  Content-Type: application/json
+
+                  {
+                    "customerEmail": "no-es-un-correo",
+                    "items": [
+                      { "sku": "KB-001", "productName": "Teclado", "unitPrice": 40.00, "quantity": 0 }
+                    ]
+                  }
+                output: |
+                  HTTP/1.1 400
+                  Content-Type: application/problem+json
+
+                  {
+                    "type": "about:blank",
+                    "title": "Bad Request",
+                    "status": 400,
+                    "detail": "Validation failed for 2 fields",
+                    "instance": "/orders",
+                    "errors": [
+                      { "field": "customerEmail", "message": "must be a well-formed email address" },
+                      { "field": "items[0].quantity", "message": "must be greater than or equal to 1" }
+                    ]
+                  }
+              - title: "Pedido inexistente"
+                input: |
+                  GET /orders/00000000-0000-0000-0000-000000000000
+                output: |
+                  HTTP/1.1 404
+                  Content-Type: application/problem+json
+
+                  {
+                    "type": "about:blank",
+                    "title": "Not Found",
+                    "status": 404,
+                    "detail": "Order 00000000-0000-0000-0000-000000000000 not found",
+                    "instance": "/orders/00000000-0000-0000-0000-000000000000"
+                  }
+            edge_cases:
+              - "JSON mal formado (falta una llave): `400` con Problem Details, no `500`."
+              - "`items` vacío (`[]`) o ausente: `400` con el campo `items` en `errors`."
+              - "`quantity` enviado como texto (`\"dos\"`): `400`."
+              - "Un id que no es UUID: `400` con el mismo formato."
+              - "Cuerpo vacío en `POST /orders`: `400`."
+            out_of_scope:
+              - "Mensajes de error traducidos. Van en inglés, como los trae Bean Validation."
+              - "Comprobar que el `sku` existe en un catálogo."
+              - "Autenticación. Es el nivel 10."
           steps:
             - title: "Valida la entrada"
               body: "Agrega reglas al cuerpo de `POST /orders`: al menos una línea, cantidad mayor que cero y cliente obligatorio."
@@ -497,6 +807,55 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Pruebas de integración que arrancan el servicio y un PostgreSQL en contenedor, y recorren los endpoints de pedidos."
+          spec:
+            context: |
+              Un compañero cambió el tipo de una columna, las pruebas unitarias siguieron en verde y
+              la API se rompió en producción. Las pruebas con una base simulada no ven ese tipo de
+              fallo. El equipo quiere pruebas que levanten el servicio entero contra un PostgreSQL
+              real, y que corran igual en tu máquina y en CI sin instalar nada a mano.
+            requirements:
+              - "Las pruebas de integración arrancan la aplicación completa con `@SpringBootTest(webEnvironment = RANDOM_PORT)`."
+              - "La base es un contenedor `postgres:16` gestionado por Testcontainers, y sobre él corren las migraciones de Flyway."
+              - "Las peticiones son HTTP reales contra el puerto de la prueba (con `TestRestTemplate`, `RestClient` o RestAssured), no llamadas directas al servicio."
+              - "Hay al menos una prueba por cada caso de la lista de ejemplos."
+              - "`mvn verify` corre todo y termina en `BUILD SUCCESS` sin un PostgreSQL instalado ni levantado a mano."
+            inputs:
+              - { name: "Docker", type: "requisito", desc: "Tiene que estar en marcha: Testcontainers lo usa para crear la base." }
+              - { name: "cuerpos de prueba", type: "JSON", desc: "Cada prueba arma el pedido que necesita. No hay datos compartidos." }
+            outputs:
+              - { name: "mvn verify", type: "consola", desc: "`Tests run: N, Failures: 0, Errors: 0` y `BUILD SUCCESS`." }
+            rules:
+              - "Nada de H2 ni de bases en memoria: la base de las pruebas es el mismo motor y la misma versión que la real."
+              - "Cada prueba crea sus datos y no depende de lo que dejó otra. Pasan en cualquier orden y también una sola."
+              - "Se comprueba el código HTTP, las cabeceras que importan y el cuerpo. Comprobar solo el `200` no es una prueba."
+              - "Las clases de integración terminan en `IT` (`OrderApiIT`) y las unitarias en `Test`, para poder correrlas por separado."
+              - "El contenedor se comparte entre las pruebas de una clase. No se levanta uno por método."
+            examples:
+              - title: "Casos que deben existir"
+                lang: "casos"
+                output: |
+                  Camino feliz
+                    POST /orders válido        -> 201, cabecera Location, total 95.00
+                    GET /orders/{id}           -> 200 con el mismo pedido y sus 2 líneas
+                    GET /orders                -> 200 y la lista contiene el pedido creado
+                    PUT /orders/{id}           -> 200, total recalculado, mismo id y createdAt
+                    DELETE /orders/{id}        -> 204; el GET siguiente -> 404
+                  Errores
+                    POST con quantity 0        -> 400 application/problem+json con items[0].quantity en errors
+                    POST con correo inválido   -> 400 y el pedido no se guarda
+                    GET de un id inexistente   -> 404 con Problem Details
+                    GET /orders/abc            -> 400
+                  Persistencia
+                    tras el POST hay 1 fila en orders y 2 en order_items
+                    tras el DELETE no queda ninguna fila en order_items
+            edge_cases:
+              - "Ejecuta una sola prueba (`mvn verify -Dit.test=OrderApiIT#deleteReturns204`): debe pasar sola."
+              - "Con Docker apagado, el fallo dice que no encuentra Docker. No es un error de tu código."
+              - "Ejecuta dos veces seguidas: la segunda no falla por datos de la primera."
+            out_of_scope:
+              - "Pruebas de carga y de rendimiento."
+              - "Mocks de la base o del repositorio."
+              - "Probar la consola o el frontend."
           steps:
             - title: "Testcontainers"
               body: "Agrega Testcontainers y configura un contenedor de PostgreSQL para las pruebas."
@@ -590,6 +949,80 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Crear un pedido descuenta inventario de cada producto. Si falta inventario de uno solo, no se guarda nada."
+          spec:
+            context: |
+              Bodega reporta que el sistema vendió 12 teclados cuando había 10. Además encontraron
+              pedidos a medias: el inventario de dos productos se descontó, el tercero falló, y el
+              pedido nunca apareció. A partir de ahora, crear un pedido y descontar su inventario
+              es una sola operación: ocurre completa o no ocurre.
+            requirements:
+              - "Una migración nueva crea la tabla `inventory`."
+              - "`POST /orders` descuenta de `inventory.available` la cantidad de cada línea y guarda el pedido, todo en la misma transacción."
+              - "Si algún producto no tiene inventario suficiente, la API responde `409 Conflict` con Problem Details y no cambia nada en la base."
+              - "El método del servicio que crea el pedido está anotado con `@Transactional`."
+              - "Una prueba de integración demuestra el rollback con el ejemplo de abajo."
+            inputs:
+              - { name: "inventory.sku", type: "varchar(40)", desc: "Clave primaria. El mismo `sku` de las líneas del pedido." }
+              - { name: "inventory.available", type: "integer NOT NULL", desc: "Unidades disponibles. Con `CHECK (available >= 0)`." }
+              - { name: "cuerpo de POST /orders", type: "JSON", desc: "El mismo del nivel 5. No cambia." }
+            outputs:
+              - { name: "201", type: "OrderResponse", desc: "Pedido creado e inventario descontado." }
+              - { name: "409", type: "Problem Details", desc: "`detail` nombra el `sku` que falló, cuánto se pidió y cuánto hay." }
+            rules:
+              - "Todo o nada: si falla una línea, no queda ni el pedido, ni sus líneas, ni el descuento de las líneas anteriores."
+              - "Un `sku` que no existe en `inventory` se trata como inventario `0`: responde `409`."
+              - "Si el mismo `sku` aparece en dos líneas del pedido, se suman sus cantidades antes de comparar."
+              - "La falta de inventario es una excepción propia (`InsufficientStockException`) que el manejador del nivel 5 convierte en `409`."
+              - "La restricción `CHECK (available >= 0)` se queda en la base como última defensa, aunque el servicio ya lo compruebe."
+              - "La validación del cuerpo va antes: un pedido inválido responde `400` sin tocar el inventario."
+            examples:
+              - title: "El tercer producto no tiene inventario"
+                input: |
+                  inventory:  KB-001 = 5,  MS-002 = 5,  HD-003 = 0
+
+                  POST /orders
+                  {
+                    "customerEmail": "ana@example.com",
+                    "items": [
+                      { "sku": "KB-001", "productName": "Teclado", "unitPrice": 40.00, "quantity": 2 },
+                      { "sku": "MS-002", "productName": "Mouse", "unitPrice": 15.00, "quantity": 1 },
+                      { "sku": "HD-003", "productName": "Disco", "unitPrice": 60.00, "quantity": 1 }
+                    ]
+                  }
+                output: |
+                  HTTP/1.1 409
+                  Content-Type: application/problem+json
+
+                  {
+                    "type": "about:blank",
+                    "title": "Conflict",
+                    "status": 409,
+                    "detail": "Insufficient stock for HD-003: requested 1, available 0",
+                    "instance": "/orders"
+                  }
+
+                  Después del fallo:
+                  inventory:  KB-001 = 5,  MS-002 = 5,  HD-003 = 0
+                  orders: 0 filas    order_items: 0 filas
+              - title: "Pedido que sí alcanza"
+                input: |
+                  inventory:  KB-001 = 5,  MS-002 = 5
+
+                  POST /orders con KB-001 x 2 y MS-002 x 1
+                output: |
+                  HTTP/1.1 201
+
+                  inventory:  KB-001 = 3,  MS-002 = 4
+                  orders: 1 fila     order_items: 2 filas
+            edge_cases:
+              - "Pedir exactamente lo que hay (`available = 2`, `quantity = 2`): se acepta y queda en `0`."
+              - "El mismo `sku` en dos líneas con 3 y 3 unidades y `available = 5`: `409`."
+              - "Quita `@Transactional` un momento y corre la prueba del rollback: debe fallar. Si sigue en verde, la prueba no está demostrando nada."
+              - "Una excepción comprobada (`extends Exception`) no hace rollback por defecto. Usa una no comprobada o decláralo en la anotación."
+            out_of_scope:
+              - "Dos pedidos simultáneos por la última unidad. Resolverlo exige bloqueos y aquí no se pide."
+              - "Devolver inventario al borrar o al modificar un pedido."
+              - "Endpoints para administrar el inventario: se carga con SQL."
           steps:
             - title: "Inventario"
               body: "Agrega una tabla de inventario por producto, con su migración."
@@ -683,6 +1116,61 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un `Dockerfile` para OrderBridge y un `docker-compose.yml` que levanta el servicio y PostgreSQL juntos."
+          spec:
+            context: |
+              Entró una persona nueva al equipo y tardó un día y medio en hacer correr OrderBridge:
+              versión de Java distinta, PostgreSQL mal configurado, un paso que solo estaba en tu
+              cabeza. El objetivo es que el siguiente tarde cinco minutos, con Docker como único
+              requisito y un solo comando.
+            requirements:
+              - "Un `Dockerfile` en dos etapas: la primera compila el jar con Maven y JDK 21; la segunda solo lo ejecuta sobre una imagen JRE 21."
+              - "Un `docker-compose.yml` con dos servicios: `app` (construido desde el `Dockerfile`) y `db` (`postgres:16`)."
+              - "`db` guarda sus datos en un volumen con nombre."
+              - "`db` tiene un `healthcheck` con `pg_isready`, y `app` arranca solo cuando `db` está sana (`depends_on` con `condition: service_healthy`)."
+              - "La configuración de la base llega a `app` por variables de entorno definidas en Compose, leídas de un archivo `.env`."
+              - "Un `.dockerignore` deja fuera `target/`, `.git/` y los archivos del editor."
+              - "`docker compose up -d --build` desde un clon limpio deja la API respondiendo en `http://localhost:8080`."
+            inputs:
+              - { name: "POSTGRES_DB", type: "variable de entorno", desc: "Nombre de la base, por ejemplo `orderbridge`." }
+              - { name: "POSTGRES_USER", type: "variable de entorno", desc: "Usuario de la base." }
+              - { name: "POSTGRES_PASSWORD", type: "variable de entorno", desc: "Contraseña. Vive en `.env`, que no se sube al repositorio." }
+              - { name: "SPRING_DATASOURCE_URL", type: "variable de entorno", desc: "`jdbc:postgresql://db:5432/orderbridge`. El host es el nombre del servicio, no `localhost`." }
+              - { name: "SPRING_DATASOURCE_USERNAME", type: "variable de entorno", desc: "El mismo usuario que `POSTGRES_USER`." }
+              - { name: "SPRING_DATASOURCE_PASSWORD", type: "variable de entorno", desc: "La misma contraseña que `POSTGRES_PASSWORD`." }
+            outputs:
+              - { name: "docker compose ps", type: "consola", desc: "`db` en estado `healthy` y `app` en `running`." }
+              - { name: "GET /status", type: "HTTP", desc: "`200` con `{\"service\":\"orderbridge\",\"status\":\"UP\"}`." }
+              - { name: "imagen final", type: "imagen Docker", desc: "Contiene el JRE y el jar. Sin Maven, sin código fuente y sin JDK." }
+            rules:
+              - "El contenedor de la aplicación no corre como `root`: el `Dockerfile` crea un usuario y cambia a él con `USER`."
+              - "Las etiquetas de las imágenes base llevan versión (`postgres:16`, `eclipse-temurin:21-jre`). Nunca `latest`."
+              - "`.env` está en `.gitignore`. Se sube un `.env.example` con las mismas claves y valores de ejemplo."
+              - "El puerto de PostgreSQL no se publica al host salvo que lo necesites para depurar. La aplicación le habla por la red interna de Compose."
+              - "El `Dockerfile` copia primero el `pom.xml` y descarga dependencias, y después copia el código, para que cambiar una clase no vuelva a descargar todo."
+            examples:
+              - title: "Arranque desde un clon limpio"
+                input: |
+                  git clone https://github.com/<usuario>/orderbridge.git
+                  cd orderbridge
+                  cp .env.example .env
+                  docker compose up -d --build
+                  docker compose ps
+                  curl http://localhost:8080/status
+                output: |
+                  NAME                 STATUS
+                  orderbridge-db-1     Up (healthy)
+                  orderbridge-app-1    Up
+
+                  {"service":"orderbridge","status":"UP"}
+            edge_cases:
+              - "`docker compose down` y luego `up`: los pedidos siguen ahí. Con `down -v` se borran, y eso tiene que quedar avisado en el README."
+              - "Primer arranque con la base vacía: Flyway crea las tablas y la aplicación no falla por arrancar antes que la base."
+              - "Ejecuta `docker compose exec app whoami`: no debe responder `root`."
+              - "Las pruebas de integración del nivel 6 siguen pasando: usan su propio contenedor, no el de Compose."
+            out_of_scope:
+              - "Kubernetes, registros de imágenes y despliegue en la nube."
+              - "Reducir el tamaño de la imagen más allá de las dos etapas."
+              - "HTTPS y proxy inverso."
           steps:
             - title: "Imagen"
               body: "Escribe un `Dockerfile` en dos etapas: una compila con Maven y la otra solo ejecuta el jar."
@@ -777,6 +1265,52 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un workflow de GitHub Actions que compila y prueba OrderBridge en cada push y en cada pull request."
+          spec:
+            context: |
+              La semana pasada alguien subió a `main` un cambio que no compilaba y nadie lo notó
+              hasta el día siguiente. El equipo decide que ningún cambio entra sin que una máquina
+              neutral lo compile y corra todas las pruebas. «En mi máquina funciona» deja de ser
+              un argumento.
+            requirements:
+              - "Existe `.github/workflows/ci.yml` con un workflow llamado `CI`."
+              - "Se dispara en cada `push` a `main` y en cada `pull_request` contra `main`."
+              - "El job corre en `ubuntu-latest`, descarga el código, instala JDK 21 (Temurin) con caché de Maven y ejecuta `mvn -B verify`."
+              - "`mvn verify` incluye las pruebas unitarias y las de integración con Testcontainers."
+              - "Si una prueba falla o el código no compila, el workflow termina en rojo."
+              - "El README muestra la insignia de estado del workflow."
+            inputs:
+              - { name: "push a main", type: "evento", desc: "Cualquier commit que llegue a la rama principal." }
+              - { name: "pull_request", type: "evento", desc: "Abrir o actualizar un pull request contra `main`." }
+            outputs:
+              - { name: "check del commit", type: "✓ o ✗ en GitHub", desc: "Visible junto a cada commit y en cada pull request." }
+              - { name: "log del job", type: "texto", desc: "El `Tests run: ...` de Maven y, si falla, qué prueba falló." }
+              - { name: "insignia", type: "imagen en el README", desc: "`passing` en verde para `main`." }
+            rules:
+              - "El workflow no contiene contraseñas ni tokens escritos. Lo que haga falta va en los secretos del repositorio."
+              - "Las acciones se usan con versión fija (`actions/checkout@v4`, `actions/setup-java@v4`), no con `@main`."
+              - "Ningún paso lleva `continue-on-error` ni se saltan pruebas (`-DskipTests`) para que quede verde."
+              - "El job declara `timeout-minutes`, para que un cuelgue no consuma minutos sin límite."
+              - "El workflow declara `permissions: contents: read`: solo necesita leer el código."
+            examples:
+              - title: "Demostrar que el rojo funciona"
+                input: |
+                  1. Crea una rama y cambia una aserción para que falle
+                  2. git push y abre un pull request
+                  3. Mira el check del pull request
+                  4. Corrige la aserción y vuelve a subir
+                output: |
+                  Paso 3:  ✗ CI / build — Failing
+                           Tests run: 24, Failures: 1, Errors: 0
+                           BUILD FAILURE
+                  Paso 4:  ✓ CI / build — Successful
+            edge_cases:
+              - "Si el workflow pasa en verde con una prueba rota, revisa que el comando sea `verify` y no `compile` o `package -DskipTests`."
+              - "Las pruebas de integración necesitan Docker: en `ubuntu-latest` ya viene instalado, no hay que agregar un servicio de PostgreSQL al workflow."
+              - "La segunda ejecución debe ser más rápida que la primera. Si no, la caché de Maven no está funcionando."
+            out_of_scope:
+              - "Despliegue automático y publicación de imágenes."
+              - "Matrices de varias versiones de Java o de sistemas operativos."
+              - "Análisis estático, cobertura y escaneo de dependencias."
           steps:
             - title: "Workflow"
               body: "Crea `.github/workflows/ci.yml` con JDK 21, caché de Maven y `mvn verify`."
@@ -870,6 +1404,67 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Perfiles `dev` y `prod`, credenciales leídas de variables de entorno y los endpoints de escritura protegidos."
+          spec:
+            context: |
+              Seguridad revisó el repositorio antes de hacerlo público y dejó tres hallazgos: la
+              contraseña de la base está en `application.yml`, la misma configuración se usa en
+              desarrollo y en producción, y cualquiera que conozca la URL puede borrar pedidos.
+              El repositorio no se publica hasta cerrar los tres.
+            requirements:
+              - "Hay dos perfiles de Spring: `dev` y `prod`, con `application-dev.yml` y `application-prod.yml`. Lo común queda en `application.yml`."
+              - "Las credenciales de la base y las de la API se leen de variables de entorno. No hay ninguna escrita en archivos versionados."
+              - "`POST`, `PUT` y `DELETE` sobre `/orders` exigen autenticación HTTP Basic."
+              - "`GET /status`, `GET /orders` y `GET /orders/{id}` siguen abiertos."
+              - "Existe un `.env.example` con todas las variables y valores de ejemplo, y `.env` está en `.gitignore`."
+              - "El historial de Git no contiene ninguna contraseña real."
+              - "Las pruebas de integración se actualizan: mandan credenciales en las escrituras y hay pruebas nuevas para el `401`."
+            inputs:
+              - { name: "SPRING_PROFILES_ACTIVE", type: "variable de entorno", desc: "`dev` o `prod`." }
+              - { name: "DB_URL", type: "variable de entorno", desc: "URL JDBC de la base." }
+              - { name: "DB_USER", type: "variable de entorno", desc: "Usuario de la base." }
+              - { name: "DB_PASSWORD", type: "variable de entorno", desc: "Contraseña de la base." }
+              - { name: "API_USER", type: "variable de entorno", desc: "Usuario que puede escribir en la API." }
+              - { name: "API_PASSWORD", type: "variable de entorno", desc: "Su contraseña." }
+              - { name: "Authorization", type: "cabecera HTTP", desc: "`Basic <base64 de usuario:contraseña>` en las peticiones de escritura." }
+            outputs:
+              - { name: "401", type: "HTTP", desc: "Escritura sin credenciales o con credenciales incorrectas. Incluye la cabecera `WWW-Authenticate: Basic`." }
+              - { name: "201 / 200 / 204", type: "HTTP", desc: "Escritura con credenciales correctas: los mismos códigos de siempre." }
+              - { name: "200", type: "HTTP", desc: "Lecturas y `/status`, sin credenciales." }
+            rules:
+              - "En `prod` no hay valores por defecto para los secretos: si falta una variable, el servicio no arranca y el error dice cuál falta."
+              - "En `dev` se permiten valores por defecto solo para apuntar a la base local de Compose."
+              - "La API no guarda sesión (`SessionCreationPolicy.STATELESS`) y CSRF está desactivado, porque no hay navegador con cookies."
+              - "La contraseña de la API se compara contra un hash (`BCryptPasswordEncoder`), no en texto plano."
+              - "En `prod` el nivel de log es `INFO` y no se imprimen las consultas SQL. En `dev` sí puedes verlas."
+              - "Si una contraseña real llegó alguna vez al historial, se cambia. Borrarla del último commit no la quita del historial."
+            examples:
+              - title: "Escribir sin credenciales"
+                input: |
+                  curl -i -X DELETE http://localhost:8080/orders/3f2b8c1e-6a4d-4e0b-9c7a-2d5e8f1a0b3c
+                output: |
+                  HTTP/1.1 401
+                  WWW-Authenticate: Basic realm="Realm"
+              - title: "Escribir con credenciales"
+                input: |
+                  curl -i -u "$API_USER:$API_PASSWORD" -X DELETE http://localhost:8080/orders/3f2b8c1e-6a4d-4e0b-9c7a-2d5e8f1a0b3c
+                output: |
+                  HTTP/1.1 204
+              - title: "Buscar secretos en el historial"
+                input: |
+                  git log -p --all -S "password" -- "*.yml" "*.properties"
+                output: |
+                  (solo referencias a variables como ${DB_PASSWORD}; ningún valor real)
+            edge_cases:
+              - "Usuario correcto con contraseña equivocada: `401`, no `403` ni `500`."
+              - "`GET /orders` sin credenciales: `200`."
+              - "Arrancar con `prod` sin `DB_PASSWORD`: el servicio no levanta."
+              - "Un `POST` inválido sin credenciales responde `401`, no `400`: la autenticación va antes que la validación."
+              - "El `docker-compose.yml` del nivel 8 sigue funcionando con los nombres nuevos de las variables."
+            out_of_scope:
+              - "JWT, OAuth2 y proveedores de identidad."
+              - "Roles y permisos distintos por usuario: hay un solo usuario de escritura."
+              - "HTTPS. En producción iría delante del servicio; aquí no se configura."
+              - "Gestores de secretos (Vault, Secret Manager)."
           steps:
             - title: "Perfiles"
               body: "Separa la configuración en `application-dev.yml` y `application-prod.yml`."
@@ -963,6 +1558,59 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un README en inglés que explica qué es OrderBridge, cómo se ejecuta y cómo está armado, con un diagrama."
+          spec:
+            context: |
+              Una persona de reclutamiento técnico va a abrir tu repositorio y le va a dedicar unos
+              dos minutos. No va a leer el código primero: va a leer el README, y si puede, va a
+              copiar los comandos. El lector es alguien que no te conoce, no habla español y no
+              puede preguntarte nada.
+            requirements:
+              - "El `README.md` de la raíz está escrito completo en inglés."
+              - "Sección «Overview»: qué es OrderBridge y qué problema resuelve, en dos o tres frases."
+              - "Sección «Tech stack»: lenguaje, framework, base de datos y herramientas, con sus versiones."
+              - "Sección «Getting started»: requisitos previos y los comandos exactos para levantarlo con Docker Compose."
+              - "Sección «API»: una tabla con método, ruta, si requiere autenticación y códigos de respuesta, más un ejemplo de `curl` para crear un pedido."
+              - "Sección «Running the tests»: el comando y qué necesita."
+              - "Sección «Architecture»: un diagrama Mermaid y un párrafo que lo explica."
+              - "Sección «Design decisions»: dos o tres decisiones, cada una con lo que se eligió, la alternativa y lo que se sacrificó."
+              - "La insignia de CI del nivel 9 está arriba, junto al título."
+            outputs:
+              - { name: "README.md", type: "Markdown", desc: "Se lee completo en menos de cinco minutos." }
+              - { name: "diagrama", type: "bloque `mermaid`", desc: "GitHub lo dibuja solo. Muestra cliente, API, capas internas y PostgreSQL, con flechas etiquetadas." }
+            rules:
+              - "Cada comando del README funciona copiado tal cual en un clon limpio. Ninguno depende de algo que solo existe en tu máquina."
+              - "Los comandos van en bloques de código con su lenguaje (`bash`, `json`), no en medio de un párrafo."
+              - "El README no contiene credenciales reales: remite a `.env.example`."
+              - "Las decisiones de diseño dicen el costo. «Usé PostgreSQL porque es bueno» no es una decisión; «PostgreSQL en lugar de H2 en las pruebas: más lentas, pero prueban el motor real» sí."
+              - "Inglés simple y directo, en presente. Frases cortas antes que frases elegantes."
+              - "No se describe lo que no existe todavía como si existiera. Lo pendiente va en una sección «Roadmap»."
+            examples:
+              - title: "Tabla de la sección API"
+                lang: "markdown"
+                output: |
+                  | Method | Path         | Auth  | Success | Errors        |
+                  |--------|--------------|-------|---------|---------------|
+                  | GET    | /status      | No    | 200     | —             |
+                  | POST   | /orders      | Basic | 201     | 400, 401, 409 |
+                  | GET    | /orders      | No    | 200     | —             |
+                  | GET    | /orders/{id} | No    | 200     | 400, 404      |
+                  | PUT    | /orders/{id} | Basic | 200     | 400, 401, 404 |
+                  | DELETE | /orders/{id} | Basic | 204     | 401, 404      |
+              - title: "Una decisión de diseño bien escrita"
+                lang: "markdown"
+                output: |
+                  ### Schema managed by Flyway, not by Hibernate
+                  Hibernate only validates the schema (`ddl-auto=validate`); every change is a
+                  versioned SQL migration. This costs a few minutes per change, but the schema
+                  history is reviewable and production never changes by surprise.
+            edge_cases:
+              - "Abre el README en GitHub, no solo en el editor: el diagrama Mermaid y las tablas pueden verse bien en local y rotos en la web."
+              - "Sigue tu propio «Getting started» en una carpeta limpia. Cada paso que tuviste que improvisar es un paso que falta."
+              - "Pásale el README a un corrector de inglés o a alguien que lo lea en voz alta: los errores de gramática restan más de lo que parece."
+            out_of_scope:
+              - "Documentación OpenAPI o Swagger."
+              - "Un sitio de documentación aparte o una wiki."
+              - "Traducción al español."
           steps:
             - title: "Lo esencial"
               body: "Escribe en inglés: qué hace el servicio, requisitos previos, cómo ejecutarlo con Docker Compose y cómo correr las pruebas."
@@ -1056,6 +1704,59 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Una entrevista simulada de una hora sobre OrderBridge, en inglés, con sus fallos anotados en el repositorio."
+          spec:
+            context: |
+              En una entrevista técnica real te van a pedir que expliques un proyecto tuyo y van a
+              tirar del hilo: por qué esa decisión, qué pasa si falla esto, cómo lo probarías.
+              Haber construido OrderBridge no garantiza saber explicarlo en inglés y con el reloj
+              corriendo. Este ejercicio encuentra los huecos antes que un entrevistador.
+            requirements:
+              - "Una sesión de entrevista simulada de 45 a 60 minutos, toda en inglés, hablada y sin leer apuntes."
+              - "La sesión cubre los siete temas de la tabla de entradas, con al menos dos preguntas por tema."
+              - "Durante la sesión o justo al terminar, se anota cada pregunta que no se respondió bien."
+              - "El archivo `docs/mock-interview.md` registra la fecha, la duración, quién o qué entrevistó, y al menos cinco preguntas falladas."
+              - "Cada pregunta fallada lleva cuatro partes: la pregunta, lo que respondiste, qué estuvo mal o faltó, y la respuesta corregida en inglés."
+              - "El archivo cierra con una lista de tres temas para repasar antes del jefe."
+            inputs:
+              - { name: "REST", type: "tema", desc: "Métodos, códigos de estado, idempotencia, por qué `201` y `Location`." }
+              - { name: "Persistencia", type: "tema", desc: "JPA, relaciones, carga perezosa, por qué Flyway y `ddl-auto=validate`." }
+              - { name: "SQL", type: "tema", desc: "Joins, agregaciones, cómo leer un `EXPLAIN ANALYZE`, cuándo sirve un índice." }
+              - { name: "Errores", type: "tema", desc: "Validación, Problem Details, qué no se le muestra al cliente." }
+              - { name: "Transacciones", type: "tema", desc: "Qué garantiza `@Transactional`, cuándo hay rollback, cómo lo demostraste." }
+              - { name: "Pruebas", type: "tema", desc: "Unitarias frente a integración, por qué Testcontainers y no H2." }
+              - { name: "Entrega", type: "tema", desc: "Docker en dos etapas, Compose, CI, perfiles y secretos." }
+            outputs:
+              - { name: "docs/mock-interview.md", type: "Markdown", desc: "El registro de la sesión, subido al repositorio." }
+            rules:
+              - "La respuesta corregida va en inglés y cabe en un minuto hablado: de tres a cinco frases."
+              - "Lo que respondiste se anota tal como salió, sin maquillarlo. El valor está en ver la diferencia."
+              - "«No supe qué decir» es una anotación válida. Dejar la pregunta fuera no lo es."
+              - "Los fallos de inglés (vocabulario que faltó, una frase que no salió) se anotan igual que los técnicos."
+              - "Si quedaron menos de cinco preguntas falladas, la entrevista fue demasiado fácil: repite con preguntas de seguimiento más duras."
+            examples:
+              - title: "Una entrada del registro"
+                lang: "markdown"
+                output: |
+                  ## Q3. What happens if the third item of an order has no stock?
+
+                  **What I said:** "The order fails and... the database goes back."
+
+                  **What was missing:** I did not say why it goes back, and I could not
+                  remember the word "rollback". I did not mention the HTTP status.
+
+                  **Corrected answer:** "Creating the order and decreasing the stock run in
+                  one transaction. If any item has insufficient stock, the service throws an
+                  unchecked exception, Spring rolls back the whole transaction, and the API
+                  returns 409 Conflict. I have an integration test that proves the stock of
+                  the other items does not change."
+            edge_cases:
+              - "Sin una persona que te entreviste: usa una simulación de Interview Arena y responde en voz alta, no escribiendo."
+              - "Si te bloqueas más de 30 segundos, di en inglés que no lo sabes, anótalo y sigue. Detener la sesión no cuenta."
+              - "Grabar el audio ayuda a anotar después lo que de verdad dijiste. La grabación no se sube al repositorio."
+            out_of_scope:
+              - "Ejercicios de algoritmos en vivo."
+              - "Preguntas de comportamiento («tell me about a time...»)."
+              - "Diseño de sistemas a gran escala."
           steps:
             - title: "Haz la entrevista"
               body: "Usa una simulación de Interview Arena o pídele a alguien que te entreviste. Recorre el servicio de punta a punta en inglés."
@@ -1138,6 +1839,62 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "OrderBridge etapa 1 en un repositorio público de GitHub: API REST de pedidos con PostgreSQL, pruebas, Docker, CI y README en inglés."
+          spec:
+            context: |
+              Es la primera entrega de OrderBridge. A partir de hoy el enlace del repositorio va en
+              tu currículum, y quien lo abra lo va a juzgar como juzgaría el trabajo de un
+              compañero: lo clona, lo levanta, prueba un par de peticiones y lee el README. Esto
+              no es un ejercicio nuevo: es la revisión de aceptación de todo el mundo.
+            requirements:
+              - "El repositorio `orderbridge` es público en GitHub."
+              - "Desde un clon limpio, con Docker como único requisito, el servicio levanta siguiendo solo el README."
+              - "La API cumple el contrato de los niveles 1, 2, 5, 7 y 10: `/status`, los cinco endpoints de `/orders`, validación con Problem Details, inventario transaccional y escrituras autenticadas."
+              - "Los datos persisten en PostgreSQL y el esquema completo sale de las migraciones de Flyway."
+              - "`mvn verify` pasa en local y el workflow de CI está en verde en el commit etiquetado."
+              - "El README en inglés tiene todas las secciones del nivel 11 y su diagrama se ve en GitHub."
+              - "Existe la etiqueta `v0.1.0` y una release de GitHub con notas cortas de lo que incluye."
+            inputs:
+              - { name: "un clon limpio", type: "carpeta nueva", desc: "Sin tu `.env`, sin tu `target/` y sin tu base local." }
+              - { name: ".env", type: "archivo", desc: "Copiado de `.env.example` y completado con valores propios." }
+            outputs:
+              - { name: "repositorio", type: "URL pública", desc: "`https://github.com/<usuario>/orderbridge`." }
+              - { name: "v0.1.0", type: "etiqueta y release", desc: "Apunta a un commit con CI en verde." }
+              - { name: "prueba de humo", type: "consola", desc: "La secuencia del ejemplo responde con los códigos esperados." }
+            rules:
+              - "Ningún secreto en el repositorio ni en su historial. Revísalo antes de hacerlo público: después ya no hay vuelta atrás."
+              - "El repositorio no tiene archivos generados (`target/`), ni archivos del editor, ni código comentado, ni `TODO` sin dueño."
+              - "La etiqueta se crea sobre `main`, después de que CI pase. No sobre una rama a medias."
+              - "Lo que no llegó a esta etapa se declara en la sección «Roadmap» del README. No se esconde."
+              - "Los mensajes de commit de la rama principal se entienden sin abrir el diff."
+            examples:
+              - title: "Prueba de humo desde un clon limpio"
+                input: |
+                  git clone https://github.com/<usuario>/orderbridge.git && cd orderbridge
+                  cp .env.example .env
+                  docker compose up -d --build
+
+                  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/status
+                  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/orders
+                  curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/orders \
+                    -H "Content-Type: application/json" -d '{"customerEmail":"ana@example.com","items":[]}'
+                  curl -s -o /dev/null -w "%{http_code}\n" -u "$API_USER:$API_PASSWORD" -X POST http://localhost:8080/orders \
+                    -H "Content-Type: application/json" -d '{"customerEmail":"ana@example.com","items":[]}'
+                  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/orders/00000000-0000-0000-0000-000000000000
+                output: |
+                  200    <- /status
+                  200    <- lista de pedidos, sin credenciales
+                  401    <- escritura sin credenciales
+                  400    <- con credenciales, pero el pedido no tiene líneas
+                  404    <- pedido inexistente
+            edge_cases:
+              - "Prueba el clon en otra carpeta o, mejor, en otra máquina. Tu carpeta de trabajo tiene cosas que el repositorio no."
+              - "Abre el repositorio en una ventana privada del navegador: así ves lo que ve alguien sin tu sesión."
+              - "Si CI falla en el commit de la etiqueta, corrige, borra la etiqueta y vuelve a crearla sobre el commit bueno."
+              - "Crea un pedido válido con inventario cargado y otro sin inventario: `201` y `409`."
+            out_of_scope:
+              - "Desplegar el servicio en la nube."
+              - "Mensajería, caché y todo lo que pertenece a las etapas siguientes de OrderBridge."
+              - "Funcionalidades nuevas. Si no está en los niveles 1 a 11, no entra en `v0.1.0`."
           steps:
             - title: "Cierra pendientes"
               body: "Repasa los niveles 1 a 11 y termina lo que haya quedado a medias."

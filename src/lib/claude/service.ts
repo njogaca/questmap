@@ -33,6 +33,15 @@ async function queueGaps(gaps: string[], source: string) {
 
 /* ============================================================ evaluaciones */
 
+/** Requisitos y reglas del `spec` de un lab, para que la revisión los contraste con la evidencia. */
+function specForReview(spec: unknown): string {
+  if (!spec || typeof spec !== "object") return "";
+  const sp = spec as { requirements?: string[]; rules?: string[] };
+  const list = (label: string, prefix: string, items?: string[]) =>
+    items?.length ? `${label}:\n${items.map((t, i) => `- ${prefix}-${i + 1}: ${t}`).join("\n")}` : "";
+  return [list("Requirements", "RF", sp.requirements), list("Business rules", "RN", sp.rules)].filter(Boolean).join("\n");
+}
+
 export async function startEvaluation(kind: "open_answer" | "lab_review", questSlug: string, answer: string) {
   const clean = answer.trim();
   if (clean.length < 20) throw new Error("Escribe tu respuesta (mínimo 20 caracteres).");
@@ -47,6 +56,7 @@ export async function startEvaluation(kind: "open_answer" | "lab_review", questS
       ? [
           `Lab: ${quest.title}`,
           p.goal ? `Goal: ${p.goal}` : "",
+          specForReview(p.spec),
           p.expected ? `Expected result: ${p.expected}` : "",
           Array.isArray(p.checklist) ? `Checklist:\n- ${(p.checklist as string[]).join("\n- ")}` : "",
         ]

@@ -10,9 +10,12 @@ import { ErrorText, RewardBanner } from "../RewardBanner";
 import { RichText } from "../RichText";
 import { PROOF_COMMIT_OR_HOURS } from "@/lib/rules";
 import { btnGhost, btnPrimary } from "../ui";
+import { LabSpecView, type LabSpecData } from "./LabSpecView";
 
 export type LabPayload = {
   goal?: string;
+  /** El ejercicio como requerimiento de trabajo: requisitos, entradas, salidas, reglas, ejemplos. */
+  spec?: LabSpecData;
   steps?: { title: string; body?: string; commands?: string[] }[];
   expected?: string;
   checklist?: string[];
@@ -95,6 +98,10 @@ export function LabQuest({
           </ul>
         </div>
       )}
+
+      {payload.spec && <LabSpecView spec={payload.spec} />}
+
+      {payload.spec && (payload.steps ?? []).length > 0 && <h2 className="text-lg font-semibold">Cómo abordarlo</h2>}
 
       <ol className="space-y-4">
         {(payload.steps ?? []).map((s, i) => (

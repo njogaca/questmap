@@ -114,19 +114,64 @@ export const quizQuestionSchema = z.object({
 
 const resourceRef = z.object({ ref: slug, required: z.boolean().default(true) });
 
-export const questSchema = z.object({
-  slug,
-  type: z.enum(questTypes),
-  title: z.string().min(1),
-  required: z.boolean().default(true),
-  estimated_min: z.number().int().positive().optional(),
-  xp: z.number().int().nonnegative().optional(),
-  status,
-  skills: z.record(z.string(), z.number().positive().max(1)).default({}),
-  resources: z.array(resourceRef).default([]),
-  questions: z.array(quizQuestionSchema).default([]),
-  payload: z.record(z.string(), z.unknown()).default({}),
-});
+/** Un dato que entra o sale del ejercicio: nombre, tipo y qué significa. */
+const specField = z.object({ name: z.string().min(1), type: z.string().min(1), desc: z.string().min(1) }).strict();
+
+/**
+ * `payload.spec` de un lab: el ejercicio escrito como un requerimiento de trabajo. Todo es
+ * opcional salvo los requisitos, porque no todo ejercicio tiene entradas (un README no las tiene).
+ * Es estricto a propósito: una clave mal escrita falla al validar en vez de no pintarse.
+ */
+export const labSpecSchema = z
+  .object({
+    /** Quién lo pide y para qué: el ticket. */
+    context: z.string().min(1).optional(),
+    /** Requisitos funcionales. La UI los numera RF-1, RF-2… */
+    requirements: z.array(z.string().min(1)).min(1),
+    inputs: z.array(specField).default([]),
+    outputs: z.array(specField).default([]),
+    /** Reglas de negocio con sus números exactos. La UI las numera RN-1, RN-2… */
+    rules: z.array(z.string().min(1)).default([]),
+    /** Casos concretos: con esta entrada, esta salida. */
+    examples: z
+      .array(
+        z
+          .object({
+            title: z.string().min(1),
+            input: z.string().optional(),
+            output: z.string().min(1),
+            lang: z.string().optional(),
+          })
+          .strict(),
+      )
+      .default([]),
+    edge_cases: z.array(z.string().min(1)).default([]),
+    out_of_scope: z.array(z.string().min(1)).default([]),
+  })
+  .strict();
+export type LabSpec = z.infer<typeof labSpecSchema>;
+
+export const questSchema = z
+  .object({
+    slug,
+    type: z.enum(questTypes),
+    title: z.string().min(1),
+    required: z.boolean().default(true),
+    estimated_min: z.number().int().positive().optional(),
+    xp: z.number().int().nonnegative().optional(),
+    status,
+    skills: z.record(z.string(), z.number().positive().max(1)).default({}),
+    resources: z.array(resourceRef).default([]),
+    questions: z.array(quizQuestionSchema).default([]),
+    payload: z.record(z.string(), z.unknown()).default({}),
+  })
+  .superRefine((q, ctx) => {
+    if (q.payload.spec === undefined) return;
+    const r = labSpecSchema.safeParse(q.payload.spec);
+    if (r.success) return;
+    for (const issue of r.error.issues)
+      ctx.addIssue({ ...issue, path: ["payload", "spec", ...issue.path] });
+  });
 
 export const levelSchema = z.object({
   slug,

@@ -42,6 +42,37 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un proyecto Maven que imprime un saludo, subido a un repositorio tuyo en GitHub."
+          spec:
+            context: |
+              Es tu primer día en un equipo. Antes de darte una tarea de verdad, el líder técnico pide
+              lo mismo a todo el que entra: demostrar que tu máquina compila, ejecuta y publica código.
+              Si otra persona clona tu repositorio, debe poder correrlo sin preguntarte nada.
+            requirements:
+              - "El proyecto es Maven, con `pom.xml` en la raíz y el código en `src/main/java`."
+              - "La clase `Main` tiene un método `public static void main(String[] args)` que imprime una sola línea de saludo."
+              - "El proyecto compila y se ejecuta con el comando del paso 2, sin abrir el editor."
+              - "El repositorio en GitHub es tuyo, se llama `pedidos-consola` y tiene al menos un commit con mensaje descriptivo."
+              - "Existe un `.gitignore` que excluye `target/` y los archivos del editor (`.idea/`, `.vscode/`, `*.iml`)."
+            inputs:
+              - { name: "(ninguna)", type: "—", desc: "El programa no lee argumentos ni teclado." }
+            outputs:
+              - { name: "salida estándar", type: "String", desc: "Una línea con el saludo, terminada en salto de línea." }
+              - { name: "código de salida", type: "int", desc: "`0`: el programa termina sin error." }
+            rules:
+              - "La versión de Java se fija en el `pom.xml` con `<maven.compiler.release>21</maven.compiler.release>`; no depende de lo que tenga instalado cada quien."
+              - "El `groupId` sigue la convención de dominio invertido, por ejemplo `dev.tunombre`."
+              - "El mensaje del commit dice qué se hizo («Proyecto Maven inicial con saludo»), no «cambios» ni «prueba»."
+            examples:
+              - title: "Ejecución"
+                input: |
+                  mvn -q compile exec:java "-Dexec.mainClass=Main"
+                output: |
+                  Hola, OrderBridge
+            edge_cases:
+              - "Clona el repositorio en otra carpeta y ejecútalo ahí. Si solo funciona en la carpeta original, falta subir algo."
+              - "`git status` justo después de compilar no debe mostrar `target/` como pendiente."
+            out_of_scope:
+              - "Paquetes, pruebas y lectura de argumentos. Llegan en los niveles siguientes."
           steps:
             - title: "Instala y comprueba"
               body: "Instala el JDK 21, Maven y tu editor. Comprueba las versiones desde la terminal."
@@ -124,6 +155,60 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Un programa que calcula el total de un pedido a partir de precios y cantidades, con impuesto y descuento."
+          spec:
+            context: |
+              La tienda arma hoy los totales en una hoja de cálculo y se equivoca cuando hay descuento.
+              Ventas pide un programa que reciba los precios y las cantidades de un pedido y devuelva
+              el desglose que va en la factura. Por ahora los datos van escritos en el código; leerlos
+              del teclado es otra tarea.
+            requirements:
+              - "`calcularSubtotal(double[] precios, int[] cantidades)` devuelve un `double` con la suma de precio por cantidad de cada producto."
+              - "`calcularDescuento(double subtotal)` devuelve un `double` con el monto a descontar, que puede ser `0.0`."
+              - "`calcularImpuesto(double base)` devuelve un `double` con el impuesto sobre la base que recibe."
+              - "`main` declara los datos, llama a los tres métodos, calcula el total e imprime el desglose en cuatro líneas."
+              - "Ningún método de cálculo imprime ni lee datos. Solo `main` escribe en consola."
+            inputs:
+              - { name: "precios", type: "double[]", desc: "Precio unitario de cada producto, sin impuesto. Posición `i` = producto `i`." }
+              - { name: "cantidades", type: "int[]", desc: "Unidades de cada producto. Mismo largo y mismo orden que `precios`." }
+            outputs:
+              - { name: "Subtotal", type: "double", desc: "Suma de precio × cantidad, antes de descuento e impuesto." }
+              - { name: "Descuento", type: "double", desc: "Monto descontado. `0.00` si no aplica." }
+              - { name: "Impuesto", type: "double", desc: "Impuesto calculado después de restar el descuento." }
+              - { name: "Total", type: "double", desc: "Lo que paga el cliente." }
+            rules:
+              - "Subtotal = suma de `precios[i] * cantidades[i]` para todas las posiciones."
+              - "Descuento = 10 % del subtotal solo si el subtotal es **mayor** que 100.00. Con 100.00 exacto no hay descuento."
+              - "Impuesto = 19 % de (subtotal − descuento). El impuesto se calcula después del descuento, no antes."
+              - "Total = subtotal − descuento + impuesto."
+              - "Las tasas (0.10, 0.19) y el umbral (100.00) son constantes con nombre (`static final`), no números sueltos dentro de las fórmulas."
+              - "Los valores se imprimen con dos decimales y punto decimal: `String.format(Locale.US, \"%.2f\", valor)`. Se redondea solo al imprimir, nunca en medio del cálculo."
+            examples:
+              - title: "Con descuento (subtotal mayor que 100)"
+                input: |
+                  precios    = {25.00, 40.00, 12.50}
+                  cantidades = {2, 1, 4}
+                output: |
+                  Subtotal: 140.00
+                  Descuento: 14.00
+                  Impuesto: 23.94
+                  Total: 149.94
+              - title: "Justo en el umbral (sin descuento)"
+                input: |
+                  precios    = {50.00}
+                  cantidades = {2}
+                output: |
+                  Subtotal: 100.00
+                  Descuento: 0.00
+                  Impuesto: 19.00
+                  Total: 119.00
+            edge_cases:
+              - "Arreglos vacíos: las cuatro líneas salen en `0.00`."
+              - "Arreglos de distinto largo: `main` lo comprueba antes de calcular, imprime `Error: precios y cantidades deben tener el mismo largo` y termina sin desglose."
+              - "Una cantidad en `0` es válida: ese producto suma `0.00`."
+            out_of_scope:
+              - "Leer datos del teclado o de un archivo."
+              - "Precios o cantidades negativas. Las validaciones llegan en el nivel 5."
+              - "`BigDecimal`. En un sistema real el dinero no se guarda en `double`; aquí se usa a propósito para practicar tipos primitivos."
           steps:
             - title: "Datos de entrada"
               body: "Guarda precios y cantidades en arreglos. Usa `double` para precios e `int` para cantidades."
@@ -217,6 +302,64 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Tres clases que representan el dominio de pedidos, con sus datos protegidos y un total calculado por el propio pedido."
+          spec:
+            context: |
+              La calculadora del nivel 2 funcionó, pero ahora piden guardar quién compró y qué compró,
+              y los descuentos van a cambiar cada temporada. Dos arreglos paralelos ya no alcanzan:
+              el equipo quiere el dominio modelado con clases, y que agregar un descuento nuevo no
+              obligue a tocar la clase `Pedido`.
+            requirements:
+              - "`Producto` se crea con `new Producto(String nombre, double precio)` y expone `getNombre()` y `getPrecio()`."
+              - "`Cliente` se crea con `new Cliente(String nombre, String correo)` y expone `getNombre()` y `getCorreo()`."
+              - "`Pedido` se crea con `new Pedido(String id, Cliente cliente, Descuento descuento)` y expone `getId()` y `getCliente()`."
+              - "`Pedido.agregarLinea(Producto producto, int cantidad)` añade una línea al pedido. No devuelve nada."
+              - "`Pedido.subtotal()` devuelve un `double` con la suma de precio × cantidad de sus líneas."
+              - "`Pedido.total()` devuelve un `double`: el subtotal menos lo que diga su `Descuento`."
+              - "`Descuento` es una interfaz con un solo método, `double calcular(double subtotal)`, que devuelve el monto a descontar."
+              - "Hay dos implementaciones: `SinDescuento` (siempre `0.0`) y `DescuentoPorcentaje`, que se crea con `new DescuentoPorcentaje(double porcentaje)`."
+            inputs:
+              - { name: "nombre", type: "String", desc: "Nombre del producto o del cliente. No puede ser `null` ni estar en blanco." }
+              - { name: "precio", type: "double", desc: "Precio unitario. Mayor o igual que `0`." }
+              - { name: "correo", type: "String", desc: "Correo del cliente. Debe contener `@`." }
+              - { name: "id", type: "String", desc: "Identificador del pedido, por ejemplo `P-001`. No puede estar en blanco." }
+              - { name: "cantidad", type: "int", desc: "Unidades de un producto en una línea." }
+              - { name: "porcentaje", type: "double", desc: "Entre `0` y `100`. `10` significa 10 %." }
+            outputs:
+              - { name: "subtotal()", type: "double", desc: "Suma de las líneas, sin descuento." }
+              - { name: "total()", type: "double", desc: "Subtotal menos descuento. Nunca negativo." }
+            rules:
+              - "Todos los campos son `private`. Los de `Producto` y `Cliente` son además `final`: no hay métodos `set`."
+              - "Un dato que rompe una regla de la tabla de entradas se rechaza en el constructor con `IllegalArgumentException` y un mensaje que nombra el campo."
+              - "Nadie fuera de `Pedido` suma líneas. Si el total se calcula en `main`, el requisito no está cumplido."
+              - "`Pedido` no pregunta qué tipo de descuento tiene (nada de `instanceof` ni `if` por tipo): solo llama a `calcular`."
+              - "Un descuento nunca supera el subtotal."
+            examples:
+              - title: "Pedido con 10 % de descuento"
+                lang: "java"
+                input: |
+                  Cliente ana = new Cliente("Ana", "ana@example.com");
+                  Pedido pedido = new Pedido("P-001", ana, new DescuentoPorcentaje(10));
+                  pedido.agregarLinea(new Producto("Teclado", 40.00), 2);
+                  pedido.agregarLinea(new Producto("Mouse", 15.00), 1);
+                output: |
+                  pedido.subtotal()  // 95.0
+                  pedido.total()     // 85.5
+              - title: "El mismo pedido sin descuento"
+                lang: "java"
+                input: |
+                  new Pedido("P-002", ana, new SinDescuento())  // mismas dos líneas
+                output: |
+                  pedido.subtotal()  // 95.0
+                  pedido.total()     // 95.0
+            edge_cases:
+              - "`new Producto(\"Teclado\", -1)` lanza `IllegalArgumentException`."
+              - "`new Cliente(\"Ana\", \"sin-arroba\")` lanza `IllegalArgumentException`."
+              - "Un pedido sin líneas tiene subtotal y total `0.0`."
+              - "Si `Pedido` expone sus líneas, devuelve una copia o una vista de solo lectura: modificar esa lista desde fuera no cambia el pedido."
+            out_of_scope:
+              - "Validar la cantidad de una línea. Se hace en el nivel 5 con una excepción propia."
+              - "Impuestos. El total de este nivel es subtotal menos descuento."
+              - "Guardar los pedidos en algún lado. Eso es el nivel 4."
           steps:
             - title: "Producto y Cliente"
               body: "Crea `Producto` (nombre, precio) y `Cliente` (nombre, correo). Campos `private`, constructor que valide y métodos de lectura."
@@ -310,13 +453,61 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Una clase que guarda pedidos en memoria y permite buscarlos por id y filtrarlos."
+          spec:
+            context: |
+              Atención al cliente necesita encontrar un pedido en cuanto alguien llama con su número,
+              y ver todos los pedidos de una persona. Todavía no hay base de datos: los pedidos viven
+              en memoria mientras corre el programa. Lo que se defina aquí es el contrato que más
+              adelante cumplirá el repositorio de verdad.
+            requirements:
+              - "`RepositorioPedidos.agregar(Pedido pedido)` guarda el pedido. No devuelve nada."
+              - "`buscarPorId(String id)` devuelve un `Optional<Pedido>`."
+              - "`listarTodos()` devuelve una `List<Pedido>` con todos los pedidos, en el orden en que se agregaron."
+              - "`filtrarPorCliente(String correo)` devuelve una `List<Pedido>` con los pedidos de ese cliente."
+              - "`filtrarPorTotalMinimo(double minimo)` devuelve una `List<Pedido>` con los pedidos cuyo `total()` es mayor o igual que `minimo`."
+              - "`cantidad()` devuelve un `int` con el número de pedidos guardados."
+            inputs:
+              - { name: "pedido", type: "Pedido", desc: "El pedido del nivel 3. Su `getId()` es la clave." }
+              - { name: "id", type: "String", desc: "Identificador exacto, por ejemplo `P-001`. Distingue mayúsculas." }
+              - { name: "correo", type: "String", desc: "Correo del cliente. La comparación ignora mayúsculas y minúsculas." }
+              - { name: "minimo", type: "double", desc: "Total mínimo, incluido: un pedido de 85.50 entra con `minimo = 85.50`." }
+            outputs:
+              - { name: "buscarPorId", type: "Optional<Pedido>", desc: "Con valor si existe; `Optional.empty()` si no. Nunca `null`." }
+              - { name: "listas", type: "List<Pedido>", desc: "Lista nueva en cada llamada. Vacía si nada cumple, nunca `null`." }
+            rules:
+              - "El almacén interno es un `Map<String, Pedido>` privado. Buscar por id usa `get` del mapa; no recorre los pedidos."
+              - "Un id repetido se rechaza: `agregar` lanza `IllegalArgumentException` con el id en el mensaje y el pedido original queda intacto."
+              - "Las listas devueltas son independientes del almacén: agregarles o quitarles elementos no cambia el repositorio."
+              - "El orden de `listarTodos()` y de los filtros es el de inserción. Elige la implementación de `Map` que lo garantice."
+            examples:
+              - title: "Tres pedidos guardados"
+                input: |
+                  P-001  ana@example.com   total 85.50
+                  P-002  luis@example.com  total 200.00
+                  P-003  ana@example.com   total 14.50
+                output: |
+                  buscarPorId("P-002")               -> Optional[P-002]
+                  buscarPorId("P-999")               -> Optional.empty
+                  filtrarPorCliente("ANA@example.com") -> [P-001, P-003]
+                  filtrarPorTotalMinimo(85.50)       -> [P-001, P-002]
+                  filtrarPorTotalMinimo(500.00)      -> []
+                  cantidad()                         -> 3
+            edge_cases:
+              - "`agregar(null)` o `buscarPorId(null)` lanzan `IllegalArgumentException`; no un `NullPointerException` tres líneas más abajo."
+              - "Agregar `P-001` dos veces: la segunda lanza la excepción y `cantidad()` sigue igual."
+              - "`listarTodos().clear()` no vacía el repositorio."
+              - "Repositorio vacío: todos los métodos de consulta devuelven vacío sin fallar."
+            out_of_scope:
+              - "Borrar o modificar pedidos."
+              - "Guardar en archivo o en base de datos."
+              - "Uso desde varios hilos a la vez."
           steps:
             - title: "Almacén de pedidos"
               body: "Crea `RepositorioPedidos` con un `Map<String, Pedido>` por id. Métodos para agregar, buscar por id y listar todos."
             - title: "Filtros"
               body: "Agrega filtros por cliente y por total mínimo. Devuelven una `List<Pedido>` nueva; no modifican el almacén."
             - title: "Casos límite"
-              body: "Decide qué pasa con un id repetido y con un id que no existe, y hazlo explícito en el código."
+              body: "Implementa lo que el requerimiento decide para un id repetido, un id que no existe y un argumento `null`. Que se lea en el código, no que ocurra por accidente."
           checklist:
             - "Buscar por id no recorre toda la lista"
             - "Los filtros devuelven listas nuevas"
@@ -403,6 +594,59 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Pedidos que se validan con excepciones propias y un reporte calculado con streams."
+          spec:
+            context: |
+              Contabilidad encontró pedidos vacíos y líneas con cantidad cero dentro del sistema, y
+              nadie sabe cuándo entraron. Piden dos cosas: que un pedido inválido no pueda guardarse
+              y que el motivo quede claro, y un reporte de ventas que hoy sacan contando a mano.
+            requirements:
+              - "`PedidoInvalidoException` es una excepción propia que extiende `RuntimeException` y recibe el mensaje en el constructor."
+              - "`Pedido.validar()` no devuelve nada: lanza `PedidoInvalidoException` si el pedido rompe alguna regla."
+              - "`RepositorioPedidos.agregar` llama a `validar()` antes de guardar. Un pedido inválido nunca queda en el almacén."
+              - "`ReportePedidos.totalVendido(List<Pedido> pedidos)` devuelve un `double` con la suma de los totales."
+              - "`ReportePedidos.pedidoMasGrande(List<Pedido> pedidos)` devuelve un `Optional<Pedido>` con el de mayor total."
+              - "`ReportePedidos.totalPorCliente(List<Pedido> pedidos)` devuelve un `Map<String, Double>` de correo del cliente a suma de sus totales."
+              - "`main` arma varios pedidos, intenta guardar uno inválido, muestra el error e imprime el reporte de los válidos."
+            inputs:
+              - { name: "pedidos", type: "List<Pedido>", desc: "Pedidos ya validados, por ejemplo `repositorio.listarTodos()`. Puede venir vacía." }
+            outputs:
+              - { name: "totalVendido", type: "double", desc: "`0.0` con lista vacía." }
+              - { name: "pedidoMasGrande", type: "Optional<Pedido>", desc: "`Optional.empty()` con lista vacía. Si hay empate, el primero de la lista." }
+              - { name: "totalPorCliente", type: "Map<String, Double>", desc: "Una entrada por correo. Mapa vacío con lista vacía." }
+              - { name: "mensaje de error", type: "String", desc: "Lo que imprime `main` al atrapar la excepción: `Error: ` seguido del mensaje." }
+            rules:
+              - "Un pedido sin líneas es inválido. Mensaje: `El pedido <id> no tiene líneas`."
+              - "Una línea con cantidad menor que 1 es inválida. Mensaje: `Cantidad inválida para '<producto>' en el pedido <id>: <cantidad>`."
+              - "Los tres métodos del reporte se resuelven con streams. No hay `for` ni `while` en `ReportePedidos`."
+              - "La excepción se atrapa una sola vez, en `main`. Ningún `catch` queda vacío ni atrapa `Exception` a secas."
+              - "El reporte no modifica la lista que recibe."
+            examples:
+              - title: "Reporte de tres pedidos válidos"
+                input: |
+                  P-001  ana@example.com   total 85.50
+                  P-002  luis@example.com  total 200.00
+                  P-003  ana@example.com   total 14.50
+                output: |
+                  Total vendido: 300.00
+                  Pedido más grande: P-002 (200.00)
+                  ana@example.com: 100.00
+                  luis@example.com: 200.00
+              - title: "Intento de guardar un pedido inválido"
+                input: |
+                  P-004 sin líneas
+                  P-005 con la línea Teclado x 0
+                output: |
+                  Error: El pedido P-004 no tiene líneas
+                  Error: Cantidad inválida para 'Teclado' en el pedido P-005: 0
+            edge_cases:
+              - "Lista vacía: el reporte devuelve `0.0`, `Optional.empty()` y un mapa vacío, sin lanzar nada."
+              - "Tras el intento fallido, `repositorio.cantidad()` no cambió."
+              - "Una cantidad negativa da el mismo error que una cantidad en cero."
+              - "El programa no termina en el primer error: sigue y muestra el reporte."
+            out_of_scope:
+              - "Reportes por fecha: el pedido todavía no tiene fecha."
+              - "Ordenar las entradas de `totalPorCliente` de una forma particular."
+              - "Excepciones comprobadas (`extends Exception`)."
           steps:
             - title: "Validaciones"
               body: "Crea una excepción `PedidoInvalidoException`. Lánzala cuando el pedido no tenga líneas o una cantidad sea menor que 1, con un mensaje que diga qué falló."
@@ -496,6 +740,57 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Pruebas con JUnit para el total, los descuentos, las validaciones, la búsqueda y el reporte de los niveles 2 a 5."
+          spec:
+            context: |
+              El equipo no acepta código sin pruebas: cada regla escrita en los requerimientos de los
+              niveles 2 a 5 debe tener una prueba que falle si alguien la rompe. Quien revise tu
+              código va a leer primero las pruebas para entender qué hace el programa.
+            requirements:
+              - "JUnit 5 (`junit-jupiter`) está declarado en el `pom.xml` con `<scope>test</scope>`."
+              - "Hay una clase de prueba por clase probada, en `src/test/java`: `PedidoTest`, `DescuentoTest`, `RepositorioPedidosTest`, `ReportePedidosTest` y la de la calculadora del nivel 2."
+              - "Cada regla de negocio (RN) de los niveles 2 a 5 tiene al menos una prueba."
+              - "Cada caso límite listado en los niveles 2 a 5 tiene su prueba."
+              - "`mvn test` corre todas las pruebas y termina en `BUILD SUCCESS`."
+            outputs:
+              - { name: "mvn test", type: "consola", desc: "`Tests run: N, Failures: 0, Errors: 0, Skipped: 0` con N de 15 o más, y `BUILD SUCCESS`." }
+            rules:
+              - "El nombre de cada prueba dice el comportamiento, no el método: `totalAplicaDiezPorCientoDeDescuento`, no `testTotal2`."
+              - "Cada prueba comprueba una sola cosa y sigue el orden preparar, ejecutar, comprobar."
+              - "Los `double` se comparan con margen: `assertEquals(85.50, pedido.total(), 0.001)`."
+              - "Las excepciones se prueban con `assertThrows`, y se comprueba también el mensaje."
+              - "Ninguna prueba depende de otra ni del orden: cada una crea sus propios objetos."
+              - "Las pruebas no imprimen en consola ni usan `main`."
+            examples:
+              - title: "Casos mínimos que deben existir"
+                lang: "casos"
+                output: |
+                  Calculadora (nivel 2)
+                    subtotal 140.00  -> descuento 14.00, impuesto 23.94, total 149.94
+                    subtotal 100.00  -> descuento 0.00 (umbral exacto)
+                    arreglos vacíos  -> subtotal 0.00
+                  Pedido y Descuento (nivel 3)
+                    Teclado 40.00 x 2 + Mouse 15.00 x 1 con 10 %  -> total 85.50
+                    mismo pedido con SinDescuento                  -> total 95.00
+                    precio negativo                                -> IllegalArgumentException
+                    correo sin arroba                              -> IllegalArgumentException
+                  RepositorioPedidos (nivel 4)
+                    id existente      -> Optional con el pedido
+                    id inexistente    -> Optional.empty
+                    id repetido       -> IllegalArgumentException y cantidad() no cambia
+                    total mínimo 85.50 incluye el pedido de 85.50
+                    modificar la lista devuelta no cambia el repositorio
+                  Validaciones y reporte (nivel 5)
+                    pedido sin líneas -> PedidoInvalidoException con el id en el mensaje
+                    cantidad 0        -> PedidoInvalidoException
+                    reporte de la lista vacía -> 0.0, Optional.empty, mapa vacío
+                    totalPorCliente suma los dos pedidos de ana -> 100.00
+            edge_cases:
+              - "Cambia a propósito el umbral del descuento de 100 a 90 en el código: al menos una prueba debe fallar. Si todas siguen en verde, falta la prueba del umbral."
+              - "Ejecuta una sola clase con `mvn test -Dtest=PedidoTest`: debe pasar sin las demás."
+            out_of_scope:
+              - "Mocks y Mockito. Aquí todo se prueba con objetos reales."
+              - "Medir cobertura con JaCoCo."
+              - "Probar `main` o lo que se imprime en consola."
           steps:
             - title: "Agrega JUnit"
               body: "Declara JUnit como dependencia de pruebas en `pom.xml` y crea las clases de prueba en `src/test/java`."
@@ -579,6 +874,94 @@ levels:
         payload:
           proof: commit_or_hours
           goal: "Una app de consola para crear, listar, buscar y reportar pedidos, con pruebas que pasan."
+          spec:
+            context: |
+              La tienda quiere dejar la hoja de cálculo ya. Mientras llega el sistema web del Mundo 1,
+              la persona de mostrador va a usar un programa de consola para registrar y consultar
+              los pedidos del día. No sabe programar: si escribe algo mal, el programa le explica el
+              error y sigue funcionando.
+            requirements:
+              - "Al arrancar muestra el menú y espera una opción. Después de cada operación vuelve a mostrarlo, hasta que se elige salir."
+              - "Opción 1, crear pedido: pide id, nombre y correo del cliente, las líneas una por una y el porcentaje de descuento. Guarda el pedido y muestra su total."
+              - "Opción 2, listar: una línea por pedido con id, correo, número de líneas y total, en el orden en que se crearon."
+              - "Opción 3, buscar por id: muestra el detalle del pedido (cliente, cada línea, subtotal, descuento y total) o avisa que no existe."
+              - "Opción 4, reporte: total vendido, pedido más grande y total por cliente."
+              - "Opción 5, salir: imprime `Hasta luego` y termina con código de salida `0`."
+              - "Reutiliza `Pedido`, `Descuento`, `RepositorioPedidos`, `PedidoInvalidoException` y `ReportePedidos` de los niveles 3 a 5. No se duplica lógica en la clase del menú."
+              - "El repositorio tiene un `README.md` con requisitos, cómo ejecutar, cómo correr las pruebas y un ejemplo de uso."
+            inputs:
+              - { name: "opción", type: "String → int", desc: "Un número del 1 al 5, leído como texto y convertido." }
+              - { name: "id", type: "String", desc: "No vacío y no repetido, por ejemplo `P-001`." }
+              - { name: "cliente", type: "String", desc: "Nombre, no vacío." }
+              - { name: "correo", type: "String", desc: "Debe contener `@`." }
+              - { name: "línea", type: "String", desc: "`nombre,precio,cantidad` separados por coma, por ejemplo `Teclado,40.00,2`. Una línea vacía termina la captura." }
+              - { name: "descuento", type: "String → double", desc: "Porcentaje de `0` a `100`. `0` significa sin descuento." }
+            outputs:
+              - { name: "consola", type: "String", desc: "Menú, preguntas, resultados y errores. Los importes con dos decimales y punto decimal." }
+              - { name: "errores", type: "String", desc: "Siempre empiezan por `Error: ` y dicen qué dato falló." }
+              - { name: "código de salida", type: "int", desc: "`0` al salir por el menú." }
+            rules:
+              - "Toda la entrada se lee como texto (`Scanner.nextLine()`) y se convierte después. Un `NumberFormatException` nunca llega al usuario."
+              - "Una entrada inválida muestra su error y vuelve al menú. Ningún dato equivocado cierra el programa ni muestra un stack trace."
+              - "Si la creación falla a mitad de camino, no queda nada guardado."
+              - "La lógica del menú es una clase aparte de `main`, que recibe de dónde lee y dónde escribe, para poder probarla sin teclado."
+              - "`mvn test` pasa en verde, con las pruebas del nivel 6 más al menos tres del menú: crear y listar, opción inválida, y línea mal escrita."
+            examples:
+              - title: "Crear un pedido"
+                lang: "sesión de consola"
+                output: |
+                  === Pedidos ===
+                  1) Crear pedido
+                  2) Listar pedidos
+                  3) Buscar por id
+                  4) Reporte
+                  5) Salir
+                  > 1
+                  Id: P-001
+                  Cliente: Ana
+                  Correo: ana@example.com
+                  Línea (nombre,precio,cantidad) o vacío para terminar: Teclado,40.00,2
+                  Línea (nombre,precio,cantidad) o vacío para terminar: Mouse,15.00,1
+                  Línea (nombre,precio,cantidad) o vacío para terminar:
+                  Descuento % (0 si no aplica): 10
+                  Pedido P-001 creado. Total: 85.50
+              - title: "Listar y buscar"
+                lang: "sesión de consola"
+                output: |
+                  > 2
+                  P-001  ana@example.com  2 líneas  85.50
+                  > 3
+                  Id: P-001
+                  Pedido P-001 — Ana <ana@example.com>
+                    Teclado  40.00 x 2 = 80.00
+                    Mouse    15.00 x 1 = 15.00
+                  Subtotal: 95.00
+                  Descuento: 9.50
+                  Total: 85.50
+              - title: "Entradas inválidas"
+                lang: "sesión de consola"
+                output: |
+                  > 9
+                  Error: opción no válida, elige un número del 1 al 5
+                  > abc
+                  Error: opción no válida, elige un número del 1 al 5
+                  > 3
+                  Id: P-999
+                  Error: no existe el pedido P-999
+                  > 1
+                  Id: P-001
+                  Error: ya existe el pedido P-001
+            edge_cases:
+              - "Línea con formato incorrecto (`Teclado;40;2`, `Teclado,abc,2`, faltan campos): muestra el error y vuelve a pedir esa línea, sin perder las anteriores."
+              - "Terminar las líneas sin haber agregado ninguna: `Error: El pedido P-002 no tiene líneas` y no se guarda."
+              - "Cantidad `0` o negativa: el error de `PedidoInvalidoException` y no se guarda."
+              - "Listar o pedir el reporte sin pedidos: `No hay pedidos todavía`, no una pantalla vacía ni un error."
+              - "Descuento fuera de 0 a 100 o con letras: error y vuelve al menú."
+              - "Fin de la entrada (Ctrl+Z en Windows, Ctrl+D en Linux): el programa termina sin stack trace."
+            out_of_scope:
+              - "Guardar los pedidos entre ejecuciones. Al cerrar, se pierden."
+              - "Editar o borrar pedidos."
+              - "Impuestos, colores en consola y varios idiomas."
           steps:
             - title: "Menú"
               body: "Un menú de texto con las opciones: crear pedido, listar, buscar por id, reporte y salir."

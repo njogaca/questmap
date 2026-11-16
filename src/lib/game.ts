@@ -1,9 +1,10 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
-import { DAILY_REVIEW_MIN_CARDS } from "./rules";
+import { DAILY_MISSIONS, DAILY_REVIEW_MIN_CARDS, EFFORT_TRACK_SLUG, effortXp, type DailyMissionKey } from "./rules";
 import { computeStreak } from "./streak";
 import { localDate } from "./time";
+import { getActiveTrack } from "./track";
 import { DAILY_REVIEW_XP, LEVEL_BONUS_XP, questXpAwarded, rankFor, ZONE_BONUS_XP } from "./xp";
 import { loadWorld, type World } from "./world";
 
@@ -49,9 +50,35 @@ async function trackOfQuest(tx: Exec, questId: number | null): Promise<number | 
   return row?.trackId ?? null;
 }
 
-async function addXp(tx: Exec, amount: number, reason: string, questId: number | null = null) {
+/** Id de la ruta de esfuerzo si es la que está activa; null en cualquier otro caso. */
+async function activeEffortTrackId(): Promise<number | null> {
+  const t = await getActiveTrack();
+  return t?.slug === EFFORT_TRACK_SLUG ? t.id : null;
+}
+
+/** ¿La zona pertenece a la ruta de esfuerzo? (puntos solo por horas y commits, sin bonos) */
+async function isEffortZone(zoneId: number): Promise<boolean> {
+  const [row] = await db
+    .select({ slug: s.tracks.slug })
+    .from(s.zones)
+    .innerJoin(s.tracks, eq(s.tracks.id, s.zones.trackId))
+    .where(eq(s.zones.id, zoneId));
+  return row?.slug === EFFORT_TRACK_SLUG;
+}
+
+/**
+ * `trackOverride` atribuye el XP a una ruta cuando no nace de una quest (minutos anotados a
+ * mano, misiones diarias). Sin él, el XP sin quest es transversal, como siempre.
+ */
+async function addXp(
+  tx: Exec,
+  amount: number,
+  reason: string,
+  questId: number | null = null,
+  trackOverride?: number | null,
+) {
   if (amount <= 0) return;
-  const trackId = await trackOfQuest(tx, questId);
+  const trackId = trackOverride !== undefined ? trackOverride : await trackOfQuest(tx, questId);
   await tx.insert(s.xpEvents).values({ amount, reason, questId, trackId });
   // XP de por vida: suma todo, incluido lo transversal.
   await tx
@@ -134,7 +161,15 @@ export async function markInProgress(questId: number, tx: Exec = db) {
  */
 export async function completeQuest(
   slug: string,
-  opts: { hintsUsed?: number; quizScore?: number; notes?: string; evidence?: string; logMinutes?: boolean } = {},
+  opts: {
+    hintsUsed?: number;
+    quizScore?: number;
+    notes?: string;
+    evidence?: string;
+    logMinutes?: boolean;
+    /** XP base a usar en lugar del de la quest (lab entregado con horas pero sin commit = 0). */
+    baseXpOverride?: number;
+  } = {},
 ): Promise<Reward> {
   const before = await loadWorld();
   const { quest } = await getQuestBySlug(slug, before);
@@ -147,8 +182,14 @@ export async function completeQuest(
 
   const [existing] = await db.select().from(s.questProgress).where(eq(s.questProgress.questId, quest.id));
   const hintsUsed = Math.max(existing?.hintsUsed ?? 0, opts.hintsUsed ?? 0);
-  const xp = questXpAwarded({ baseXp: quest.xp, type: quest.type, hintsUsed, quizScore: opts.quizScore });
+  const baseXp = opts.baseXpOverride ?? quest.xp;
+  const xp = questXpAwarded({ baseXp, type: quest.type, hintsUsed, quizScore: opts.quizScore });
   const reward = emptyReward();
+  // Ruta de esfuerzo: completar un nivel o un mundo no da puntos por sí mismo.
+  const effort = await isEffortZone(zone.id);
+  const levelBonus = effort ? 0 : LEVEL_BONUS_XP;
+  const zoneBonus = effort ? 0 : ZONE_BONUS_XP;
+  const plus = (n: number) => (n > 0 ? ` (+${n} XP)` : "");
 
   await db.transaction(async (tx) => {
     const values = {
@@ -163,7 +204,9 @@ export async function completeQuest(
     await tx.insert(s.questProgress).values(values).onConflictDoUpdate({ target: s.questProgress.questId, set: values });
     await addXp(tx, xp, `quest:${quest.type}`, quest.id);
     reward.xp += xp;
-    reward.messages.push(`+${xp} XP · ${quest.title}${hintsUsed > 0 ? " (−20 % por pistas)" : ""}`);
+    reward.messages.push(
+      xp > 0 ? `+${xp} XP · ${quest.title}${hintsUsed > 0 ? " (−20 % por pistas)" : ""}` : `Hecho · ${quest.title}`,
+    );
     if (opts.logMinutes !== false) reward.badges.push(...(await logStudy(quest.estimatedMin, `quest:${quest.slug}`, quest.id, tx)));
   });
 
@@ -172,9 +215,9 @@ export async function completeQuest(
   const levelAfter = after.levels.find((l) => l.id === level.id)!;
   const zoneAfter = after.zones.find((z) => z.id === zone.id)!;
   if (!level.progress.completed && levelAfter.progress.completed) {
-    await addXp(db, LEVEL_BONUS_XP, `level:${level.slug}`);
-    reward.xp += LEVEL_BONUS_XP;
-    reward.messages.push(`Nodo comprometido: nivel ${level.number} de ${zone.title} (+${LEVEL_BONUS_XP} XP)`);
+    await addXp(db, levelBonus, `level:${level.slug}`);
+    reward.xp += levelBonus;
+    reward.messages.push(`Nodo comprometido: nivel ${level.number} de ${zone.title}${plus(levelBonus)}`);
     const next = after.levels.find((l) => l.zoneId === zone.id && l.number === level.number + 1);
     if (next && next.progress.unlocked) reward.messages.push(`Desbloqueado: ${next.title}`);
     for (const z of after.zones) {
@@ -183,9 +226,9 @@ export async function completeQuest(
     }
   }
   if (zone.progress.state !== "completed" && zoneAfter.progress.state === "completed") {
-    await addXp(db, ZONE_BONUS_XP, `zone:${zone.slug}`);
-    reward.xp += ZONE_BONUS_XP;
-    reward.messages.push(`¡Sector ${zone.title} completado! (+${ZONE_BONUS_XP} XP)`);
+    await addXp(db, zoneBonus, `zone:${zone.slug}`);
+    reward.xp += zoneBonus;
+    reward.messages.push(`¡Sector ${zone.title} completado!${plus(zoneBonus)}`);
     const b = await awardBadge(db, `badge-zone-${zone.slug}`);
     if (b) reward.badges.push(b);
   }
@@ -208,7 +251,9 @@ export async function grantDailyReview(cardsReviewed: number): Promise<Reward> {
     .select({ id: s.xpEvents.id })
     .from(s.xpEvents)
     .where(and(eq(s.xpEvents.reason, reason)));
-  if (!already && cardsReviewed >= DAILY_REVIEW_MIN_CARDS) {
+  // En la ruta de esfuerzo repasar glosario no da puntos (los minutos sí cuentan para la racha).
+  const effortActive = (await activeEffortTrackId()) !== null;
+  if (!effortActive && !already && cardsReviewed >= DAILY_REVIEW_MIN_CARDS) {
     const xpBefore = await getXpTotal();
     await addXp(db, DAILY_REVIEW_XP, reason);
     reward.xp = DAILY_REVIEW_XP;
@@ -218,6 +263,63 @@ export async function grantDailyReview(cardsReviewed: number): Promise<Reward> {
   }
   reward.messages.push(`${minutes} min registrados`);
   return reward;
+}
+
+/* ------------------------------------------------- horas y misiones diarias */
+
+/**
+ * Minutos que el usuario anota a mano (no los estimados que la app registra sola al completar
+ * una quest). Siempre cuentan para la racha; en la ruta de esfuerzo además dan puntos.
+ */
+export async function logEffort(minutes: number, activity: string, questId: number | null = null): Promise<Reward> {
+  const reward = emptyReward();
+  const m = Math.max(0, Math.round(minutes));
+  if (m === 0) return reward;
+  reward.badges.push(...(await logStudy(m, activity, questId)));
+  reward.messages.push(`${m} min anotados`);
+  const trackId = await activeEffortTrackId();
+  if (trackId !== null) {
+    const xp = effortXp(m);
+    const xpBefore = await getXpTotal();
+    await addXp(db, xp, `hours:${activity}`, questId, trackId);
+    reward.xp = xp;
+    if (xp > 0) reward.messages.push(`+${xp} XP por horas hechas`);
+    const rAfter = rankFor(xpBefore + xp);
+    if (rAfter.index > rankFor(xpBefore).index) reward.rankUp = rAfter.name;
+  }
+  return reward;
+}
+
+const dailyActivity = (key: DailyMissionKey) => `daily:${key}`;
+const dailyMarker = (key: DailyMissionKey, day: string) => `daily:${key}:${day}`;
+
+/**
+ * Qué misiones diarias están hechas hoy (fecha local). Las que llevan minutos se leen de
+ * `study_log`; las que solo se marcan (gimnasio) dejan un evento de 0 puntos en `xp_events`,
+ * el mismo patrón que usa el repaso diario de glosario. Así no hace falta una tabla nueva.
+ */
+export async function dailyMissionsDone(): Promise<Set<DailyMissionKey>> {
+  const today = localDate();
+  const [logs, marks] = await Promise.all([
+    db.select({ activity: s.studyLog.activity }).from(s.studyLog).where(eq(s.studyLog.date, today)),
+    db.select({ reason: s.xpEvents.reason }).from(s.xpEvents).where(sql`${s.xpEvents.reason} like ${`daily:%:${today}`}`),
+  ]);
+  const done = new Set<DailyMissionKey>();
+  for (const m of DAILY_MISSIONS) {
+    if (logs.some((l) => l.activity === dailyActivity(m.key))) done.add(m.key);
+    if (marks.some((x) => x.reason === dailyMarker(m.key, today))) done.add(m.key);
+  }
+  return done;
+}
+
+/** Marca una misión diaria como hecha (una vez por día local). */
+export async function completeDailyMission(key: DailyMissionKey): Promise<Reward> {
+  const mission = DAILY_MISSIONS.find((m) => m.key === key);
+  if (!mission) throw new Error("Misión desconocida.");
+  if ((await dailyMissionsDone()).has(key)) return { ...emptyReward(), messages: ["Ya la habías marcado hoy."] };
+  if (mission.minutes > 0) return logEffort(mission.minutes, dailyActivity(key));
+  await db.insert(s.xpEvents).values({ amount: 0, reason: dailyMarker(key, localDate()), questId: null, trackId: null });
+  return { ...emptyReward(), messages: [`${mission.label}: hecho`] };
 }
 
 export async function awardPerfectQuizBadge() {

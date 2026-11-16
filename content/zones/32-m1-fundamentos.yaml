@@ -1,0 +1,1154 @@
+# Mundo 1 de la ruta plan-2027. Misma forma que el Mundo 0: glosario + ejercicio + quiz por nivel.
+# Todo el mundo construye un solo proyecto: OrderBridge, un servicio de pedidos.
+slug: m1-fundamentos
+title: "Mundo 1 · Fundamentos"
+order: 32
+emoji: "🧱"
+track: plan-2027
+map: { x: 340, y: 300 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: m0-recuperar-horas, level: 7 }
+skills: [spring_api, sql_data, delivery]
+story: >
+  Fase 1 del plan: de enero a marzo de 2027. El mismo dominio de pedidos, ahora como un
+  servicio de verdad: Spring Boot, PostgreSQL, pruebas, Docker y CI. Doce niveles y un jefe
+  el 15 de marzo: la etapa 1 de OrderBridge publicada en GitHub. Se abre al vencer al jefe
+  del Mundo 0.
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: m1-n1-spring-boot
+    number: 1
+    title: "Spring Boot, primer endpoint"
+    story: "Objetivo: levantar un servicio Spring Boot y responder una petición HTTP."
+    quests:
+      - slug: m1-n1-glosario
+        type: glossary
+        title: "Glosario — Spring Boot"
+        xp: 0
+        estimated_min: 10
+        skills: { spring_api: 1.0 }
+        payload:
+          terms: [g-p1-framework, g-p1-endpoint, g-p1-controller, g-p1-dependency-injection]
+
+      - slug: m1-n1-ejercicio
+        type: lab
+        title: "Ejercicio — GET de estado del servicio"
+        xp: 50
+        estimated_min: 120
+        skills: { spring_api: 1.0 }
+        resources:
+          - { ref: res-p-boot-first-app, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "El proyecto OrderBridge creado con Spring Boot y un endpoint `GET /status` que responde con el nombre y el estado del servicio."
+          steps:
+            - title: "Crea el proyecto"
+              body: "Genera un proyecto Spring Boot con Maven y la dependencia web. Arráncalo."
+              commands: ["mvn spring-boot:run"]
+            - title: "El endpoint"
+              body: "Crea un controlador con `GET /status` que devuelva un JSON con `service` y `status`."
+              commands: ["curl http://localhost:8080/status"]
+            - title: "Repositorio"
+              body: "Crea el repositorio `orderbridge` en GitHub y sube este primer avance."
+          checklist:
+            - "El servicio arranca sin errores"
+            - "`GET /status` responde 200 con un JSON"
+            - "El código está en el repositorio"
+
+      - slug: m1-n1-quiz
+        type: quiz
+        title: "Quiz — Spring Boot"
+        xp: 0
+        estimated_min: 12
+        skills: { spring_api: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué anotación convierte una clase en un controlador que devuelve datos y no páginas?"
+            options: ["@Service", "@RestController", "@Entity"]
+            answer: 1
+            explanation: "@RestController recibe peticiones y serializa la respuesta, normalmente a JSON."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿En qué puerto escucha Spring Boot si no configuras nada?"
+            options: ["8080", "80", "3000"]
+            answer: 0
+            explanation: "El valor por defecto es 8080. Se cambia con server.port."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Con inyección de dependencias, cada clase crea con new los objetos que necesita."
+            answer: false
+            explanation: "Es al revés: Spring construye los objetos y se los entrega a la clase."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué hace @SpringBootApplication en la clase principal?"
+            options: ["Crea la base de datos", "Activa la configuración automática y la búsqueda de componentes", "Publica el servicio en internet"]
+            answer: 1
+            explanation: "Es el punto de arranque: configura Spring según las dependencias y encuentra tus clases."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué define a un endpoint?"
+            options: ["Solo la ruta", "El método HTTP y la ruta", "El nombre de la clase"]
+            answer: 1
+            explanation: "GET /status y POST /status son endpoints distintos."
+            skill: spring_api
+            difficulty: 1
+
+  # ================================================================ NIVEL 2
+  - slug: m1-n2-rest
+    number: 2
+    title: "REST completo"
+    story: "Objetivo: exponer las cuatro operaciones básicas sobre pedidos con los métodos y códigos HTTP correctos."
+    quests:
+      - slug: m1-n2-glosario
+        type: glossary
+        title: "Glosario — REST"
+        xp: 0
+        estimated_min: 10
+        skills: { spring_api: 1.0 }
+        payload:
+          terms: [g-p1-rest, g-p1-http-method, g-p1-status-code, g-p1-request-body]
+
+      - slug: m1-n2-ejercicio
+        type: lab
+        title: "Ejercicio — Crear, leer, actualizar y borrar pedidos"
+        xp: 50
+        estimated_min: 180
+        skills: { spring_api: 1.0 }
+        resources:
+          - { ref: res-p-spring-rest, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Los endpoints de `/orders` para crear, leer, actualizar y borrar, con los pedidos guardados en memoria por ahora."
+          steps:
+            - title: "Capas"
+              body: "Separa controlador, servicio y un almacén en memoria. El controlador no tiene reglas de negocio."
+            - title: "Los cinco endpoints"
+              body: "`POST /orders`, `GET /orders`, `GET /orders/{id}`, `PUT /orders/{id}` y `DELETE /orders/{id}`."
+            - title: "Códigos"
+              body: "Crear responde 201, borrar responde 204 y un id inexistente responde 404."
+          checklist:
+            - "Los cinco endpoints responden"
+            - "Los códigos HTTP son los correctos"
+            - "El controlador solo delega en el servicio"
+
+      - slug: m1-n2-quiz
+        type: quiz
+        title: "Quiz — REST"
+        xp: 0
+        estimated_min: 12
+        skills: { spring_api: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué código devuelve un POST que creó un pedido?"
+            options: ["200", "201", "204"]
+            answer: 1
+            explanation: "201 Created indica que se creó un recurso nuevo."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué método HTTP se usa para borrar el pedido 7?"
+            options: ["DELETE /orders/7", "GET /orders/7/delete", "POST /orders/delete"]
+            answer: 0
+            explanation: "En REST el verbo va en el método, no en la ruta."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Llamar dos veces al mismo GET debe dejar los datos igual que llamarlo una vez."
+            answer: true
+            explanation: "GET solo lee. No debe cambiar nada en el servidor."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "Piden el pedido 99 y no existe. ¿Qué respondes?"
+            options: ["200 con cuerpo vacío", "500", "404"]
+            answer: 2
+            explanation: "404 dice que el recurso no existe. 500 sería un fallo del servidor, que no es el caso."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué anotación toma el id de la ruta /orders/{id}?"
+            options: ["@RequestBody", "@PathVariable", "@Autowired"]
+            answer: 1
+            explanation: "@PathVariable lee partes de la ruta. @RequestBody lee el cuerpo."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Quién construye los objetos que un controlador necesita?"
+            options: ["El propio controlador con new", "Spring", "El navegador"]
+            answer: 1
+            explanation: "Eso es la inyección de dependencias."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. @RestController devuelve datos, normalmente en JSON."
+            answer: true
+            explanation: "Spring serializa el objeto de retorno a JSON."
+            skill: spring_api
+            difficulty: 1
+
+  # ================================================================ NIVEL 3
+  - slug: m1-n3-jpa
+    number: 3
+    title: "PostgreSQL con JPA"
+    story: "Objetivo: que los pedidos sobrevivan a un reinicio, guardados en PostgreSQL."
+    quests:
+      - slug: m1-n3-glosario
+        type: glossary
+        title: "Glosario — Persistencia"
+        xp: 0
+        estimated_min: 10
+        skills: { sql_data: 1.0 }
+        payload:
+          terms: [g-p1-entity, g-p1-orm, g-p1-primary-key, g-p1-migration]
+
+      - slug: m1-n3-ejercicio
+        type: lab
+        title: "Ejercicio — Pedidos guardados en base de datos"
+        xp: 50
+        estimated_min: 180
+        skills: { sql_data: 1.0 }
+        resources:
+          - { ref: res-p-spring-jpa, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "El almacén en memoria reemplazado por PostgreSQL con Spring Data JPA."
+          steps:
+            - title: "Base de datos"
+              body: "Levanta PostgreSQL en local y configura la conexión en el proyecto."
+            - title: "Entidades y repositorio"
+              body: "Convierte `Order` y sus líneas en entidades. Crea un repositorio de Spring Data y úsalo desde el servicio."
+            - title: "Esquema versionado"
+              body: "Crea las tablas con una migración de Flyway en lugar de dejar que Hibernate las genere."
+          checklist:
+            - "Los pedidos siguen ahí después de reiniciar el servicio"
+            - "Las tablas se crean con una migración"
+            - "Los endpoints del nivel 2 siguen funcionando igual"
+
+      - slug: m1-n3-quiz
+        type: quiz
+        title: "Quiz — Persistencia"
+        xp: 0
+        estimated_min: 12
+        skills: { sql_data: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué anotación marca una clase como tabla en JPA?"
+            options: ["@Entity", "@Table", "@Repository"]
+            answer: 0
+            explanation: "@Entity hace que JPA la trate como tabla. @Table solo ajusta el nombre."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué anotación marca el campo que es clave primaria?"
+            options: ["@Key", "@Primary", "@Id"]
+            answer: 2
+            explanation: "@Id identifica la clave primaria de la entidad."
+            skill: sql_data
+            difficulty: 1
+          - type: tf
+            prompt: "Con Spring Data JPA tienes que escribir a mano la implementación de findById."
+            answer: false
+            explanation: "Basta declarar la interfaz del repositorio. Spring genera la implementación."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Por qué usar migraciones en lugar de dejar que Hibernate cree las tablas?"
+            options: ["Porque es más rápido al arrancar", "Porque cada cambio del esquema queda versionado y repetible", "Porque Hibernate no puede crear tablas"]
+            answer: 1
+            explanation: "Con migraciones todos los entornos pasan por los mismos cambios, en el mismo orden."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "Un pedido tiene muchas líneas. ¿Qué relación es desde el pedido?"
+            options: ["@ManyToOne", "@OneToMany", "@OneToOne"]
+            answer: 1
+            explanation: "Un pedido, muchas líneas. Desde la línea hacia el pedido es @ManyToOne."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué código responde un DELETE correcto que no devuelve contenido?"
+            options: ["204", "201", "404"]
+            answer: 0
+            explanation: "204 No Content: salió bien y no hay cuerpo."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. PUT sirve para reemplazar un recurso existente."
+            answer: true
+            explanation: "PUT envía la versión completa del recurso."
+            skill: spring_api
+            difficulty: 1
+
+  # ================================================================ NIVEL 4
+  - slug: m1-n4-sql
+    number: 4
+    title: "SQL a mano"
+    story: "Objetivo: leer y escribir SQL sin depender del ORM, y saber cuándo una consulta es lenta."
+    quests:
+      - slug: m1-n4-glosario
+        type: glossary
+        title: "Glosario — SQL"
+        xp: 0
+        estimated_min: 10
+        skills: { sql_data: 1.0 }
+        payload:
+          terms: [g-p1-join, g-p1-foreign-key, g-p1-index, g-p1-query-plan]
+
+      - slug: m1-n4-ejercicio
+        type: lab
+        title: "Ejercicio — Consultas con joins e índices"
+        xp: 50
+        estimated_min: 180
+        skills: { sql_data: 1.0 }
+        resources:
+          - { ref: res-p-spring-jdbc, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un archivo `queries.sql` con consultas escritas a mano sobre pedidos, y un índice justificado con el plan de la consulta."
+          steps:
+            - title: "Consultas"
+              body: "Escribe cinco consultas: pedidos con su cliente, total por cliente, los tres productos más vendidos, clientes sin pedidos y pedidos de los últimos 7 días."
+            - title: "Mide"
+              body: "Carga datos de prueba suficientes y mira el plan de una consulta lenta con `EXPLAIN ANALYZE`."
+            - title: "Índice"
+              body: "Agrega un índice con una migración, vuelve a medir y anota el antes y el después en el README."
+          checklist:
+            - "Las cinco consultas devuelven el resultado correcto"
+            - "Hay al menos un `JOIN` y un `GROUP BY`"
+            - "El índice está en una migración y su efecto está anotado"
+
+      - slug: m1-n4-quiz
+        type: quiz
+        title: "Quiz — SQL"
+        xp: 0
+        estimated_min: 12
+        skills: { sql_data: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "Quieres todos los clientes, tengan pedidos o no. ¿Qué join usas desde clientes?"
+            options: ["INNER JOIN", "LEFT JOIN", "CROSS JOIN"]
+            answer: 1
+            explanation: "LEFT JOIN conserva todas las filas de la tabla izquierda aunque no tengan pareja."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué cláusula agrupa filas para calcular un total por cliente?"
+            options: ["ORDER BY", "GROUP BY", "WHERE"]
+            answer: 1
+            explanation: "GROUP BY junta las filas de cada cliente para aplicar SUM o COUNT."
+            skill: sql_data
+            difficulty: 1
+          - type: tf
+            prompt: "Un índice acelera las lecturas y no tiene ningún costo."
+            answer: false
+            explanation: "Cada índice hay que mantenerlo en cada escritura y ocupa espacio."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué comando muestra cómo PostgreSQL va a ejecutar una consulta?"
+            options: ["SHOW", "DESCRIBE", "EXPLAIN"]
+            answer: 2
+            explanation: "EXPLAIN muestra el plan. Con ANALYZE además la ejecuta y mide."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué impide una clave foránea?"
+            options: ["Que una línea apunte a un pedido que no existe", "Que haya dos pedidos el mismo día", "Que la tabla crezca demasiado"]
+            answer: 0
+            explanation: "La base rechaza referencias a filas inexistentes."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "Repaso. ¿Qué es una entidad en JPA?"
+            options: ["Una consulta guardada", "Una clase que representa una tabla", "Un índice"]
+            answer: 1
+            explanation: "Cada objeto de la entidad es una fila."
+            skill: sql_data
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Una migración es un cambio de esquema versionado en el repositorio."
+            answer: true
+            explanation: "Así todos los entornos aplican los mismos cambios."
+            skill: sql_data
+            difficulty: 1
+
+  # ================================================================ NIVEL 5
+  - slug: m1-n5-validacion
+    number: 5
+    title: "Validación y manejo de errores"
+    story: "Objetivo: que la API rechace datos malos y explique el motivo de forma clara y uniforme."
+    quests:
+      - slug: m1-n5-glosario
+        type: glossary
+        title: "Glosario — Validación y errores"
+        xp: 0
+        estimated_min: 10
+        skills: { spring_api: 1.0 }
+        payload:
+          terms: [g-p1-validation, g-p1-bad-request, g-p1-exception-handler, g-p1-problem-details]
+
+      - slug: m1-n5-ejercicio
+        type: lab
+        title: "Ejercicio — Respuestas de error claras"
+        xp: 50
+        estimated_min: 150
+        skills: { spring_api: 1.0 }
+        resources:
+          - { ref: res-p-spring-errors, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Entradas validadas y todos los errores de la API con el mismo formato."
+          steps:
+            - title: "Valida la entrada"
+              body: "Agrega reglas al cuerpo de `POST /orders`: al menos una línea, cantidad mayor que cero y cliente obligatorio."
+            - title: "Un solo manejador"
+              body: "Crea una clase con `@RestControllerAdvice` que convierta las excepciones en respuestas con formato Problem Details."
+            - title: "Sin fugas"
+              body: "Comprueba que ningún error devuelve el stack trace al cliente."
+          checklist:
+            - "Un pedido inválido responde 400 y dice qué campo falló"
+            - "Un id inexistente responde 404 con el mismo formato"
+            - "Ninguna respuesta muestra el stack trace"
+
+      - slug: m1-n5-quiz
+        type: quiz
+        title: "Quiz — Validación y errores"
+        xp: 0
+        estimated_min: 12
+        skills: { spring_api: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "El cliente envía un pedido sin líneas. ¿Qué código corresponde?"
+            options: ["500", "400", "404"]
+            answer: 1
+            explanation: "400: la petición está mal y es responsabilidad de quien la envió."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué anotación activa la validación del cuerpo de la petición?"
+            options: ["@Valid", "@Check", "@Verify"]
+            answer: 0
+            explanation: "@Valid junto a @RequestBody hace que Spring aplique las reglas del objeto."
+            skill: spring_api
+            difficulty: 2
+          - type: tf
+            prompt: "Devolver el stack trace al cliente ayuda y no tiene riesgo."
+            answer: false
+            explanation: "Expone detalles internos del sistema. Va al log, no a la respuesta."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Dónde conviene convertir las excepciones en respuestas HTTP?"
+            options: ["En cada método del controlador", "En un manejador central con @RestControllerAdvice", "En el repositorio"]
+            answer: 1
+            explanation: "Un manejador central garantiza el mismo formato en toda la API."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué diferencia hay entre un 400 y un 500?"
+            options: ["Ninguna", "400 es error de quien llama y 500 es error del servidor", "400 es más grave"]
+            answer: 1
+            explanation: "Los 4xx los corrige el cliente; los 5xx los corriges tú."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "Repaso. ¿Qué join conserva las filas sin pareja de la tabla izquierda?"
+            options: ["LEFT JOIN", "INNER JOIN", "Ninguno"]
+            answer: 0
+            explanation: "LEFT JOIN rellena con NULL lo que falta del lado derecho."
+            skill: sql_data
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. EXPLAIN sirve para ver el plan de una consulta."
+            answer: true
+            explanation: "Muestra los pasos que la base eligió."
+            skill: sql_data
+            difficulty: 1
+
+  # ================================================================ NIVEL 6
+  - slug: m1-n6-integracion
+    number: 6
+    title: "Pruebas de integración"
+    story: "Objetivo: probar la API de punta a punta contra un PostgreSQL de verdad, no contra uno simulado."
+    quests:
+      - slug: m1-n6-glosario
+        type: glossary
+        title: "Glosario — Pruebas de integración"
+        xp: 0
+        estimated_min: 10
+        skills: { spring_api: 1.0 }
+        payload:
+          terms: [g-p1-integration-test, g-p1-test-container, g-p1-test-fixture, g-p1-flaky-test]
+
+      - slug: m1-n6-ejercicio
+        type: lab
+        title: "Ejercicio — Pruebas contra una base de datos real"
+        xp: 50
+        estimated_min: 180
+        skills: { spring_api: 1.0 }
+        resources:
+          - { ref: res-p-boot-testcontainers, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Pruebas de integración que arrancan el servicio y un PostgreSQL en contenedor, y recorren los endpoints de pedidos."
+          steps:
+            - title: "Testcontainers"
+              body: "Agrega Testcontainers y configura un contenedor de PostgreSQL para las pruebas."
+            - title: "Camino feliz"
+              body: "Prueba crear un pedido, leerlo, actualizarlo y borrarlo a través de HTTP."
+            - title: "Errores"
+              body: "Prueba el 400 de un pedido inválido y el 404 de un id inexistente. Cada prueba prepara sus propios datos."
+          checklist:
+            - "Las pruebas corren con `mvn verify` sin una base instalada a mano"
+            - "Hay pruebas del camino feliz y de los errores"
+            - "Las pruebas pasan en cualquier orden"
+
+      - slug: m1-n6-quiz
+        type: quiz
+        title: "Quiz — Pruebas de integración"
+        xp: 0
+        estimated_min: 12
+        skills: { spring_api: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué comprueba una prueba de integración que una unitaria no?"
+            options: ["La sintaxis del código", "Que varias piezas funcionan juntas", "La velocidad del compilador"]
+            answer: 1
+            explanation: "Ejercita el endpoint, el servicio y la base reales a la vez."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Por qué probar contra PostgreSQL real y no contra una base en memoria distinta?"
+            options: ["Porque es más rápido", "Porque el SQL y los tipos pueden comportarse distinto", "Porque es obligatorio en Spring"]
+            answer: 1
+            explanation: "Una base distinta puede aceptar cosas que la real rechaza, y al revés."
+            skill: spring_api
+            difficulty: 2
+          - type: tf
+            prompt: "Una prueba que a veces pasa y a veces falla sin cambios de código se puede ignorar."
+            answer: false
+            explanation: "Una prueba inestable esconde un problema real y hace que nadie confíe en el resultado."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué anotación arranca el contexto completo de Spring en una prueba?"
+            options: ["@SpringBootTest", "@Test", "@Mock"]
+            answer: 0
+            explanation: "@SpringBootTest levanta la aplicación como en ejecución normal."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué hace que las pruebas no dependan unas de otras?"
+            options: ["Correrlas siempre en el mismo orden", "Que cada una prepare y limpie sus datos", "Tener solo una prueba"]
+            answer: 1
+            explanation: "Si cada prueba arma su propio estado, el orden deja de importar."
+            skill: spring_api
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué formato estándar se usa para el cuerpo de un error?"
+            options: ["Problem Details", "CSV", "Texto libre"]
+            answer: 0
+            explanation: "Es un JSON con title, status y detail."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Un pedido con cantidad cero debe responder 400."
+            answer: true
+            explanation: "Es un dato inválido enviado por el cliente."
+            skill: spring_api
+            difficulty: 1
+
+  # ================================================================ NIVEL 7
+  - slug: m1-n7-transacciones
+    number: 7
+    title: "Transacciones"
+    story: "Objetivo: que una operación de varios pasos quede completa o no quede."
+    quests:
+      - slug: m1-n7-glosario
+        type: glossary
+        title: "Glosario — Transacciones"
+        xp: 0
+        estimated_min: 10
+        skills: { sql_data: 1.0 }
+        payload:
+          terms: [g-p1-transaction, g-p1-rollback, g-p1-atomicity, g-p1-isolation]
+
+      - slug: m1-n7-ejercicio
+        type: lab
+        title: "Ejercicio — Pedido con varios productos, todo o nada"
+        xp: 50
+        estimated_min: 180
+        skills: { sql_data: 1.0 }
+        resources:
+          - { ref: res-p-spring-tx, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Crear un pedido descuenta inventario de cada producto. Si falta inventario de uno solo, no se guarda nada."
+          steps:
+            - title: "Inventario"
+              body: "Agrega una tabla de inventario por producto, con su migración."
+            - title: "Una transacción"
+              body: "Marca el método que crea el pedido con `@Transactional`. Descuenta el inventario de cada línea y lanza una excepción si no alcanza."
+            - title: "Demuéstralo"
+              body: "Escribe una prueba de integración: un pedido con tres productos donde el tercero no tiene inventario. Después de fallar, los otros dos deben seguir intactos."
+          checklist:
+            - "Sin inventario suficiente no queda ningún pedido guardado"
+            - "El inventario de los demás productos no cambia tras el fallo"
+            - "Hay una prueba que demuestra el rollback"
+
+      - slug: m1-n7-quiz
+        type: quiz
+        title: "Quiz — Transacciones"
+        xp: 0
+        estimated_min: 12
+        skills: { sql_data: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué garantiza la atomicidad?"
+            options: ["Que la consulta sea rápida", "Que se aplique todo o nada", "Que nadie más lea la tabla"]
+            answer: 1
+            explanation: "Nunca queda la operación a medias."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "Por defecto, ¿qué excepciones provocan rollback con @Transactional?"
+            options: ["Ninguna", "Las no comprobadas (RuntimeException)", "Solo las de SQL"]
+            answer: 1
+            explanation: "Por defecto revierte con RuntimeException y Error, no con las comprobadas."
+            skill: sql_data
+            difficulty: 3
+          - type: tf
+            prompt: "Si atrapas la excepción dentro del método transaccional y no la relanzas, la transacción se revierte igual."
+            answer: false
+            explanation: "Spring no se entera del fallo y confirma los cambios."
+            skill: sql_data
+            difficulty: 3
+          - type: mcq
+            prompt: "¿Dónde conviene poner @Transactional?"
+            options: ["En el controlador", "En el método del servicio que agrupa los pasos", "En la entidad"]
+            answer: 1
+            explanation: "El servicio conoce la operación completa de negocio."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "Dos compras intentan llevarse la última unidad a la vez. ¿Qué propiedad lo controla?"
+            options: ["El aislamiento", "El índice", "La clave primaria"]
+            answer: 0
+            explanation: "El aislamiento define qué ve cada transacción de las demás."
+            skill: sql_data
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué herramienta arranca un PostgreSQL desechable para las pruebas?"
+            options: ["Maven", "Testcontainers", "Flyway"]
+            answer: 1
+            explanation: "Testcontainers crea y destruye el contenedor en cada ejecución."
+            skill: spring_api
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Cada prueba de integración debe preparar sus propios datos."
+            answer: true
+            explanation: "Así no depende del orden ni de otras pruebas."
+            skill: spring_api
+            difficulty: 1
+
+  # ================================================================ NIVEL 8
+  - slug: m1-n8-docker
+    number: 8
+    title: "Docker"
+    story: "Objetivo: que cualquiera levante el servicio y su base con un solo comando."
+    quests:
+      - slug: m1-n8-glosario
+        type: glossary
+        title: "Glosario — Docker"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        payload:
+          terms: [g-p1-image, g-p1-container, g-p1-dockerfile, g-p1-volume]
+
+      - slug: m1-n8-ejercicio
+        type: lab
+        title: "Ejercicio — El servicio y la base con Docker Compose"
+        xp: 50
+        estimated_min: 150
+        skills: { delivery: 1.0 }
+        resources:
+          - { ref: res-p-spring-docker, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un `Dockerfile` para OrderBridge y un `docker-compose.yml` que levanta el servicio y PostgreSQL juntos."
+          steps:
+            - title: "Imagen"
+              body: "Escribe un `Dockerfile` en dos etapas: una compila con Maven y la otra solo ejecuta el jar."
+            - title: "Compose"
+              body: "Define los servicios `app` y `db`. La base usa un volumen y el servicio espera a que la base esté lista."
+              commands: ["docker compose up -d --build"]
+            - title: "Prueba limpia"
+              body: "Clona el repositorio en otra carpeta y levántalo sin instalar nada más que Docker."
+          checklist:
+            - "`docker compose up` levanta todo sin pasos manuales"
+            - "Los datos sobreviven a `docker compose down` sin `-v`"
+            - "La imagen final no incluye Maven ni el código fuente"
+
+      - slug: m1-n8-quiz
+        type: quiz
+        title: "Quiz — Docker"
+        xp: 0
+        estimated_min: 12
+        skills: { delivery: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Cuál es la diferencia entre imagen y contenedor?"
+            options: ["Son lo mismo", "La imagen es el paquete y el contenedor es ese paquete en ejecución", "El contenedor es el archivo y la imagen es el proceso"]
+            answer: 1
+            explanation: "De una imagen puedes arrancar muchos contenedores."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Para qué sirve un volumen en el servicio de la base?"
+            options: ["Para que arranque más rápido", "Para que los datos no se pierdan al borrar el contenedor", "Para abrir el puerto"]
+            answer: 1
+            explanation: "Sin volumen, los datos mueren con el contenedor."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Dentro de Compose, el servicio app se conecta a la base usando localhost."
+            answer: false
+            explanation: "Cada contenedor tiene su propio localhost. Se usa el nombre del servicio, por ejemplo db."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué gana un Dockerfile en dos etapas?"
+            options: ["Una imagen final más pequeña, sin herramientas de compilación", "Que compile dos veces", "Que use dos bases de datos"]
+            answer: 0
+            explanation: "La etapa final solo copia el resultado, no el compilador ni el código."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "Cambiaste el código y corres docker compose up -d sin más. ¿Qué pasa?"
+            options: ["Se recompila sola", "Sigue corriendo la imagen anterior", "Da error"]
+            answer: 1
+            explanation: "Hace falta --build para reconstruir la imagen con el código nuevo."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué pasa con los cambios de una transacción cuando hay rollback?"
+            options: ["Se guardan a medias", "Se deshacen todos", "Se guardan en otra tabla"]
+            answer: 1
+            explanation: "El rollback deja la base como estaba antes de empezar."
+            skill: sql_data
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. @Transactional va normalmente en el servicio."
+            answer: true
+            explanation: "El servicio agrupa los pasos de una operación de negocio."
+            skill: sql_data
+            difficulty: 1
+
+  # ================================================================ NIVEL 9
+  - slug: m1-n9-ci
+    number: 9
+    title: "CI con GitHub Actions"
+    story: "Objetivo: que las pruebas corran solas en cada commit y avisen cuando algo se rompe."
+    quests:
+      - slug: m1-n9-glosario
+        type: glossary
+        title: "Glosario — Integración continua"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        payload:
+          terms: [g-p1-ci, g-p1-pipeline, g-p1-workflow, g-p1-build-status]
+
+      - slug: m1-n9-ejercicio
+        type: lab
+        title: "Ejercicio — Pruebas automáticas en cada commit"
+        xp: 50
+        estimated_min: 120
+        skills: { delivery: 1.0 }
+        resources:
+          - { ref: res-p-gha-maven, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un workflow de GitHub Actions que compila y prueba OrderBridge en cada push y en cada pull request."
+          steps:
+            - title: "Workflow"
+              body: "Crea `.github/workflows/ci.yml` con JDK 21, caché de Maven y `mvn verify`."
+            - title: "Rómpelo a propósito"
+              body: "Sube un commit con una prueba que falle y comprueba que el workflow queda en rojo. Luego arréglalo."
+            - title: "Insignia"
+              body: "Agrega la insignia de estado del workflow al README."
+          checklist:
+            - "El workflow corre en cada push"
+            - "Una prueba rota deja el workflow en rojo"
+            - "El README muestra la insignia en verde"
+
+      - slug: m1-n9-quiz
+        type: quiz
+        title: "Quiz — Integración continua"
+        xp: 0
+        estimated_min: 12
+        skills: { delivery: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿En qué carpeta van los workflows de GitHub Actions?"
+            options: [".github/workflows", "src/main/resources", ".ci"]
+            answer: 0
+            explanation: "GitHub lee los archivos YAML de .github/workflows."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Para qué sirve la integración continua?"
+            options: ["Para escribir el código más rápido", "Para detectar pronto un cambio que rompe algo", "Para reemplazar las pruebas"]
+            answer: 1
+            explanation: "Cada cambio se compila y se prueba al momento de subirlo."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Si las pruebas pasan en tu máquina, no hace falta correrlas en CI."
+            answer: false
+            explanation: "CI corre en un entorno limpio y detecta lo que solo funcionaba por tu configuración local."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué comando de Maven corre también las pruebas de integración?"
+            options: ["mvn compile", "mvn clean", "mvn verify"]
+            answer: 2
+            explanation: "verify ejecuta todo el ciclo, incluidas las pruebas de integración."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Por qué usar caché de dependencias en el workflow?"
+            options: ["Para no descargar todo Maven en cada ejecución", "Para guardar contraseñas", "Para saltarse las pruebas"]
+            answer: 0
+            explanation: "El caché acorta cada ejecución al reutilizar las dependencias ya descargadas."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué archivo describe cómo construir una imagen?"
+            options: ["pom.xml", "Dockerfile", "README"]
+            answer: 1
+            explanation: "El Dockerfile lista los pasos de construcción."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Un volumen conserva los datos aunque se borre el contenedor."
+            answer: true
+            explanation: "Para eso existe."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ NIVEL 10
+  - slug: m1-n10-configuracion
+    number: 10
+    title: "Configuración y seguridad básica"
+    story: "Objetivo: el mismo código corre en cualquier entorno y ningún secreto vive en el repositorio."
+    quests:
+      - slug: m1-n10-glosario
+        type: glossary
+        title: "Glosario — Configuración y seguridad"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        payload:
+          terms: [g-p1-environment-variable, g-p1-profile, g-p1-secret, g-p1-authentication]
+
+      - slug: m1-n10-ejercicio
+        type: lab
+        title: "Ejercicio — Perfiles y secretos fuera del código"
+        xp: 50
+        estimated_min: 150
+        skills: { delivery: 1.0 }
+        resources:
+          - { ref: res-p-boot-config, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Perfiles `dev` y `prod`, credenciales leídas de variables de entorno y los endpoints de escritura protegidos."
+          steps:
+            - title: "Perfiles"
+              body: "Separa la configuración en `application-dev.yml` y `application-prod.yml`."
+            - title: "Secretos fuera"
+              body: "Lee usuario y contraseña de la base desde variables de entorno. Agrega un `.env.example` sin valores reales y revisa el historial de Git."
+            - title: "Protege la escritura"
+              body: "Con Spring Security, exige autenticación en `POST`, `PUT` y `DELETE`. `GET /status` queda abierto."
+          checklist:
+            - "No hay ninguna contraseña en el repositorio ni en su historial"
+            - "El servicio arranca con cada perfil"
+            - "Escribir sin credenciales responde 401"
+
+      - slug: m1-n10-quiz
+        type: quiz
+        title: "Quiz — Configuración y seguridad"
+        xp: 0
+        estimated_min: 12
+        skills: { delivery: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Dónde debe vivir la contraseña de la base en producción?"
+            options: ["En application.yml dentro del repositorio", "En una variable de entorno o un gestor de secretos", "En un comentario del código"]
+            answer: 1
+            explanation: "Lo que está en el repositorio lo ve cualquiera con acceso, para siempre."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Si subiste una contraseña y luego la borraste en otro commit, ya está a salvo."
+            answer: false
+            explanation: "Sigue en el historial. Hay que cambiar la contraseña."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué código responde una petición sin credenciales a un endpoint protegido?"
+            options: ["401", "404", "200"]
+            answer: 0
+            explanation: "401 significa que no te has identificado. 403 es que sí, pero no tienes permiso."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Cómo se activa el perfil prod en Spring Boot?"
+            options: ["Renombrando la clase principal", "Con spring.profiles.active=prod", "No se puede"]
+            answer: 1
+            explanation: "Se indica con esa propiedad o con la variable SPRING_PROFILES_ACTIVE."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué diferencia hay entre authentication y authorization?"
+            options: ["Ninguna", "La primera dice quién eres y la segunda qué puedes hacer", "La primera es para bases de datos"]
+            answer: 1
+            explanation: "Primero se identifica al usuario y luego se decide si tiene permiso."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "Repaso. ¿Qué evento suele disparar un workflow de CI?"
+            options: ["Un push al repositorio", "Abrir el editor", "Apagar el equipo"]
+            answer: 0
+            explanation: "Lo habitual es correrlo en push y en pull request."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Una insignia roja en el README indica que el último pipeline falló."
+            answer: true
+            explanation: "La insignia refleja el estado del último workflow."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ NIVEL 11
+  - slug: m1-n11-documentacion
+    number: 11
+    title: "Documentación en inglés"
+    story: "Objetivo: que alguien que no te conoce entienda y ejecute el proyecto leyendo solo el README, en inglés."
+    quests:
+      - slug: m1-n11-glosario
+        type: glossary
+        title: "Glosario — Documentación"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        payload:
+          terms: [g-p1-readme, g-p1-architecture-diagram, g-p1-prerequisite, g-p1-trade-off]
+
+      - slug: m1-n11-ejercicio
+        type: lab
+        title: "Ejercicio — README con diagrama"
+        xp: 50
+        estimated_min: 150
+        skills: { delivery: 1.0 }
+        resources:
+          - { ref: res-p-gh-diagrams, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un README en inglés que explica qué es OrderBridge, cómo se ejecuta y cómo está armado, con un diagrama."
+          steps:
+            - title: "Lo esencial"
+              body: "Escribe en inglés: qué hace el servicio, requisitos previos, cómo ejecutarlo con Docker Compose y cómo correr las pruebas."
+            - title: "Diagrama"
+              body: "Dibuja con Mermaid las piezas (cliente, API, base de datos) y cómo se comunican."
+            - title: "Decisiones"
+              body: "Agrega una sección corta con dos o tres decisiones de diseño y lo que se sacrificó en cada una."
+          checklist:
+            - "Todo el README está en inglés"
+            - "Los pasos para ejecutar funcionan copiándolos tal cual"
+            - "El diagrama se ve en GitHub"
+
+      - slug: m1-n11-quiz
+        type: quiz
+        title: "Quiz — Documentación"
+        xp: 0
+        estimated_min: 12
+        skills: { delivery: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué debe poder hacer alguien después de leer solo tu README?"
+            options: ["Entender todo el código línea por línea", "Ejecutar el proyecto y correr sus pruebas", "Conocer tu historia profesional"]
+            answer: 1
+            explanation: "El README es la puerta de entrada: qué es y cómo se usa."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué sección evita que alguien falle al primer comando?"
+            options: ["Prerequisites", "License", "Credits"]
+            answer: 0
+            explanation: "Los requisitos previos dicen qué instalar y en qué versión."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Un diagrama Mermaid se escribe como texto dentro del Markdown y GitHub lo dibuja."
+            answer: true
+            explanation: "Va en un bloque de código marcado como mermaid."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Cuál es la frase más clara para un README en inglés?"
+            options: ["Run the service with Docker Compose.", "The service, it can be possible to run with Docker.", "Docker running service is doing."]
+            answer: 0
+            explanation: "Imperativo corto y directo. Es el estilo habitual de las instrucciones."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué es explicar un trade-off?"
+            options: ["Decir que tu solución es perfecta", "Decir qué ganaste y qué sacrificaste con una decisión", "Listar las tecnologías usadas"]
+            answer: 1
+            explanation: "Mostrar el costo de cada decisión es lo que distingue una buena explicación técnica."
+            skill: delivery
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué nunca debe subirse al repositorio?"
+            options: ["El README", "Un secreto", "Las pruebas"]
+            answer: 1
+            explanation: "Contraseñas, tokens y llaves van fuera del código."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Un perfil de Spring permite usar configuración distinta por entorno."
+            answer: true
+            explanation: "Por ejemplo, otra base de datos para las pruebas."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ NIVEL 12
+  - slug: m1-n12-repaso
+    number: 12
+    title: "Repaso"
+    story: "Objetivo: explicar en voz alta y en inglés todo lo construido en este mundo, bajo presión de tiempo."
+    quests:
+      - slug: m1-n12-glosario
+        type: glossary
+        title: "Glosario — Entrevista"
+        xp: 0
+        estimated_min: 10
+        skills: { spring_api: 1.0 }
+        payload:
+          terms: [g-p1-walkthrough, g-p1-follow-up-question, g-p1-bottleneck]
+
+      - slug: m1-n12-ejercicio
+        type: lab
+        title: "Ejercicio — Entrevista simulada completa"
+        xp: 50
+        estimated_min: 90
+        skills: { spring_api: 1.0 }
+        resources:
+          - { ref: res-p-boot-reference, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Una entrevista simulada de una hora sobre OrderBridge, en inglés, con sus fallos anotados en el repositorio."
+          steps:
+            - title: "Haz la entrevista"
+              body: "Usa una simulación de Interview Arena o pídele a alguien que te entreviste. Recorre el servicio de punta a punta en inglés."
+            - title: "Anota lo que falló"
+              body: "Escribe en `docs/mock-interview.md` las preguntas que no supiste responder bien."
+            - title: "Cierra los huecos"
+              body: "Repasa cada punto anotado y escribe debajo la respuesta corregida."
+          checklist:
+            - "La entrevista duró al menos 45 minutos"
+            - "Las preguntas falladas están anotadas"
+            - "Cada una tiene su respuesta corregida"
+
+      - slug: m1-n12-quiz
+        type: quiz
+        title: "Quiz — Repaso del mundo"
+        xp: 0
+        estimated_min: 12
+        skills: { spring_api: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "Una petición llega a OrderBridge. ¿En qué orden pasa por las capas?"
+            options: ["Repositorio, servicio, controlador", "Controlador, servicio, repositorio", "Servicio, controlador, repositorio"]
+            answer: 1
+            explanation: "El controlador recibe, el servicio aplica las reglas y el repositorio habla con la base."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "Te preguntan por qué un endpoint es lento. ¿Qué miras primero?"
+            options: ["El color del README", "Las consultas que hace y su plan", "La versión del editor"]
+            answer: 1
+            explanation: "Lo más habitual es una consulta sin índice o demasiadas consultas."
+            skill: sql_data
+            difficulty: 2
+          - type: tf
+            prompt: "En una entrevista conviene decir en voz alta lo que estás pensando."
+            answer: true
+            explanation: "El entrevistador evalúa cómo razonas, no solo el resultado."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "No sabes la respuesta a una pregunta. ¿Qué es mejor?"
+            options: ["Inventar algo con seguridad", "Decir qué sabes, qué no y cómo lo averiguarías", "Quedarte callado"]
+            answer: 1
+            explanation: "Mostrar el camino para resolverlo vale más que una respuesta inventada."
+            skill: spring_api
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué garantiza que un pedido con varios productos no quede a medias?"
+            options: ["Un índice", "Una transacción", "Un perfil"]
+            answer: 1
+            explanation: "La transacción aplica todos los pasos o ninguno."
+            skill: sql_data
+            difficulty: 1
+          - type: mcq
+            prompt: "Repaso. ¿Qué sección del README dice qué instalar antes de empezar?"
+            options: ["Prerequisites", "Changelog", "Roadmap"]
+            answer: 0
+            explanation: "Los requisitos previos, con sus versiones."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Un diagrama de arquitectura muestra las piezas del sistema y cómo se comunican."
+            answer: true
+            explanation: "Es la vista general antes de entrar al código."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ JEFE
+  - slug: m1-n13-jefe
+    number: 13
+    title: "Jefe — OrderBridge etapa 1"
+    story: "Fecha: 15 de marzo de 2027. El servicio completo, público y listo para que lo revise otra persona. Vencerlo abre el Mundo 2."
+    quests:
+      - slug: m1-jefe-orderbridge-etapa-1
+        type: lab
+        title: "Jefe (15 mar) — Etapa 1 de OrderBridge publicada en GitHub"
+        xp: 150
+        estimated_min: 600
+        skills: { spring_api: 1.0 }
+        payload:
+          proof: commit_or_hours
+          goal: "OrderBridge etapa 1 en un repositorio público de GitHub: API REST de pedidos con PostgreSQL, pruebas, Docker, CI y README en inglés."
+          steps:
+            - title: "Cierra pendientes"
+              body: "Repasa los niveles 1 a 11 y termina lo que haya quedado a medias."
+            - title: "Prueba desde cero"
+              body: "Clona el repositorio en una carpeta limpia y sigue tu propio README sin saltarte nada."
+            - title: "Publica"
+              body: "Haz público el repositorio y crea la etiqueta `v0.1.0`."
+              commands: ["git tag v0.1.0", "git push origin v0.1.0"]
+          checklist:
+            - "El repositorio es público"
+            - "El workflow de CI está en verde"
+            - "`docker compose up` levanta todo desde un clon limpio"
+            - "El README está en inglés y tiene el diagrama"
+            - "Existe la etiqueta `v0.1.0`"

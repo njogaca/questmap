@@ -87,7 +87,7 @@ export function MapCodex({ zones, selectedId, onSelect }: MapViewProps) {
                       <span className="block h-px" style={{ width: `${z.percent}%`, background: color }} />
                     </span>
                     <span className="shrink-0 font-mono text-[11px] text-dim">
-                      {z.percent} % · {z.levelsCompleted}/5
+                      {z.percent} % · {z.levelsCompleted}/{z.levelsTotal}
                     </span>
                   </div>
                 )}

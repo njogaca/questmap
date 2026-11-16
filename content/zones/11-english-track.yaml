@@ -4,6 +4,7 @@ slug: english-track
 title: English Track
 order: 11
 emoji: "🗣️"
+track: backend-gcp  # archivo: ya no es transversal (la ruta plan-2027 tiene su propia misión diaria de inglés)
 unlocked_from_start: true
 map: { x: 330, y: 70 }
 prerequisites: []

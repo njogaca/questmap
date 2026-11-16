@@ -1,0 +1,17 @@
+# Mundo 3 de la ruta plan-2027. Bloqueado: solo título y descripción, sin niveles todavía.
+# Depende del Mundo 2, que aún no tiene niveles, así que no puede abrirse antes de tiempo.
+slug: m3-entrevistas
+title: "Mundo 3 · Entrevistas"
+order: 34
+emoji: "🎙️"
+track: plan-2027
+map: { x: 730, y: 300 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: m2-distribuidos, level: 1 }
+skills: []
+story: >
+  Fase 3 del plan: de julio a septiembre de 2027. Diseño de sistemas, problemas de código,
+  despliegue en GKE.
+
+levels: []

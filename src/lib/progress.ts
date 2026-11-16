@@ -31,6 +31,8 @@ export type ZoneOut = {
   /** 0–100, quests required publicadas completadas / total. */
   percent: number;
   levelsCompleted: number;
+  /** Niveles que tiene la zona (5 en las originales, hasta 13 en los mundos del plan). */
+  levelsTotal: number;
   missingPrereqs: PrereqIn[];
 };
 
@@ -142,7 +144,9 @@ export function computeProgress(input: {
       previousCompleted = completed;
     }
 
-    const allLevelsDone = zl.length === 5 && levelsCompleted === 5;
+    // Una zona se completa con TODOS sus niveles. El mínimo de 5 evita que una zona a medio
+    // escribir (2 niveles publicados) se dé por terminada antes de tiempo.
+    const allLevelsDone = zl.length >= 5 && levelsCompleted === zl.length;
     let state: NodeState;
     if (z.status === "outline") state = "outline";
     else if (!unlocked) state = "locked";
@@ -155,6 +159,7 @@ export function computeProgress(input: {
       unlocked,
       percent: reqTotal ? Math.round((reqDone / reqTotal) * 100) : 0,
       levelsCompleted,
+      levelsTotal: zl.length,
       missingPrereqs,
     });
   }

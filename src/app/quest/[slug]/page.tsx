@@ -150,8 +150,20 @@ export default async function QuestPage({ params }: { params: Promise<{ slug: st
     );
   } else if (quest.type === "lab") {
     const [prog] = await db.select().from(s.questProgress).where(eq(s.questProgress.questId, quest.id));
+    const labLinks = await db
+      .select({ title: s.resources.title, url: s.resources.url, howToFind: s.resources.howToFind })
+      .from(s.questResources)
+      .innerJoin(s.resources, eq(s.resources.id, s.questResources.resourceId))
+      .where(eq(s.questResources.questId, quest.id))
+      .orderBy(asc(s.questResources.order));
     body = (
-      <LabQuest slug={quest.slug} payload={payload as LabPayload} completed={completed} savedEvidence={prog?.evidence ?? ""} />
+      <LabQuest
+        slug={quest.slug}
+        payload={payload as LabPayload}
+        completed={completed}
+        savedEvidence={prog?.evidence ?? ""}
+        resources={labLinks}
+      />
     );
   } else if (quest.type === "micro") {
     const kind = String(payload.kind ?? "flashcards");

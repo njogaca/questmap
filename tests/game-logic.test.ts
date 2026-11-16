@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { gradeAnswer, scorePercent } from "../src/lib/quiz";
 import { computeReadiness } from "../src/lib/readiness";
+import { COMMIT_URL_RE, effortXp } from "../src/lib/rules";
 import { reviewCard, SRS_NEW } from "../src/lib/srs";
 import { computeStreak } from "../src/lib/streak";
 import { localDate, weekStart } from "../src/lib/time";
@@ -84,6 +85,19 @@ describe("xp y rangos", () => {
     assert.equal(questXpAwarded({ baseXp: 40, type: "quiz", hintsUsed: 0, quizScore: 100 }), 50);
     assert.equal(questXpAwarded({ baseXp: 40, type: "quiz", hintsUsed: 0, quizScore: 90 }), 40);
     assert.equal(questXpAwarded({ baseXp: 50, type: "lab", hintsUsed: 2 }), 40);
+  });
+  it("ruta de esfuerzo: un quiz de 0 puntos no da bono; las horas dan 10 puntos por cada 30 min", () => {
+    assert.equal(questXpAwarded({ baseXp: 0, type: "quiz", hintsUsed: 0, quizScore: 100 }), 0);
+    assert.equal(effortXp(30), 10);
+    assert.equal(effortXp(20), 7);
+    assert.equal(effortXp(90), 30);
+    assert.equal(effortXp(0), 0);
+  });
+  it("solo cuenta como commit un enlace a un commit concreto", () => {
+    assert.ok(COMMIT_URL_RE.test("https://github.com/user/orderbridge/commit/a1b2c3d"));
+    assert.ok(COMMIT_URL_RE.test("listo: https://gitlab.com/u/r/-/commit/0123456789abcdef0123456789abcdef01234567"));
+    assert.ok(!COMMIT_URL_RE.test("https://github.com/user/orderbridge"));
+    assert.ok(!COMMIT_URL_RE.test("lo subí ayer, commit a1b2c3d"));
   });
   it("rangos por XP", () => {
     assert.equal(rankFor(0).name, "Novice");

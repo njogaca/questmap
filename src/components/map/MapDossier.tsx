@@ -89,7 +89,7 @@ export function MapDossier({ zones, selectedId, onSelect }: MapViewProps) {
                     </>
                   ) : (
                     <>
-                      {z.levelsCompleted}/5 carpetas leídas · {z.percent} %
+                      {z.levelsCompleted}/{z.levelsTotal} carpetas leídas · {z.percent} %
                     </>
                   )}
                 </div>

@@ -288,7 +288,7 @@ function ZonePanel({ zone }: { zone: MapZone }) {
         <div className="mb-1 flex justify-between font-mono text-xs text-dim">
           <span>progreso</span>
           <span>
-            {zone.percent} % · {zone.levelsCompleted}/5 niveles
+            {zone.percent} % · {zone.levelsCompleted}/{zone.levelsTotal} niveles
           </span>
         </div>
         <ProgressBar percent={zone.percent} state={zone.state} />

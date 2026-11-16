@@ -16,6 +16,7 @@ export type MapZone = {
   state: NodeState;
   percent: number;
   levelsCompleted: number;
+  levelsTotal: number;
   skills: { code: string; name: string }[];
   prereqs: { zoneTitle: string; level: number; met: boolean }[];
 };

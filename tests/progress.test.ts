@@ -56,6 +56,38 @@ describe("computeProgress", () => {
     assert.equal(w.zones.get(1)!.levelsCompleted, 5);
   });
 
+  it("una zona de 7 niveles (mundo del plan) solo se completa con los 7 y abre la siguiente", () => {
+    const z: ZoneIn[] = [
+      { id: 1, slug: "m0", status: "published", unlockedFromStart: true },
+      { id: 2, slug: "m1", status: "published", unlockedFromStart: false },
+      { id: 3, slug: "m2", status: "published", unlockedFromStart: false }, // sin niveles: bloqueada
+    ];
+    const l: LevelIn[] = [
+      ...[1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: 10 + n, zoneId: 1, number: n, status: "published" as const })),
+      { id: 21, zoneId: 2, number: 1, status: "published" },
+    ];
+    const q: QuestIn[] = [
+      ...[1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: 100 + n, levelId: 10 + n, required: true, status: "published" as const })),
+      { id: 201, levelId: 21, required: true, status: "published" },
+    ];
+    const p = [
+      { zoneId: 2, requiresZoneId: 1, requiresLevelNumber: 7 },
+      { zoneId: 3, requiresZoneId: 2, requiresLevelNumber: 13 },
+    ];
+    const at = (ids: number[]) => computeProgress({ zones: z, levels: l, quests: q, prereqs: p, progress: done(...ids) });
+
+    const six = at([101, 102, 103, 104, 105, 106]);
+    assert.equal(six.zones.get(1)!.state, "in_progress");
+    assert.equal(six.zones.get(1)!.levelsTotal, 7);
+    assert.equal(six.zones.get(2)!.state, "locked");
+
+    const seven = at([101, 102, 103, 104, 105, 106, 107]);
+    assert.equal(seven.zones.get(1)!.state, "completed");
+    assert.equal(seven.zones.get(2)!.state, "available");
+    assert.equal(seven.zones.get(3)!.state, "locked");
+    assert.equal(seven.zones.get(3)!.levelsTotal, 0);
+  });
+
   it("una quest en progreso marca el nivel en progreso", () => {
     const w = run([{ questId: 101, status: "in_progress" }]);
     assert.equal(w.levels.get(11)!.state, "in_progress");

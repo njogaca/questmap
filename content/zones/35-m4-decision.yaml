@@ -1,0 +1,13 @@
+# Mundo 4 de la ruta plan-2027 (oct - nov 2027). Bloqueado: solo título, sin descripción ni niveles.
+slug: m4-decision
+title: "Mundo 4 · Decisión"
+order: 35
+emoji: "🏁"
+track: plan-2027
+map: { x: 890, y: 170 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: m3-entrevistas, level: 1 }
+skills: []
+
+levels: []

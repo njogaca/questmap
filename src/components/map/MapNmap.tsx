@@ -52,7 +52,7 @@ export function MapNmap({ zones, selectedId, onSelect }: MapViewProps) {
               ? `req: ${pending ? `${pending.zoneTitle} N${pending.level}` : "—"}`
               : z.state === "outline"
                 ? "próximamente"
-                : `${asciiBar(z.percent, 10)} ${String(z.percent).padStart(3)}% N${z.levelsCompleted}/5`;
+                : `${asciiBar(z.percent, 10)} ${String(z.percent).padStart(3)}% N${z.levelsCompleted}/${z.levelsTotal}`;
           return (
             <li key={z.id}>
               <Link

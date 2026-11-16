@@ -103,7 +103,7 @@ skills:
     description: Terminal, logs, procesos y permisos en Linux (dentro de contenedores y en GCP)
     core: false
     target_xp: 710 # REAL con la Zona 12 publicada (2026-11-07): 710
-    track: null  # transversal: vale para todas las rutas
+    track: backend-gcp  # dejó de ser transversal junto con Terminal Tundra (2026-11-15)
 
   # ---------------------------------------------- Ruta: Cyber Range (ciberseguridad)
   # `linux` NO se repite aquí: es transversal y esta ruta la hereda junto con Terminal
@@ -153,3 +153,31 @@ skills:
     core: false
     target_xp: 120 # planeado con la ruta completa; publicado hoy: 20
     track: cybersecurity
+
+  # ---------------------------------------------------------------- Ruta plan-2027
+  # target_xp = puntos por commit de todos los ejercicios publicados de la skill
+  # (50 por ejercicio, 150 por jefe). Glosario y quiz valen 0 en esta ruta.
+  - code: core_java
+    name: Java base
+    description: Sintaxis, objetos, colecciones, streams y pruebas con JUnit
+    core: true
+    target_xp: 400
+    track: plan-2027
+  - code: spring_api
+    name: Spring y APIs REST
+    description: Spring Boot, endpoints REST, validación, errores y pruebas de integración
+    core: true
+    target_xp: 400
+    track: plan-2027
+  - code: sql_data
+    name: SQL y datos
+    description: PostgreSQL, JPA, SQL a mano y transacciones
+    core: true
+    target_xp: 150
+    track: plan-2027
+  - code: delivery
+    name: Entrega
+    description: Entorno, Git, Docker, CI, configuración y documentación
+    core: false
+    target_xp: 250
+    track: plan-2027

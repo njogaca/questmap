@@ -292,7 +292,7 @@ pese, lo que hay que cambiar es *eso*, no el reparto en componentes.
 | Ruta | Qué hay |
 |---|---|
 | `src/db/schema.ts` | Esquema Drizzle. Contenido arriba, progreso abajo, separados por un comentario |
-| `src/content/schema.ts` | Zod del YAML. Límites: máximo 5 niveles por zona, `map` en viewBox 1000×640 |
+| `src/content/schema.ts` | Zod del YAML. Límites: máximo 13 niveles por zona (`MAX_LEVELS_PER_ZONE`), `map` en viewBox 1000×640 |
 | `src/content/load.ts` | Carga y valida `content/`, incluida la integridad referencial |
 | `scripts/seed.ts` | Seed idempotente |
 | `src/lib/world.ts` | `loadWorld()`: contenido + progreso + estados, cacheado por petición |
@@ -301,6 +301,7 @@ pese, lo que hay que cambiar es *eso*, no el reparto en componentes.
 | `src/lib/readiness.ts` | Cobertura y readiness real (dos métricas distintas, no las mezcles) |
 | `src/lib/game.ts` | XP, insignias, racha. `addXp` deriva el `track_id` desde la zona de la quest |
 | `src/lib/portability.ts` | Export/import de progreso por slug |
+| `src/lib/rules.ts` | Reglas compartidas. Incluye la ruta de esfuerzo (`EFFORT_TRACK_SLUG`) y las misiones diarias |
 | `src/components/ui.ts` | **Clases de botón compartidas** |
 | `SPEC.md` | Especificación original del proyecto |
 | `docs/PLANTILLA-QUESTMAP.md` | Plantilla genérica para crear otro QuestMap |
@@ -347,3 +348,26 @@ Por dónde seguir, en orden de sospecha:
 **Aviso para medirlo:** `requestAnimationFrame` NO se ejecuta en una pestaña oculta. Si lo
 inspeccionas desde un navegador controlado cuyo panel no está visible, el canvas saldrá siempre
 en blanco y medirás un falso positivo del bug. Hay que verificarlo con la ventana a la vista.
+
+---
+
+## 10. Ruta de esfuerzo (`plan-2027`)
+
+La ruta `plan-2027` juega con reglas distintas a las demás, y es fácil romperlas sin querer:
+
+- **Los puntos salen solo de horas anotadas y de commits.** Glosario y quiz llevan `xp: 0` en el
+  YAML; no hay bono de nivel, ni de zona, ni de repaso diario de glosario. La constante
+  `EFFORT_TRACK_SLUG` de `src/lib/rules.ts` decide qué ruta juega así.
+- **El ejercicio de cada nivel es un `lab` con `payload.proof: commit_or_hours`.** Solo se entrega
+  con un enlace `…/commit/<hash>` o con minutos anotados. El commit da el `xp` del lab; los minutos
+  dan 10 puntos por cada 30 (`effortXp`). Como el lab es `required`, ningún nivel se completa sin
+  una de las dos cosas.
+- **Los minutos que la app registra sola** al completar una quest (`estimated_min`) cuentan para la
+  racha pero **nunca dan puntos**. Solo puntúan los que anota el usuario (`logEffort`).
+- **Los mundos tienen más de 5 niveles** y el jefe es un nivel propio (el 7 en el Mundo 0, el 13 en
+  el Mundo 1) con un `lab`, no una quest `boss`: así se entrega con commit u horas como todo lo demás.
+- Los mundos 2, 3 y 4 son zonas publicadas **sin niveles**, encadenadas por prerrequisito para que
+  se vean bloqueadas. Al escribir sus niveles, revisa esa cadena.
+- **Misiones diarias**: tres fijas (`DAILY_MISSIONS`). Inglés y Java se guardan en `study_log` con
+  actividad `daily:<clave>`; el gimnasio solo deja un evento de 0 puntos en `xp_events`
+  (`daily:gym:<fecha>`), porque no es tiempo de estudio.

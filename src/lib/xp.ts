@@ -33,7 +33,8 @@ export function rankFor(xp: number) {
 /** XP final de una quest al completarla. */
 export function questXpAwarded(opts: { baseXp: number; type: string; hintsUsed: number; quizScore?: number }): number {
   let xp = opts.baseXp;
-  if (opts.type === "quiz" && (opts.quizScore ?? 0) >= 95) xp += QUIZ_EXCELLENCE_BONUS;
+  // Un quiz que vale 0 (ruta de esfuerzo) tampoco da el bono de excelencia.
+  if (opts.type === "quiz" && opts.baseXp > 0 && (opts.quizScore ?? 0) >= 95) xp += QUIZ_EXCELLENCE_BONUS;
   if (opts.hintsUsed > 0) xp = Math.round(xp * (1 - HINT_PENALTY));
   return xp;
 }

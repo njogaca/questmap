@@ -7,15 +7,23 @@ import {
   assertUnlocked,
   awardFirstLabNoHintsBadge,
   awardPerfectQuizBadge,
+  completeDailyMission,
   completeQuest,
   getQuestBySlug,
   grantDailyReview,
+  logEffort,
   logStudy,
   markInProgress,
   type Reward,
 } from "@/lib/game";
 import { gradeAnswer, QUIZ_PASS_PERCENT, scorePercent, type QuizQuestionPayload } from "@/lib/quiz";
-import { GLOSSARY_PASS_PERCENT, LEARN_NOTE_MIN_CHARS } from "@/lib/rules";
+import {
+  COMMIT_URL_RE,
+  DAILY_MISSIONS,
+  GLOSSARY_PASS_PERCENT,
+  LEARN_NOTE_MIN_CHARS,
+  PROOF_COMMIT_OR_HOURS,
+} from "@/lib/rules";
 import { reviewCard, SRS_NEW, type SrsGrade } from "@/lib/srs";
 
 export type ActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -247,6 +255,8 @@ export async function completeLab(input: {
   checked: number;
   evidence: string;
   hintsUsed: number;
+  /** Minutos trabajados; solo se usa en labs con `proof: commit_or_hours`. */
+  minutes?: number;
 }): Promise<ActionResult<{ reward: Reward }>> {
   try {
     const { quest } = await getQuestBySlug(input.questSlug);
@@ -254,6 +264,33 @@ export async function completeLab(input: {
     const checklist = (quest.payload.checklist as string[] | undefined) ?? [];
     if (input.checked < checklist.length) throw new Error("Completa todo el checklist antes de entregar.");
     const evidence = input.evidence.trim();
+
+    // Ejercicio con prueba de esfuerzo: solo se da por hecho con un commit o con horas anotadas.
+    // El commit da los puntos del ejercicio; las horas dan puntos por tiempo. Se pueden dar ambos.
+    if (quest.payload.proof === PROOF_COMMIT_OR_HOURS) {
+      if (quest.state === "completed") throw new Error("Este ejercicio ya está entregado.");
+      const hasCommit = COMMIT_URL_RE.test(evidence);
+      const m = Math.round(Number(input.minutes ?? 0));
+      if (!Number.isFinite(m) || m < 0 || m > 600) throw new Error("Los minutos deben estar entre 0 y 600.");
+      if (!hasCommit && m < 1)
+        throw new Error("Pega el enlace a tu commit (…/commit/<hash>) o anota los minutos que trabajaste.");
+      const reward = await completeQuest(input.questSlug, {
+        evidence: evidence || `${m} min anotados`,
+        hintsUsed: input.hintsUsed,
+        logMinutes: false, // aquí solo cuentan los minutos reales, no los estimados
+        baseXpOverride: hasCommit ? undefined : 0,
+      });
+      if (m > 0) {
+        const hours = await logEffort(m, `lab:${quest.slug}`, quest.id);
+        reward.xp += hours.xp;
+        reward.messages.push(...hours.messages);
+        reward.badges.push(...hours.badges);
+        reward.rankUp = hours.rankUp ?? reward.rankUp;
+      }
+      refresh();
+      return { ok: true, reward };
+    }
+
     if (evidence.length < 20)
       throw new Error("Pega tu evidencia: la salida de un comando o la URL de tu commit/repo (mínimo 20 caracteres).");
     const reward = await completeQuest(input.questSlug, { evidence, hintsUsed: input.hintsUsed });
@@ -287,13 +324,30 @@ export async function completeMicro(questSlug: string, text?: string): Promise<A
 
 /* ----------------------------------------------------------------- minutos */
 
-export async function addManualMinutes(minutes: number, activity: string): Promise<ActionResult<{ badges: string[] }>> {
+export async function addManualMinutes(
+  minutes: number,
+  activity: string,
+): Promise<ActionResult<{ badges: string[]; xp: number }>> {
   try {
     const m = Math.round(Number(minutes));
     if (!Number.isFinite(m) || m < 1 || m > 600) throw new Error("Ingresa entre 1 y 600 minutos.");
-    const badges = await logStudy(m, `manual:${activity.trim() || "estudio"}`);
+    const reward = await logEffort(m, `manual:${activity.trim() || "estudio"}`);
     refresh();
-    return { ok: true, badges };
+    return { ok: true, badges: reward.badges, xp: reward.xp };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/* --------------------------------------------------------- misiones diarias */
+
+export async function completeDaily(key: string): Promise<ActionResult<{ reward: Reward }>> {
+  try {
+    const mission = DAILY_MISSIONS.find((m) => m.key === key);
+    if (!mission) throw new Error("Misión desconocida.");
+    const reward = await completeDailyMission(mission.key);
+    refresh();
+    return { ok: true, reward };
   } catch (e) {
     return fail(e);
   }

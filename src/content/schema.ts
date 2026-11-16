@@ -43,6 +43,12 @@ const slug = z
 const status = z.enum(["published", "outline"]).default("published");
 
 /**
+ * Tope de niveles por zona. Las zonas originales tienen 5; los mundos de la ruta `plan-2027`
+ * llegan a 13 (12 niveles + el jefe como nivel propio).
+ */
+export const MAX_LEVELS_PER_ZONE = 13;
+
+/**
  * `track` en una skill o una zona:
  *   - ausente  → el seed NO toca la ruta que ya tenga en la base (así el backfill sobrevive)
  *   - null     → transversal explícito: vale para todas las rutas
@@ -124,7 +130,7 @@ export const questSchema = z.object({
 
 export const levelSchema = z.object({
   slug,
-  number: z.number().int().min(1).max(5),
+  number: z.number().int().min(1).max(MAX_LEVELS_PER_ZONE),
   title: z.string().min(1),
   story: z.string().optional(),
   status,
@@ -141,10 +147,10 @@ export const zoneSchema = z.object({
   unlocked_from_start: z.boolean().default(false),
   /** Posición del nodo en el mapa (viewBox 1000 × 640). */
   map: z.object({ x: z.number().min(0).max(1000), y: z.number().min(0).max(640) }).optional(),
-  prerequisites: z.array(z.object({ zone: slug, level: z.number().int().min(1).max(5) })).default([]),
+  prerequisites: z.array(z.object({ zone: slug, level: z.number().int().min(1).max(MAX_LEVELS_PER_ZONE) })).default([]),
   skills: z.array(z.string()).default([]),
   track: trackRef,
-  levels: z.array(levelSchema).max(5),
+  levels: z.array(levelSchema).max(MAX_LEVELS_PER_ZONE),
 });
 
 export const glossaryTermSchema = z.object({

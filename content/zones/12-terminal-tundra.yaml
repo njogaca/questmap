@@ -2,6 +2,7 @@ slug: terminal-tundra
 title: Terminal Tundra
 order: 12
 emoji: "🐧"
+track: backend-gcp  # archivo: ya no es transversal
 map: { x: 400, y: 590 }
 unlocked_from_start: true
 prerequisites: []

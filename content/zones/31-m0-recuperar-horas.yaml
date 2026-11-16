@@ -1,0 +1,593 @@
+# Mundo 0 de la ruta plan-2027. Cada nivel: glosario + ejercicio + quiz.
+# El ejercicio lleva `proof: commit_or_hours`: solo se entrega con un commit o con horas anotadas.
+# Glosario y quiz valen 0 puntos en esta ruta (los puntos salen de horas y commits).
+slug: m0-recuperar-horas
+title: "Mundo 0 · Recuperar horas"
+order: 31
+emoji: "⏱️"
+track: plan-2027
+map: { x: 150, y: 440 }
+unlocked_from_start: true
+prerequisites: []
+skills: [core_java, delivery]
+story: >
+  Fase 0 del plan: del 16 de noviembre al 31 de diciembre de 2026. Volver a programar todos
+  los días con Java puro, sin frameworks. Seis niveles cortos y un jefe el 31 de diciembre:
+  una app de consola de pedidos con pruebas.
+
+levels:
+  # ================================================================ NIVEL 1
+  - slug: m0-n1-entorno
+    number: 1
+    title: "Entorno"
+    story: "Objetivo: dejar la máquina lista para trabajar. JDK, editor, Maven y un repositorio en GitHub."
+    quests:
+      - slug: m0-n1-glosario
+        type: glossary
+        title: "Glosario — Entorno"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        payload:
+          terms: [g-p0-jdk, g-p0-build-tool, g-p0-dependency, g-p0-repository, g-p0-commit]
+
+      - slug: m0-n1-ejercicio
+        type: lab
+        title: "Ejercicio — Hola mundo subido al repositorio"
+        xp: 50
+        estimated_min: 90
+        skills: { delivery: 1.0 }
+        resources:
+          - { ref: res-p-java-getting-started, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un proyecto Maven que imprime un saludo, subido a un repositorio tuyo en GitHub."
+          steps:
+            - title: "Instala y comprueba"
+              body: "Instala el JDK 21, Maven y tu editor. Comprueba las versiones desde la terminal."
+              commands: ["java -version", "mvn -version", "git --version"]
+            - title: "Crea el proyecto"
+              body: "Crea un proyecto Maven con una clase `Main` que imprima un saludo. Compílalo y ejecútalo."
+              commands: ["mvn -q compile exec:java \"-Dexec.mainClass=Main\""]
+            - title: "Súbelo a GitHub"
+              body: "Crea el repositorio en GitHub, agrega un `.gitignore` que excluya `target/` y sube tu primer commit."
+          checklist:
+            - "`java -version` y `mvn -version` responden sin error"
+            - "El programa imprime el saludo"
+            - "El repositorio está en GitHub y `target/` no se subió"
+
+      - slug: m0-n1-quiz
+        type: quiz
+        title: "Quiz — Entorno"
+        xp: 0
+        estimated_min: 10
+        skills: { delivery: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué incluye el JDK que no necesitas solo para ejecutar un programa ya compilado?"
+            options: ["El compilador javac", "La máquina virtual", "Las librerías estándar"]
+            answer: 0
+            explanation: "Para ejecutar basta la máquina virtual y las librerías. El compilador solo hace falta para programar."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿En qué archivo declara Maven las dependencias del proyecto?"
+            options: ["build.gradle", "pom.xml", "package.json", "settings.json"]
+            answer: 1
+            explanation: "pom.xml es el archivo de Maven. build.gradle es de Gradle y package.json es de Node."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "La carpeta target de Maven debe subirse al repositorio."
+            answer: false
+            explanation: "target contiene archivos generados al compilar. Se excluye con .gitignore porque cualquiera puede regenerarla."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué orden de comandos lleva un cambio local hasta GitHub?"
+            options: ["git push, git commit, git add", "git commit, git add, git push", "git add, git commit, git push"]
+            answer: 2
+            explanation: "Primero eliges los cambios (add), luego guardas la foto (commit) y al final la envías (push)."
+            skill: delivery
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué describe mejor un commit?"
+            options: ["Una copia de seguridad en la nube", "Una foto del proyecto con un mensaje", "Una rama nueva del proyecto"]
+            answer: 1
+            explanation: "Un commit guarda el estado del proyecto en un momento dado y explica qué cambió."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ NIVEL 2
+  - slug: m0-n2-fundamentos
+    number: 2
+    title: "Tipos, condiciones, ciclos y métodos"
+    story: "Objetivo: escribir lógica básica en Java sin mirar apuntes. Variables con tipo, if, for y métodos propios."
+    quests:
+      - slug: m0-n2-glosario
+        type: glossary
+        title: "Glosario — Fundamentos del lenguaje"
+        xp: 0
+        estimated_min: 10
+        skills: { core_java: 1.0 }
+        payload:
+          terms: [g-p0-variable, g-p0-primitive-type, g-p0-loop, g-p0-method]
+
+      - slug: m0-n2-ejercicio
+        type: lab
+        title: "Ejercicio — Calculadora del total de un pedido"
+        xp: 50
+        estimated_min: 120
+        skills: { core_java: 1.0 }
+        resources:
+          - { ref: res-p-java-basics, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Un programa que calcula el total de un pedido a partir de precios y cantidades, con impuesto y descuento."
+          steps:
+            - title: "Datos de entrada"
+              body: "Guarda precios y cantidades en arreglos. Usa `double` para precios e `int` para cantidades."
+            - title: "Métodos"
+              body: "Escribe un método para el subtotal, otro para el impuesto y otro para el descuento. Cada uno recibe datos y devuelve un resultado; ninguno imprime."
+            - title: "Reglas"
+              body: "Aplica un descuento del 10 % si el subtotal pasa de 100. Imprime subtotal, descuento, impuesto y total."
+          checklist:
+            - "El total sale de recorrer los arreglos con un ciclo"
+            - "Hay al menos tres métodos con un tipo de retorno"
+            - "El descuento solo se aplica cuando corresponde"
+
+      - slug: m0-n2-quiz
+        type: quiz
+        title: "Quiz — Fundamentos del lenguaje"
+        xp: 0
+        estimated_min: 12
+        skills: { core_java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué tipo usarías para guardar la cantidad de unidades de un producto?"
+            options: ["double", "int", "boolean", "String"]
+            answer: 1
+            explanation: "Una cantidad de unidades es un número entero. double es para decimales."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Cuánto vale 7 / 2 en Java si los dos números son int?"
+            options: ["3.5", "4", "3"]
+            answer: 2
+            explanation: "La división entre enteros descarta los decimales. Para obtener 3.5 al menos uno debe ser double."
+            skill: core_java
+            difficulty: 2
+          - type: tf
+            prompt: "Un método declarado como void devuelve un valor."
+            answer: false
+            explanation: "void significa que el método no devuelve nada."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué ciclo conviene para recorrer todos los elementos de un arreglo?"
+            options: ["for", "if", "switch"]
+            answer: 0
+            explanation: "for repite un bloque para cada elemento. if y switch deciden, no repiten."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Cómo se comparan dos textos (String) por su contenido?"
+            options: ["Con ==", "Con equals", "Con ="]
+            answer: 1
+            explanation: "equals compara el contenido. == compara si son el mismo objeto y = asigna."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué comando de Maven compila el proyecto?"
+            options: ["mvn compile", "mvn start", "mvn java"]
+            answer: 0
+            explanation: "mvn compile compila el código de src/main/java."
+            skill: delivery
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. git commit envía los cambios a GitHub."
+            answer: false
+            explanation: "commit guarda la foto en tu máquina. Quien la envía a GitHub es git push."
+            skill: delivery
+            difficulty: 1
+
+  # ================================================================ NIVEL 3
+  - slug: m0-n3-clases
+    number: 3
+    title: "Clases, objetos e interfaces"
+    story: "Objetivo: modelar un problema con clases propias en lugar de variables sueltas."
+    quests:
+      - slug: m0-n3-glosario
+        type: glossary
+        title: "Glosario — Objetos"
+        xp: 0
+        estimated_min: 10
+        skills: { core_java: 1.0 }
+        payload:
+          terms: [g-p0-class, g-p0-object, g-p0-constructor, g-p0-interface, g-p0-encapsulation]
+
+      - slug: m0-n3-ejercicio
+        type: lab
+        title: "Ejercicio — Clases Pedido, Producto y Cliente"
+        xp: 50
+        estimated_min: 150
+        skills: { core_java: 1.0 }
+        resources:
+          - { ref: res-p-java-classes, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Tres clases que representan el dominio de pedidos, con sus datos protegidos y un total calculado por el propio pedido."
+          steps:
+            - title: "Producto y Cliente"
+              body: "Crea `Producto` (nombre, precio) y `Cliente` (nombre, correo). Campos `private`, constructor que valide y métodos de lectura."
+            - title: "Pedido"
+              body: "Crea `Pedido` con un cliente y sus líneas (producto y cantidad). El método `total()` lo calcula el pedido; nadie suma desde fuera."
+            - title: "Una interfaz"
+              body: "Define una interfaz `Descuento` con un método que reciba el subtotal. Escribe dos implementaciones y aplícalas a un pedido."
+          checklist:
+            - "Ningún campo es público"
+            - "Un precio negativo se rechaza en el constructor"
+            - "El pedido acepta cualquier implementación de `Descuento`"
+
+      - slug: m0-n3-quiz
+        type: quiz
+        title: "Quiz — Objetos"
+        xp: 0
+        estimated_min: 12
+        skills: { core_java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Cuál es la diferencia entre una clase y un objeto?"
+            options: ["Son lo mismo", "La clase es el molde y el objeto es una pieza concreta", "El objeto es el molde y la clase es la pieza"]
+            answer: 1
+            explanation: "La clase define; el objeto es una instancia creada con new."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Para qué se marca un campo como private?"
+            options: ["Para que ocupe menos memoria", "Para que solo la propia clase pueda cambiarlo", "Para que no se pueda leer nunca"]
+            answer: 1
+            explanation: "private obliga a pasar por los métodos de la clase, que pueden validar el cambio."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Una interfaz dice qué métodos existen, pero no guarda el estado del objeto."
+            answer: true
+            explanation: "La interfaz es un contrato. El estado vive en las clases que la implementan."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Cuándo se ejecuta el constructor?"
+            options: ["Al compilar", "Al crear el objeto con new", "Al terminar el programa"]
+            answer: 1
+            explanation: "El constructor corre una vez por objeto, en el momento de crearlo."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "Un método recibe un parámetro de tipo Descuento, que es una interfaz. ¿Qué puedes pasarle?"
+            options: ["Solo un objeto llamado Descuento", "Cualquier objeto cuya clase implemente Descuento", "Cualquier objeto"]
+            answer: 1
+            explanation: "Eso es polimorfismo: el método funciona con cualquier implementación del contrato."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué palabra hace que un método devuelva un resultado?"
+            options: ["return", "void", "break"]
+            answer: 0
+            explanation: "return entrega el valor y termina el método."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. double puede guardar números con decimales."
+            answer: true
+            explanation: "double es el tipo primitivo habitual para decimales."
+            skill: core_java
+            difficulty: 1
+
+  # ================================================================ NIVEL 4
+  - slug: m0-n4-colecciones
+    number: 4
+    title: "Colecciones y genéricos"
+    story: "Objetivo: guardar y consultar muchos objetos con la colección adecuada para cada caso."
+    quests:
+      - slug: m0-n4-glosario
+        type: glossary
+        title: "Glosario — Colecciones"
+        xp: 0
+        estimated_min: 10
+        skills: { core_java: 1.0 }
+        payload:
+          terms: [g-p0-collection, g-p0-list, g-p0-map, g-p0-generics]
+
+      - slug: m0-n4-ejercicio
+        type: lab
+        title: "Ejercicio — Lista de pedidos con búsqueda y filtro"
+        xp: 50
+        estimated_min: 150
+        skills: { core_java: 1.0 }
+        resources:
+          - { ref: res-p-java-collections, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Una clase que guarda pedidos en memoria y permite buscarlos por id y filtrarlos."
+          steps:
+            - title: "Almacén de pedidos"
+              body: "Crea `RepositorioPedidos` con un `Map<String, Pedido>` por id. Métodos para agregar, buscar por id y listar todos."
+            - title: "Filtros"
+              body: "Agrega filtros por cliente y por total mínimo. Devuelven una `List<Pedido>` nueva; no modifican el almacén."
+            - title: "Casos límite"
+              body: "Decide qué pasa con un id repetido y con un id que no existe, y hazlo explícito en el código."
+          checklist:
+            - "Buscar por id no recorre toda la lista"
+            - "Los filtros devuelven listas nuevas"
+            - "Un id inexistente no rompe el programa"
+
+      - slug: m0-n4-quiz
+        type: quiz
+        title: "Quiz — Colecciones"
+        xp: 0
+        estimated_min: 12
+        skills: { core_java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "Necesitas encontrar un pedido por su id muchas veces. ¿Qué colección conviene?"
+            options: ["List", "Map", "Un arreglo"]
+            answer: 1
+            explanation: "Un Map busca por clave directamente. En una lista habría que recorrer los elementos."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Una List permite elementos repetidos."
+            answer: true
+            explanation: "La lista conserva el orden y admite repetidos. El que no los admite es Set."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué gana el código al declarar List<Pedido> en lugar de List a secas?"
+            options: ["Va más rápido", "El compilador impide meter otro tipo", "Ocupa menos memoria"]
+            answer: 1
+            explanation: "Los genéricos mueven el error al momento de compilar, antes de ejecutar."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué devuelve map.get(clave) si la clave no existe?"
+            options: ["Una excepción", "null", "Una cadena vacía"]
+            answer: 1
+            explanation: "get devuelve null. Por eso hay que decidir qué hacer cuando el id no está."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Qué pasa al guardar en un Map dos valores con la misma clave?"
+            options: ["Se guardan los dos", "El segundo reemplaza al primero", "El programa no compila"]
+            answer: 1
+            explanation: "Cada clave tiene un solo valor. put con una clave existente sustituye el anterior."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué es una interfaz?"
+            options: ["Un contrato de métodos", "Un tipo de ciclo", "Una colección"]
+            answer: 0
+            explanation: "La interfaz lista métodos que las clases prometen implementar."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Un campo private puede modificarse directamente desde otra clase."
+            answer: false
+            explanation: "Solo la propia clase accede a sus campos private."
+            skill: core_java
+            difficulty: 1
+
+  # ================================================================ NIVEL 5
+  - slug: m0-n5-excepciones-streams
+    number: 5
+    title: "Excepciones, lambdas y streams"
+    story: "Objetivo: manejar errores a propósito y procesar colecciones sin escribir cada ciclo a mano."
+    quests:
+      - slug: m0-n5-glosario
+        type: glossary
+        title: "Glosario — Errores y streams"
+        xp: 0
+        estimated_min: 10
+        skills: { core_java: 1.0 }
+        payload:
+          terms: [g-p0-exception, g-p0-stack-trace, g-p0-lambda, g-p0-stream]
+
+      - slug: m0-n5-ejercicio
+        type: lab
+        title: "Ejercicio — Validaciones y reporte de pedidos"
+        xp: 50
+        estimated_min: 150
+        skills: { core_java: 1.0 }
+        resources:
+          - { ref: res-p-java-streams, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Pedidos que se validan con excepciones propias y un reporte calculado con streams."
+          steps:
+            - title: "Validaciones"
+              body: "Crea una excepción `PedidoInvalidoException`. Lánzala cuando el pedido no tenga líneas o una cantidad sea menor que 1, con un mensaje que diga qué falló."
+            - title: "Reporte"
+              body: "Con streams calcula el total vendido, el pedido más grande y el total por cliente."
+            - title: "Atrapar donde toca"
+              body: "Atrapa la excepción en `main` y muestra un mensaje claro. No la atrapes en medio para ignorarla."
+          checklist:
+            - "Un pedido inválido lanza la excepción propia"
+            - "El reporte no usa ciclos for"
+            - "Ningún `catch` está vacío"
+
+      - slug: m0-n5-quiz
+        type: quiz
+        title: "Quiz — Errores y streams"
+        xp: 0
+        estimated_min: 12
+        skills: { core_java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué pasa si se lanza una excepción y nadie la atrapa?"
+            options: ["El programa la ignora", "El programa se detiene y muestra el stack trace", "Java la corrige sola"]
+            answer: 1
+            explanation: "Una excepción sin atrapar sube hasta main y termina el programa."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué hace filter en un stream?"
+            options: ["Transforma cada elemento", "Deja pasar solo los que cumplen una condición", "Ordena los elementos"]
+            answer: 1
+            explanation: "filter conserva los elementos que cumplen. El que transforma es map."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Un bloque catch vacío es una buena forma de manejar un error."
+            answer: false
+            explanation: "Un catch vacío esconde el problema. Después nadie sabe por qué fallan los datos."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Qué es p -> p.total() > 100?"
+            options: ["Una clase", "Una expresión lambda", "Un ciclo"]
+            answer: 1
+            explanation: "Es una función sin nombre que recibe p y devuelve verdadero o falso."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿En qué parte del stack trace suele estar la línea donde falló tu código?"
+            options: ["Al final", "En las primeras líneas", "No aparece"]
+            answer: 1
+            explanation: "La parte de arriba muestra el punto del fallo; lo de abajo es cómo se llegó hasta ahí."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "Repaso. ¿Qué colección busca un valor por su clave?"
+            options: ["List", "Map", "Set"]
+            answer: 1
+            explanation: "Map guarda pares clave y valor."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. List<Pedido> acepta que agregues un String."
+            answer: false
+            explanation: "El tipo genérico hace que el compilador lo rechace."
+            skill: core_java
+            difficulty: 1
+
+  # ================================================================ NIVEL 6
+  - slug: m0-n6-junit
+    number: 6
+    title: "Pruebas con JUnit"
+    story: "Objetivo: que cada regla del programa tenga una prueba automática que la defienda."
+    quests:
+      - slug: m0-n6-glosario
+        type: glossary
+        title: "Glosario — Pruebas"
+        xp: 0
+        estimated_min: 10
+        skills: { core_java: 1.0 }
+        payload:
+          terms: [g-p0-unit-test, g-p0-assertion, g-p0-test-case, g-p0-edge-case]
+
+      - slug: m0-n6-ejercicio
+        type: lab
+        title: "Ejercicio — Pruebas de todo lo anterior"
+        xp: 50
+        estimated_min: 180
+        skills: { core_java: 1.0 }
+        resources:
+          - { ref: res-p-junit-guide, required: false }
+        payload:
+          proof: commit_or_hours
+          goal: "Pruebas con JUnit para el total, los descuentos, las validaciones, la búsqueda y el reporte de los niveles 2 a 5."
+          steps:
+            - title: "Agrega JUnit"
+              body: "Declara JUnit como dependencia de pruebas en `pom.xml` y crea las clases de prueba en `src/test/java`."
+              commands: ["mvn test"]
+            - title: "Casos normales"
+              body: "Una prueba por regla: total, descuento, búsqueda por id, filtros y reporte."
+            - title: "Casos límite"
+              body: "Prueba el pedido vacío, la cantidad cero, el id inexistente y el precio negativo. Usa `assertThrows` para las excepciones."
+          checklist:
+            - "`mvn test` pasa en verde"
+            - "Cada regla tiene al menos una prueba"
+            - "Hay pruebas de casos límite con `assertThrows`"
+
+      - slug: m0-n6-quiz
+        type: quiz
+        title: "Quiz — Pruebas"
+        xp: 0
+        estimated_min: 12
+        skills: { core_java: 1.0 }
+        questions:
+          - type: mcq
+            prompt: "¿Qué anotación marca un método como prueba en JUnit?"
+            options: ["@Run", "@Test", "@Check"]
+            answer: 1
+            explanation: "JUnit ejecuta los métodos anotados con @Test."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿En qué carpeta de un proyecto Maven van las pruebas?"
+            options: ["src/main/java", "src/test/java", "target"]
+            answer: 1
+            explanation: "src/test/java es la carpeta estándar. Maven no la incluye en el programa final."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "¿Con qué se comprueba que un método lanza una excepción?"
+            options: ["assertEquals", "assertThrows", "assertTrue"]
+            answer: 1
+            explanation: "assertThrows falla si el código no lanza la excepción esperada."
+            skill: core_java
+            difficulty: 2
+          - type: tf
+            prompt: "Una buena prueba unitaria depende del resultado de otra prueba."
+            answer: false
+            explanation: "Cada prueba debe poder correr sola y en cualquier orden."
+            skill: core_java
+            difficulty: 2
+          - type: mcq
+            prompt: "¿Cuál de estos es un caso límite?"
+            options: ["Un pedido con dos productos", "Un pedido sin productos", "Un pedido con un cliente"]
+            answer: 1
+            explanation: "El pedido vacío está en el borde de lo permitido, que es donde suelen aparecer los errores."
+            skill: core_java
+            difficulty: 1
+          - type: mcq
+            prompt: "Repaso. ¿Qué operación de un stream transforma cada elemento en otro?"
+            options: ["filter", "map", "count"]
+            answer: 1
+            explanation: "map convierte cada elemento; filter los selecciona."
+            skill: core_java
+            difficulty: 1
+          - type: tf
+            prompt: "Repaso. Lanzar una excepción propia con un mensaje claro ayuda a encontrar el fallo."
+            answer: true
+            explanation: "El mensaje dice qué regla se rompió sin tener que depurar."
+            skill: core_java
+            difficulty: 1
+
+  # ================================================================ JEFE
+  - slug: m0-n7-jefe
+    number: 7
+    title: "Jefe — App de consola de pedidos"
+    story: "Fecha: 31 de diciembre de 2026. Todo lo del mundo junto en un solo programa que funciona y tiene pruebas. Vencerlo abre el Mundo 1."
+    quests:
+      - slug: m0-jefe-app-consola
+        type: lab
+        title: "Jefe (31 dic) — App de consola de pedidos con pruebas"
+        xp: 150
+        estimated_min: 480
+        skills: { core_java: 1.0 }
+        payload:
+          proof: commit_or_hours
+          goal: "Una app de consola para crear, listar, buscar y reportar pedidos, con pruebas que pasan."
+          steps:
+            - title: "Menú"
+              body: "Un menú de texto con las opciones: crear pedido, listar, buscar por id, reporte y salir."
+            - title: "Reglas y errores"
+              body: "Usa las clases, el almacén, las validaciones y el reporte de los niveles anteriores. Una entrada inválida muestra un mensaje y el programa sigue."
+            - title: "Pruebas y entrega"
+              body: "Todas las pruebas pasan con `mvn test`. Sube el código con un README corto que diga cómo ejecutarlo."
+          checklist:
+            - "El menú completo funciona de principio a fin"
+            - "Una entrada inválida no detiene el programa"
+            - "`mvn test` pasa en verde"
+            - "El repositorio tiene un README con los pasos para ejecutar"

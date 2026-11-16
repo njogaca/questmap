@@ -27,3 +27,15 @@ tracks:
     description: >
       De cero a analista de seguridad: redes y sistemas, un SOC donde triar alertas de
       verdad, detección con ATT&CK, ofensiva con OWASP y respuesta a incidentes.
+
+  # Ruta de esfuerzo: aquí los puntos salen SOLO de horas anotadas y de commits
+  # (ver EFFORT_TRACK_SLUG en src/lib/rules.ts). Sus zonas son los 5 mundos del plan.
+  - slug: plan-2027
+    title: Plan 2027
+    emoji: "🧭"
+    ui: hud
+    order: 3
+    description: >
+      Cinco mundos, uno por fase del plan: recuperar horas con Java, fundamentos con
+      Spring Boot y PostgreSQL, sistemas distribuidos, entrevistas y decisión.
+      Solo cuentan las horas hechas y los commits.

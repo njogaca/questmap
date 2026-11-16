@@ -2,9 +2,9 @@ import "server-only";
 import { and, asc, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { db, schema as s } from "@/db/client";
 import { openReviewItems } from "./claude/service";
-import { getStreak, getXpTotal } from "./game";
-import { dueCount, newCards } from "./glossary";
+import { dailyMissionsDone, getStreak, getXpTotal } from "./game";
 import { computeReadiness } from "./readiness";
+import { DAILY_MISSIONS } from "./rules";
 import { addDays, localDate, localWeekday, weekStart } from "./time";
 import { getActiveTrack } from "./track";
 import { rankFor } from "./xp";
@@ -70,7 +70,7 @@ export async function loadDashboard() {
   // filtro, la cobertura de Cassandra contaminaría el "¿estoy listo?" de una ruta de Python.
   const inTrack = track === null ? undefined : or(eq(s.skills.trackId, track.id), isNull(s.skills.trackId));
 
-  const [skills, progress, xpTotal, streak, due, fresh, badges, weekly, reviews, dailyReviewEvents] = await Promise.all([
+  const [skills, progress, xpTotal, streak, badges, weekly, reviews, missionsDone] = await Promise.all([
     db
       .select()
       .from(s.skills)
@@ -79,8 +79,6 @@ export async function loadDashboard() {
     db.select().from(s.questProgress),
     getXpTotal(),
     getStreak(),
-    dueCount(),
-    newCards(10),
     db
       .select({ title: s.badges.title, icon: s.badges.icon, awardedAt: s.userBadges.awardedAt })
       .from(s.userBadges)
@@ -92,8 +90,7 @@ export async function loadDashboard() {
       .where(gte(s.studyLog.date, addDays(weekStart(today), -7 * 7)))
       .groupBy(s.studyLog.date),
     openReviewItems(5),
-    // El repaso diario de glosario ya se registra como evento de XP, una vez por día (grantDailyReview).
-    db.select({ id: s.xpEvents.id }).from(s.xpEvents).where(eq(s.xpEvents.reason, `daily_review:${today}`)),
+    dailyMissionsDone(),
   ]);
 
   const readiness = computeReadiness(
@@ -109,24 +106,12 @@ export async function loadDashboard() {
     minutes: weekly.filter((r) => r.date >= w && r.date < addDays(w, 7)).reduce((a, r) => a + r.minutes, 0),
   }));
 
-  // Daily Quest: las micros del día se cierran al cumplirlas. El mapa no es una misión diaria,
-  // es un puntero a la campaña, así que no entra en el conteo de hoy.
+  // Daily Quest: tres misiones fijas (inglés, Java, gimnasio), las mismas todos los días.
+  // El mapa no es una misión diaria, es un puntero a la campaña, así que no entra en el conteo.
   const nextQuest = openQuests(world)[0];
-  const englishMicro = openQuests(world, (q) => q.type === "micro" && q.skills.some((sk) => sk.code === "english"))[0];
-
-  const completedToday = new Set(
-    progress
-      .filter((p) => p.status === "completed" && p.completedAt && localDate(p.completedAt) === today)
-      .map((p) => p.questId),
-  );
-  const englishDone = world.quests.find(
-    (q) => q.type === "micro" && q.skills.some((sk) => sk.code === "english") && completedToday.has(q.id),
-  );
-  // Se reabre si vuelven a vencer tarjetas más tarde en el día: el SRS manda sobre el "ya está".
-  const glossaryDone = dailyReviewEvents.length > 0 && due === 0;
-  const englishApplies = Boolean(englishMicro || englishDone);
-  const dailyTotal = 1 + (englishApplies ? 1 : 0);
-  const dailyDone = (glossaryDone ? 1 : 0) + (englishDone ? 1 : 0);
+  const missions = DAILY_MISSIONS.map((m) => ({ ...m, done: missionsDone.has(m.key) }));
+  const dailyTotal = missions.length;
+  const dailyDone = missions.filter((m) => m.done).length;
 
   // Siguientes acciones: una por skill core debajo del umbral (la más baja primero)
   const actions: Recommendation[] = [];
@@ -162,11 +147,7 @@ export async function loadDashboard() {
     weeklyMinutes,
     badges,
     daily: {
-      dueCards: due,
-      newCards: fresh.length,
-      glossaryDone,
-      english: englishMicro ? toRec(world, englishMicro) : null,
-      englishDone: englishDone ? toRec(world, englishDone) : null,
+      missions,
       done: dailyDone,
       total: dailyTotal,
       allDone: dailyDone >= dailyTotal,

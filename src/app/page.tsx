@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DailyMissions } from "@/components/DailyMissions";
 import { ManualMinutes } from "@/components/ManualMinutes";
 import { RadarChart } from "@/components/RadarChart";
 import { ReviewItem } from "@/components/ReviewItem";
@@ -25,6 +26,10 @@ const SHORT: Record<string, string> = {
   testing: "Testing",
   english: "English",
   distributed_systems: "Dist. Sys",
+  core_java: "Java",
+  spring_api: "Spring",
+  sql_data: "SQL",
+  delivery: "Entrega",
 };
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -48,17 +53,6 @@ function QuestLink({ rec, label }: { rec: Recommendation; label?: string }) {
   );
 }
 
-/** Misión del día ya cumplida: queda tachada, con el enlace vivo por si quieres seguir. */
-function DoneRow({ label, title, children }: { label: string; title: string; children?: React.ReactNode }) {
-  return (
-    <div className="hud-panel hud-panel-done p-3">
-      <p className="font-mono text-xs text-done">{label} · hecho ✓</p>
-      <p className="mt-0.5 text-dim line-through">{title}</p>
-      {children && <p className="mt-1 font-mono text-xs">{children}</p>}
-    </div>
-  );
-}
-
 export default async function Dashboard() {
   const d = await loadDashboard();
   const maxWeek = Math.max(60, ...d.weeklyMinutes.map((w) => w.minutes));
@@ -79,8 +73,8 @@ export default async function Dashboard() {
       <h1 className="mt-1 text-3xl font-bold">Daily Quest</h1>
       <p className="mt-1 text-sm text-dim">
         {d.isThursday
-          ? "Hoy es jueves: bloque profundo de ~4 h. Ideal para labs y quizzes largos."
-          : "Hoy tienes ~15 min en el trabajo para micro-quests, y la noche para avanzar en el mapa."}
+          ? "Hoy es jueves: bloque profundo de ~4 h. Ideal para el ejercicio del nivel."
+          : "Tres misiones fijas al día. Lo demás es avanzar en el mapa."}
       </p>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
@@ -93,44 +87,8 @@ export default async function Dashboard() {
               {d.daily.allDone ? "completas ✓" : `${d.daily.done} / ${d.daily.total}`}
             </p>
           </div>
-          <div className="mt-3 grid gap-2">
-            {d.daily.glossaryDone ? (
-              <DoneRow label="1 · micro de glosario" title="Repaso diario de glosario">
-                <Link href="/glosario/repaso" className="text-available">
-                  seguir repasando (opcional)
-                </Link>
-              </DoneRow>
-            ) : (
-              <Link
-                href="/glosario/repaso"
-                className="hud-item block p-3"
-              >
-                <p className="font-mono text-xs text-available">1 · micro de glosario · ~5 min</p>
-                <p className="mt-0.5">
-                  {d.daily.dueCards > 0
-                    ? `Repasar ${d.daily.dueCards} tarjeta(s) vencida(s)`
-                    : d.daily.newCards > 0
-                      ? `Aprender ${d.daily.newCards} término(s) nuevo(s)`
-                      : "Glosario al día"}
-                </p>
-              </Link>
-            )}
-            {d.daily.englishDone ? (
-              <DoneRow label="2 · micro de inglés" title={d.daily.englishDone.title}>
-                {d.daily.english && (
-                  <Link href={`/quest/${d.daily.english.slug}`} className="text-available">
-                    seguir con {d.daily.english.title} (opcional)
-                  </Link>
-                )}
-              </DoneRow>
-            ) : d.daily.english ? (
-              <QuestLink rec={d.daily.english} label="2 · micro de inglés" />
-            ) : (
-              <div className="rounded-md border border-dashed border-line p-3 text-sm text-dim">
-                <p className="font-mono text-xs">2 · micro de inglés</p>
-                No hay micro de inglés abierta ahora mismo.
-              </div>
-            )}
+          <div className="mt-3">
+            <DailyMissions missions={d.daily.missions} />
           </div>
           {/* El mapa no es una misión del día: es por dónde ibas. */}
           <div className="mt-4 border-t border-line pt-3">

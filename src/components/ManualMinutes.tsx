@@ -25,7 +25,8 @@ export function ManualMinutes() {
         start(async () => {
           const r = await addManualMinutes(Number(fd.get("minutes")), String(fd.get("activity") ?? ""));
           if (!r.ok) return setMsg(r.error);
-          setMsg(r.badges.length ? `Guardado. Insignia: ${r.badges.join(", ")}` : "Guardado.");
+          const xp = r.xp > 0 ? ` +${r.xp} XP.` : "";
+          setMsg(r.badges.length ? `Guardado.${xp} Insignia: ${r.badges.join(", ")}` : `Guardado.${xp}`);
           setOpen(false);
           router.refresh();
         })

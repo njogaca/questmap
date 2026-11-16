@@ -1,0 +1,170 @@
+# Glosario del Mundo 0 (ruta plan-2027). Término en inglés, explicación corta en español.
+zone: m0-recuperar-horas
+terms:
+  # ------------------------------------------------------------ Nivel 1: entorno
+  - slug: g-p0-jdk
+    term: JDK
+    category: entorno
+    definition_es: "Java Development Kit. El paquete que instalas para programar en Java; trae el compilador (javac) y lo necesario para ejecutar programas."
+    definition_en: "Java Development Kit. The package you install to write Java; it includes the compiler and the runtime."
+    example_en: "Install JDK 21 before you create the project."
+  - slug: g-p0-build-tool
+    term: Build tool
+    category: entorno
+    definition_es: "Herramienta que compila, prueba y empaqueta el proyecto con un solo comando. En este plan es Maven."
+    definition_en: "A tool that compiles, tests and packages the project with one command. Here it is Maven."
+    example_en: "Maven is the build tool for this project."
+  - slug: g-p0-dependency
+    term: Dependency
+    category: entorno
+    definition_es: "Librería de otra persona que tu proyecto usa. En Maven se declaran en el archivo pom.xml y se descargan solas."
+    definition_en: "A library written by someone else that your project uses. Maven downloads it for you."
+    example_en: "We added JUnit as a test dependency."
+  - slug: g-p0-repository
+    term: Repository
+    category: entorno
+    definition_es: "Carpeta del proyecto con todo su historial de cambios, guardada con Git. En GitHub vive la copia remota."
+    definition_en: "The project folder with its full change history, tracked by Git."
+    example_en: "Push your changes to the remote repository."
+  - slug: g-p0-commit
+    term: Commit
+    category: entorno
+    definition_es: "Una foto guardada del proyecto en un momento dado, con un mensaje que dice qué cambió."
+    definition_en: "A saved snapshot of the project at one moment, with a message describing the change."
+    example_en: "Each commit should do one thing."
+
+  # ------------------------------------------------------- Nivel 2: fundamentos
+  - slug: g-p0-variable
+    term: Variable
+    category: lenguaje
+    definition_es: "Un nombre que guarda un valor. En Java siempre tiene un tipo fijo."
+    definition_en: "A name that holds a value. In Java it always has a fixed type."
+    example_en: "Declare a variable for the order total."
+  - slug: g-p0-primitive-type
+    term: Primitive type
+    category: lenguaje
+    definition_es: "Tipo básico que guarda el valor directamente, como int, double o boolean. No es un objeto."
+    definition_en: "A basic type that stores the value directly, such as int, double or boolean."
+    example_en: "Use a primitive type for the quantity."
+  - slug: g-p0-loop
+    term: Loop
+    category: lenguaje
+    definition_es: "Bloque que se repite mientras se cumpla una condición o para cada elemento de una lista (for, while)."
+    definition_en: "A block that repeats while a condition holds or for each element of a list."
+    example_en: "The loop adds the price of every item."
+  - slug: g-p0-method
+    term: Method
+    category: lenguaje
+    definition_es: "Bloque de código con nombre que recibe datos, hace una tarea y puede devolver un resultado."
+    definition_en: "A named block of code that takes inputs, does one task and may return a result."
+    example_en: "This method returns the total with tax."
+
+  # ------------------------------------------------- Nivel 3: clases y objetos
+  - slug: g-p0-class
+    term: Class
+    category: objetos
+    definition_es: "El molde. Define qué datos y qué comportamiento tendrán los objetos de ese tipo."
+    definition_en: "The blueprint. It defines the data and behavior its objects will have."
+    example_en: "Order is a class with a list of products."
+  - slug: g-p0-object
+    term: Object
+    category: objetos
+    definition_es: "Una pieza concreta hecha con el molde de una clase, con sus propios valores."
+    definition_en: "A concrete instance created from a class, with its own values."
+    example_en: "Each order in the list is an object."
+  - slug: g-p0-constructor
+    term: Constructor
+    category: objetos
+    definition_es: "Código que se ejecuta al crear un objeto con new y deja sus datos iniciales listos."
+    definition_en: "Code that runs when an object is created and sets its initial data."
+    example_en: "The constructor rejects a negative price."
+  - slug: g-p0-interface
+    term: Interface
+    category: objetos
+    definition_es: "Un contrato. Lista los métodos que una clase promete tener, sin decir cómo los hace."
+    definition_en: "A contract. It lists the methods a class promises to have, without saying how."
+    example_en: "Both classes implement the same interface."
+  - slug: g-p0-encapsulation
+    term: Encapsulation
+    category: objetos
+    definition_es: "Esconder los datos de un objeto (private) y permitir cambios solo a través de sus métodos."
+    definition_en: "Hiding an object's data and allowing changes only through its methods."
+    example_en: "Encapsulation keeps the total consistent."
+
+  # ---------------------------------------------- Nivel 4: colecciones y genéricos
+  - slug: g-p0-collection
+    term: Collection
+    category: colecciones
+    definition_es: "Objeto que agrupa varios elementos, como una lista, un conjunto o un mapa."
+    definition_en: "An object that groups several elements, such as a list, a set or a map."
+    example_en: "Store the orders in a collection."
+  - slug: g-p0-list
+    term: List
+    category: colecciones
+    definition_es: "Colección ordenada que permite repetidos y acceso por posición."
+    definition_en: "An ordered collection that allows duplicates and access by position."
+    example_en: "The list keeps the orders in insertion order."
+  - slug: g-p0-map
+    term: Map
+    category: colecciones
+    definition_es: "Colección de pares clave y valor. Buscas el valor a partir de su clave, que no se repite."
+    definition_en: "A collection of key and value pairs. You look up a value by its unique key."
+    example_en: "Use a map to find an order by its id."
+  - slug: g-p0-generics
+    term: Generics
+    category: colecciones
+    definition_es: "Forma de indicar el tipo que guarda una colección, como List<Order>, para que el compilador revise los errores."
+    definition_en: "A way to state the type a collection holds, so the compiler can check it."
+    example_en: "Generics stop you from adding a String to a list of orders."
+
+  # ------------------------------------- Nivel 5: excepciones, lambdas y streams
+  - slug: g-p0-exception
+    term: Exception
+    category: lenguaje
+    definition_es: "Objeto que representa un error en plena ejecución. Si nadie lo atrapa, el programa se detiene."
+    definition_en: "An object that represents an error at run time. If nobody catches it, the program stops."
+    example_en: "The method throws an exception when the quantity is zero."
+  - slug: g-p0-stack-trace
+    term: Stack trace
+    category: lenguaje
+    definition_es: "La lista de llamadas que muestra Java cuando ocurre una excepción. Dice en qué línea falló y cómo se llegó ahí."
+    definition_en: "The list of calls Java prints when an exception happens. It shows where it failed."
+    example_en: "Read the stack trace from the top."
+  - slug: g-p0-lambda
+    term: Lambda expression
+    category: lenguaje
+    definition_es: "Una función corta y sin nombre que se pasa como dato, por ejemplo order -> order.total() > 100."
+    definition_en: "A short function without a name that you pass as a value."
+    example_en: "Pass a lambda expression to the filter."
+  - slug: g-p0-stream
+    term: Stream
+    category: lenguaje
+    definition_es: "Una cadena de pasos (filtrar, transformar, reunir) que procesa los elementos de una colección sin escribir el ciclo a mano."
+    definition_en: "A pipeline of steps that processes the elements of a collection without a manual loop."
+    example_en: "The stream filters paid orders and sums their totals."
+
+  # ------------------------------------------------- Nivel 6: pruebas con JUnit
+  - slug: g-p0-unit-test
+    term: Unit test
+    category: pruebas
+    definition_es: "Código que comprueba una pieza pequeña del programa, sola y en milisegundos."
+    definition_en: "Code that checks one small piece of the program, alone and in milliseconds."
+    example_en: "Write a unit test for the discount rule."
+  - slug: g-p0-assertion
+    term: Assertion
+    category: pruebas
+    definition_es: "La comprobación dentro de una prueba. Compara el resultado real con el esperado; si no coinciden, la prueba falla."
+    definition_en: "The check inside a test. It compares the actual result with the expected one."
+    example_en: "The assertion failed because the total was wrong."
+  - slug: g-p0-test-case
+    term: Test case
+    category: pruebas
+    definition_es: "Un escenario concreto que se prueba. Por ejemplo, un pedido vacío debe dar total cero."
+    definition_en: "One specific scenario under test."
+    example_en: "Add a test case for an empty order."
+  - slug: g-p0-edge-case
+    term: Edge case
+    category: pruebas
+    definition_es: "Situación en el límite de lo permitido, donde suelen esconderse los errores. Por ejemplo cantidad cero, lista vacía o valor nulo."
+    definition_en: "A situation at the limit of what is allowed, where bugs usually hide."
+    example_en: "Zero quantity is an edge case."

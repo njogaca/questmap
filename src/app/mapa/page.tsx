@@ -21,6 +21,7 @@ export default async function MapPage() {
     state: z.progress.state,
     percent: z.progress.percent,
     levelsCompleted: z.progress.levelsCompleted,
+    levelsTotal: z.progress.levelsTotal,
     skills: z.skills.map((code) => ({ code, name: world.skillNames.get(code) ?? code })),
     prereqs: z.prereqs.map((p) => ({ zoneTitle: p.zoneTitle, level: p.level, met: p.met })),
   }));

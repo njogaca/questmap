@@ -1709,3 +1709,152 @@ resources:
     required: false
     why: Tabla de referencia para identificar de qué tipo es un hash que te encontraste.
     verified: false
+
+  # ------------------------------------------------------------ Ruta plan-2027
+  # Un recurso oficial por nivel. Todos abiertos y confirmados el 2026-11-15.
+  # Tres no son de Java ni de Spring porque el tema no lo cubren: JUnit, GitHub Actions
+  # y diagramas en README. En esos casos se usa la documentación oficial de la herramienta.
+  - slug: res-p-java-getting-started
+    title: "dev.java — Getting Started with Java"
+    type: docs
+    url: https://dev.java/learn/first-steps/first-java-code/getting-started/
+    language: en
+    cost: free
+    why: Instalar el JDK, compilar y ejecutar tu primer programa.
+    verified: true
+  - slug: res-p-java-basics
+    title: "dev.java — Java Language Basics"
+    type: docs
+    url: https://dev.java/learn/language/constructs/basics/
+    language: en
+    cost: free
+    why: Variables, tipos, operadores, condiciones y ciclos.
+    verified: true
+  - slug: res-p-java-classes
+    title: "dev.java — Classes and Objects"
+    type: docs
+    url: https://dev.java/learn/language/oop/classes-objects/
+    language: en
+    cost: free
+    why: Clases, objetos, constructores y miembros.
+    verified: true
+  - slug: res-p-java-collections
+    title: "dev.java — The Collections Framework"
+    type: docs
+    url: https://dev.java/learn/api/collections-and-streams/collections-framework/
+    language: en
+    cost: free
+    why: List, Set, Map y cómo elegir entre ellas.
+    verified: true
+  - slug: res-p-java-streams
+    title: "dev.java — The Stream API"
+    type: docs
+    url: https://dev.java/learn/api/collections-and-streams/streams/
+    language: en
+    cost: free
+    why: filter, map y collect sobre colecciones, con lambdas.
+    verified: true
+  - slug: res-p-junit-guide
+    title: "JUnit User Guide"
+    type: docs
+    url: https://docs.junit.org/current/user-guide/
+    language: en
+    cost: free
+    why: Guía oficial de JUnit. Java no tiene documentación propia de pruebas.
+    verified: true
+  - slug: res-p-boot-first-app
+    title: "Spring Boot — Developing Your First Spring Boot Application"
+    type: docs
+    url: https://docs.spring.io/spring-boot/tutorial/first-application/index.html
+    language: en
+    cost: free
+    why: Tu primer endpoint con Spring Boot y Maven, paso a paso.
+    verified: true
+  - slug: res-p-spring-rest
+    title: "Spring — Building REST services with Spring"
+    type: docs
+    url: https://spring.io/guides/tutorials/rest
+    language: en
+    cost: free
+    why: CRUD completo con Spring MVC, de principio a fin.
+    verified: true
+  - slug: res-p-spring-jpa
+    title: "Spring — Accessing Data with JPA"
+    type: docs
+    url: https://spring.io/guides/gs/accessing-data-jpa
+    language: en
+    cost: free
+    why: Entidades y repositorios con Spring Data JPA.
+    verified: true
+  - slug: res-p-spring-jdbc
+    title: "Spring Framework — Using the JDBC Core Classes"
+    type: docs
+    url: https://docs.spring.io/spring-framework/reference/data-access/jdbc/core.html
+    language: en
+    cost: free
+    why: Cómo ejecutar SQL escrito a mano desde Java con JdbcClient.
+    verified: true
+  - slug: res-p-spring-errors
+    title: "Spring Framework — Error Responses"
+    type: docs
+    url: https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html
+    language: en
+    cost: free
+    why: Respuestas de error estándar (Problem Details) en una API REST.
+    verified: true
+  - slug: res-p-boot-testcontainers
+    title: "Spring Boot — Testcontainers"
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/testing/testcontainers.html
+    language: en
+    cost: free
+    why: Pruebas de integración contra una base de datos real en Docker.
+    verified: true
+  - slug: res-p-spring-tx
+    title: "Spring Framework — Declarative Transaction Management"
+    type: docs
+    url: https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative.html
+    language: en
+    cost: free
+    why: Cómo funciona @Transactional y cuándo hace rollback.
+    verified: true
+  - slug: res-p-spring-docker
+    title: "Spring — Spring Boot with Docker"
+    type: docs
+    url: https://spring.io/guides/gs/spring-boot-docker
+    language: en
+    cost: free
+    why: Empaquetar un servicio Spring Boot en una imagen Docker.
+    verified: true
+  - slug: res-p-gha-maven
+    title: "GitHub Docs — Building and testing Java with Maven"
+    type: docs
+    url: https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-java-with-maven
+    language: en
+    cost: free
+    why: Guía oficial de GitHub Actions para Java. Spring no documenta CI.
+    verified: true
+  - slug: res-p-boot-config
+    title: "Spring Boot — Externalized Configuration"
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/features/external-config.html
+    language: en
+    cost: free
+    why: Perfiles, variables de entorno y orden de precedencia de la configuración.
+    verified: true
+  - slug: res-p-gh-diagrams
+    title: "GitHub Docs — Creating diagrams"
+    type: docs
+    url: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-diagrams
+    language: en
+    cost: free
+    why: Diagramas Mermaid dentro de un README. Ni Java ni Spring cubren este tema.
+    verified: true
+  - slug: res-p-boot-reference
+    title: "Spring Boot — Reference Documentation"
+    type: docs
+    url: https://docs.spring.io/spring-boot/reference/index.html
+    language: en
+    cost: free
+    why: Índice de todo lo visto en el mundo, para repasar antes de la entrevista.
+    verified: true

@@ -1,0 +1,17 @@
+# Mundo 2 de la ruta plan-2027. Bloqueado: solo título y descripción, sin niveles todavía.
+# Se abre al vencer al jefe del Mundo 1 (nivel 13).
+slug: m2-distribuidos
+title: "Mundo 2 · Distribuidos"
+order: 33
+emoji: "🛰️"
+track: plan-2027
+map: { x: 540, y: 440 }
+unlocked_from_start: false
+prerequisites:
+  - { zone: m1-fundamentos, level: 13 }
+skills: []
+story: >
+  Fase 2 del plan: de abril a junio de 2027. Kafka, puente desde IBM MQ, resiliencia,
+  Kubernetes, observabilidad.
+
+levels: []
